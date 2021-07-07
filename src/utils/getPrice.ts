@@ -19,13 +19,16 @@ export async function getPrice2(endpoint: string, token: string) {
 
   // returns the price of the coin and divides it by the price of ETH to get price in USD. 
   // (for ETH we need to pull price from https://data.kovan.enzyme.finance/api/currency/list)
+
+  // used a different method by getting the price of USDC in ETH and dividing by that value to get the number in USD
   if (returnToken?.type ==='ETH') {
-      const priceOfEth = Number(result.assets.find((asset) => asset.symbol === 'WETH')?.price?.price);
-      return Number(result.assets.find((asset) => asset.symbol === token)?.price?.price) * priceOfEth;
+      const priceOfUSDC = Number(result.assets.find((asset) => asset.symbol === 'USDC')?.price?.price);
+      return Number(result.assets.find((asset) => asset.symbol === token)?.price?.price)/priceOfUSDC;
   }
   // returns price of the token
   if (returnToken?.type ==='USD') {
     return Number(result.assets.find((asset) => asset.symbol === token)?.price?.price);
     }
+
 }
 
