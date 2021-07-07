@@ -1,0 +1,20 @@
+# node dependencies
+node_modules
+
+# dot files
+.*
+
+# .lock files
+*.lock
+
+# .log files
+*.log
+
+# Ignore generated files
+src/utils/subgraph/subgraph.ts
+
+# allowed dot files
+!.prettierrc
+!.env.example
+!.gitignore
+

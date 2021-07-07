@@ -1,0 +1,40 @@
+{
+  "name": "enzyme-bot",
+  "version": "1.0.0",
+  "description": "A (naive) bot implementation on Enzyme Finance using EnzymeJS",
+  "author": "Avantgarde Finance <team@avantgarde.finance",
+  "contributors": [
+    "Erin Koen <erin.koen@gmail.com"
+  ],
+  "license": "MIT",
+  "private": false,
+  "scripts": {
+    "dev": "cross-env NODE_ENV=development ts-node --require dotenv-extended/config --transpile-only src/index.ts",
+    "codegen": "dotenv -- graphql-codegen --config codegen.yaml"
+  },
+  "dependencies": {
+    "@enzymefinance/protocol": "^2.0.1",
+    "@uniswap/sdk": "^3.0.3",
+    "axios": "^0.21.1",
+    "ethers": "^5.0.30",
+    "graphql": "^15.5.0",
+    "graphql-request": "^3.4.0"
+  },
+  "devDependencies": {
+    "@graphql-codegen/cli": "^1.20.0",
+    "@graphql-codegen/typescript": "^1.20.0",
+    "@graphql-codegen/typescript-graphql-request": "^3.0.0",
+    "@graphql-codegen/typescript-operations": "^1.17.13",
+    "@typescript-eslint/eslint-plugin": "^4.14.0",
+    "@typescript-eslint/parser": "^4.14.0",
+    "cross-env": "^7.0.3",
+    "dotenv-cli": "^4.0.0",
+    "dotenv-extended": "^2.9.0",
+    "eslint": "^7.18.0",
+    "eslint-config-prettier": "^7.2.0",
+    "eslint-plugin-prettier": "^3.3.1",
+    "prettier": "^2.2.1",
+    "ts-node": "^9.1.1",
+    "typescript": "^4.1.3"
+  }
+}
