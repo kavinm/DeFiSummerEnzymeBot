@@ -179,7 +179,7 @@ export class EnzymeBot {
       biggestPosition.amount
     );
     
-
+    // calling the price for token. 
     console.log(await getPrice2(this.subgraphEndpoint,"wNXM"));
 
 
