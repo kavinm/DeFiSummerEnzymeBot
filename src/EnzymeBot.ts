@@ -45,12 +45,14 @@ export class EnzymeBot {
   ) {}
 
   public async chooseRandomAsset() {
-    const release = this.vault.fund?.release.id
+    const release = this.vault.fund?.release.id;
+
+    //console.log(release);
 
     if (!release) {
       return undefined;
     }
-    
+
     const assets = this.tokens.assets.filter((asset) => !asset.derivativeType);
 
     const releaseAssets = assets.filter((asset) =>
@@ -86,8 +88,8 @@ export class EnzymeBot {
   }) {
     const adapter = this.contracts.network?.currentRelease?.uniswapV2Adapter;
     const integrationManager = this.contracts.network?.currentRelease?.integrationManager;
-    const comptroller = this.vault.fund?.accessor.id
-    
+    const comptroller = this.vault.fund?.accessor.id;
+
     if (!adapter || !integrationManager || !comptroller) {
       console.log(
         'Missing a contract address. Uniswap Adapter: ',
@@ -112,12 +114,21 @@ export class EnzymeBot {
 
     const contract = new ComptrollerLib(comptroller, this.wallet);
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
-
   }
 
   public async tradeAlgorithmically() {
+
+    
+    let priceTokenLimit = 33561;
+    let tokenName = 'WBTC'
+    
+    let realTokenPrice =  getPrice2(this.subgraphEndpoint, tokenName));
+    
+   
     // get a random token
     const randomToken = await this.chooseRandomAsset();
+
+    console.log(randomToken);
 
     // if no random token return, or if the random token is a derivative that's not available on Uniswap
     if (!randomToken || randomToken.derivativeType) {
@@ -157,14 +168,14 @@ export class EnzymeBot {
       }
       return carry;
     }, holdingsWithAmounts[0]);
-      
+
     console.log(
       `The Miner's Delight has chosen. You will trade ${utils.formatUnits(
         biggestPosition.amount,
         biggestPosition.decimals
       )} ${biggestPosition.name} (${biggestPosition.symbol}) for as many ${randomToken.name} (${
         randomToken.symbol
-      }) as you can get.`,
+      }) as you can get.`
     );
 
     // get the trade data
@@ -178,10 +189,8 @@ export class EnzymeBot {
       },
       biggestPosition.amount
     );
+
     
-
-    console.log(await getPrice2(this.subgraphEndpoint,"WETH"));
-
 
     // call the transaction
     return this.swapTokens(price);
