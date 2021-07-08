@@ -180,7 +180,7 @@ export class EnzymeBot {
     );
     
 
-    console.log(await getPrice2(this.subgraphEndpoint,"wNXM"));
+    console.log(await getPrice2(this.subgraphEndpoint,"WETH"));
 
 
     // call the transaction
