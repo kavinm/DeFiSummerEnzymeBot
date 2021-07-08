@@ -117,15 +117,58 @@ export class EnzymeBot {
   }
 
   public async tradeAlgorithmically() {
-    let priceTokenLimit = 33561;
-    let tokenName = 'WBTC';
+    // writing the function that sells your token for another if it goes below a certain price
+    let tokenPriceLimit = 33561;
+    let sellTokenSymbol = 'WBTC';
 
-    let realTokenPrice = getPrice2(this.subgraphEndpoint, tokenName);
+    let buyTokenSymbol = 'WETH';
+
+    let realTokenPrice = await getPrice2(this.subgraphEndpoint, sellTokenSymbol);
+
+    //let amountToSell =
+
+    // const price = await this.getPrice(
+    //   { id: randomToken.id, decimals: randomToken.decimals, symbol: randomToken.symbol, name: randomToken.name },
+    //   {
+    //     id: biggestPosition.id as string,
+    //     decimals: biggestPosition.decimals as number,
+    //     symbol: biggestPosition.symbol as string,
+    //     name: biggestPosition.name as string,
+    //   },
+    //   biggestPosition.amount
+    // );
+
+    const buyingToken = this.tokens.assets.find((asset) => !asset.derivativeType && asset.symbol === buyTokenSymbol)!;
+
+    const vaultHoldings2 = await this.getHoldings();
+    if (vaultHoldings2.length === 0) {
+      console.log('Your fund has no assets.');
+      return;
+    }
+
+    const sellingToken = vaultHoldings2.find((asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol)!;
+
+    // if you have no holdings, return
+
+    // the first input token will be bought, the second will be sold
+    const swapTokensInput = await this.getPrice(
+      { id: buyingToken.id, decimals: buyingToken.decimals, symbol: buyingToken.symbol, name: buyingToken.name },
+      {
+        id: sellingToken.id as string,
+        decimals: sellingToken.decimals as number,
+        symbol: sellingToken.symbol as string,
+        name: sellingToken.name as string,
+      },
+      sellingToken.amount
+    );
+
+    if (realTokenPrice && realTokenPrice > tokenPriceLimit) {
+    }
 
     // get a random token
     const randomToken = await this.chooseRandomAsset();
 
-    console.log(randomToken);
+    //console.log(randomToken);
 
     // if no random token return, or if the random token is a derivative that's not available on Uniswap
     if (!randomToken || randomToken.derivativeType) {
