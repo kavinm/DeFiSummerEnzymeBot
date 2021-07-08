@@ -117,14 +117,11 @@ export class EnzymeBot {
   }
 
   public async tradeAlgorithmically() {
-
-    
     let priceTokenLimit = 33561;
-    let tokenName = 'WBTC'
-    
-    let realTokenPrice =  getPrice2(this.subgraphEndpoint, tokenName));
-    
-   
+    let tokenName = 'WBTC';
+
+    let realTokenPrice = getPrice2(this.subgraphEndpoint, tokenName);
+
     // get a random token
     const randomToken = await this.chooseRandomAsset();
 
@@ -189,8 +186,6 @@ export class EnzymeBot {
       },
       biggestPosition.amount
     );
-
-    
 
     // call the transaction
     return this.swapTokens(price);

@@ -1,7 +1,10 @@
+// Gets the price of the token and returns it in USD
+
 import { gql } from './subgraph/sdk';
 import { AssetBlacklistSetting_OrderBy } from './subgraph/subgraph';
 import axios from 'axios';
 
+// filler function that is not being used ATM
 // pass these your subgraph endpoint
 // export async function getTokens(endpoint: string) {
 //   const result = await gql(endpoint).assets();
