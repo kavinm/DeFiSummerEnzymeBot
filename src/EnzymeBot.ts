@@ -116,6 +116,23 @@ export class EnzymeBot {
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
 
+  public async sellAll() {
+    let singleToken = 'WETH';
+
+    const vaultHoldings = await this.getHoldings();
+
+    // if you have no holdings, return
+    if (vaultHoldings.length === 0) {
+      console.log('Your fund has no assets.');
+      return;
+    }
+
+    //makes an amount array of numbers from getToken
+    const holdingsAmounts2 = await Promise.all(
+      vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    );
+  }
+
   public async buyLimit() {
     // writing the function that buys a wanted token and sells held token if the wanted token goes above a certain price
     let tokenPriceLimit = 2000;
