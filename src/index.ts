@@ -2,9 +2,10 @@ import { EnzymeBot } from './EnzymeBot';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 
+//test
 async function run(bot: EnzymeBot) {
   try {
-    // return the transaction object
+    // return the transaction object 
     const tx = await bot.buyLimit();
 
     // if for some reason the transaction is returned as undefined, return
