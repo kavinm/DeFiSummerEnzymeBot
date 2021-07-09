@@ -118,25 +118,12 @@ export class EnzymeBot {
 
   public async tradeAlgorithmically() {
     // writing the function that sells your token for another if it goes below a certain price
-    let tokenPriceLimit = 33561;
+    let tokenPriceLimit = 30000;
     let sellTokenSymbol = 'WBTC';
 
     let buyTokenSymbol = 'WETH';
 
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, sellTokenSymbol);
-
-    //let amountToSell =
-
-    // const price = await this.getPrice(
-    //   { id: randomToken.id, decimals: randomToken.decimals, symbol: randomToken.symbol, name: randomToken.name },
-    //   {
-    //     id: biggestPosition.id as string,
-    //     decimals: biggestPosition.decimals as number,
-    //     symbol: biggestPosition.symbol as string,
-    //     name: biggestPosition.name as string,
-    //   },
-    //   biggestPosition.amount
-    // );
 
     //get holdings of vault
     const vaultHoldings2 = await this.getHoldings();
@@ -157,7 +144,7 @@ export class EnzymeBot {
 
     // combine holding token data with amounts
     const holdingsWithAmounts2 = vaultHoldings2.map((item, index) => {
-      return { ...item, amount: holdingAmounts[index] };
+      return { ...item, amount: holdingsAmounts2[index] };
     });
 
     // find the token you will sell by searching for largest token holding
@@ -179,6 +166,7 @@ export class EnzymeBot {
     );
 
     if (realTokenPrice && realTokenPrice > tokenPriceLimit) {
+      return this.swapTokens(swapTokensInput);
     }
 
     // get a random token
