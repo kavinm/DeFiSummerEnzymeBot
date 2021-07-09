@@ -5,7 +5,7 @@ import { getRevertError } from './utils/getRevertError';
 async function run(bot: EnzymeBot) {
   try {
     // return the transaction object
-    const tx = await bot.tradeAlgorithmically();
+    const tx = await bot.buyLimit();
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -41,7 +41,7 @@ async function run(bot: EnzymeBot) {
     console.log(error);
   } finally {
     console.log('Scheduling the next iteration...');
-    
+
     // commented out to prevent loop  in exchanging tokens
     // setTimeout(() => {
     //   run(bot);

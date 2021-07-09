@@ -116,13 +116,70 @@ export class EnzymeBot {
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
 
-  public async tradeAlgorithmically() {
-    // writing the function that sells your token for another if it goes below a certain price
-    let tokenPriceLimit = 30000;
+  public async buyLimit() {
+    // writing the function that buys a wanted token and sells held token if the wanted token goes above a certain price
+    let tokenPriceLimit = 2000;
+
     let sellTokenSymbol = 'WBTC';
 
     let buyTokenSymbol = 'WETH';
 
+    // gets the price of the wanted token
+    let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
+
+    //get holdings of vault
+    const vaultHoldings2 = await this.getHoldings();
+
+    // if you have no holdings, return
+    if (vaultHoldings2.length === 0) {
+      console.log('Your fund has no assets.');
+      return;
+    }
+
+    // define the buy token
+    const buyingToken = this.tokens.assets.find((asset) => !asset.derivativeType && asset.symbol === buyTokenSymbol)!;
+
+    //makes an amount array of numbers from getToken
+    const holdingsAmounts2 = await Promise.all(
+      vaultHoldings2.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    );
+
+    // combine holding token data with amounts
+    const holdingsWithAmounts2 = vaultHoldings2.map((item, index) => {
+      return { ...item, amount: holdingsAmounts2[index] };
+    });
+
+    // find the token you will sell by searching for largest token holding
+    const sellingToken = holdingsWithAmounts2.find(
+      (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
+    )!;
+
+    // the first input token will be bought, the second will be sold
+    // this will create the input needed for our swap
+    const swapTokensInput = await this.getPrice(
+      { id: buyingToken.id, decimals: buyingToken.decimals, symbol: buyingToken.symbol, name: buyingToken.name },
+      {
+        id: sellingToken.id as string,
+        decimals: sellingToken.decimals as number,
+        symbol: sellingToken.symbol as string,
+        name: sellingToken.name as string,
+      },
+      sellingToken.amount
+    );
+
+    if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
+      return this.swapTokens(swapTokensInput);
+    }
+  }
+
+  public async sellLimit() {
+    // writing the function that sells your token for another if it goes below a certain price
+    let tokenPriceLimit = 2000;
+    let sellTokenSymbol = 'WETH';
+
+    let buyTokenSymbol = 'WBTC';
+
+    // this is getting the price of the sellToken
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, sellTokenSymbol);
 
     //get holdings of vault
