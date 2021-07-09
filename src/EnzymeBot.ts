@@ -116,8 +116,8 @@ export class EnzymeBot {
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
 
-  public async sellAll() {
-    let singleToken = 'WETH';
+  public async liquidate() {
+    let liquidTokenSymbol = 'WETH';
 
     const vaultHoldings = await this.getHoldings();
 
@@ -127,10 +127,45 @@ export class EnzymeBot {
       return;
     }
 
+    //this will be the token we are liquidating everything into
+    const liquidToken = this.tokens.assets.find(
+      (asset) => !asset.derivativeType && asset.symbol === liquidTokenSymbol
+    )!;
+
     //makes an amount array of numbers from getToken
-    const holdingsAmounts2 = await Promise.all(
+    const holdingsAmounts = await Promise.all(
       vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
     );
+
+    //combines the vault holdings (list of token objects) with token amounts
+    const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+      return { ...item, amount: holdingsAmounts[index] };
+    });
+
+    holdingsWithAmounts.forEach(async (holding) => {
+      if (holding.symbol !== liquidTokenSymbol) {
+        const sellingToken = holdingsWithAmounts.find(
+          (asset) => !asset?.derivativeType && asset?.symbol === holding.symbol
+        )!;
+
+        console.log(sellingToken);
+
+        const swapTokensInput = await this.getPrice(
+          { id: liquidToken.id, decimals: liquidToken.decimals, symbol: liquidToken.symbol, name: liquidToken.name },
+          {
+            id: sellingToken.id as string,
+            decimals: sellingToken.decimals as number,
+            symbol: sellingToken.symbol as string,
+            name: sellingToken.name as string,
+          },
+          sellingToken.amount
+        );
+        console.log(swapTokensInput);
+        if (swapTokensInput) {
+          this.swapTokens(swapTokensInput).then(() => console.log('Done Liquidating'));
+        }
+      }
+    });
   }
 
   public async buyLimit() {
@@ -191,10 +226,10 @@ export class EnzymeBot {
 
   public async sellLimit() {
     // writing the function that sells your token for another if it goes below a certain price
-    let tokenPriceLimit = 2000;
-    let sellTokenSymbol = 'WETH';
+    let tokenPriceLimit = 5;
+    let sellTokenSymbol = 'UNI';
 
-    let buyTokenSymbol = 'WBTC';
+    let buyTokenSymbol = 'WETH';
 
     // this is getting the price of the sellToken
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, sellTokenSymbol);
