@@ -1,4 +1,5 @@
-import { EnzymeBot } from './EnzymeBot';
+// changed import to Test Enzyme Bot make sure to change back
+import { EnzymeBot } from './TestEnzymeBot';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 
