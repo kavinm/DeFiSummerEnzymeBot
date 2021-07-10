@@ -2,10 +2,18 @@ import { EnzymeBot } from './EnzymeBot';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 
+let i = 0;
+
 async function run(bot: EnzymeBot) {
+  const vaultHoldings = await bot.getHoldings();
+  const lengthHoldings = vaultHoldings.length;
+  console.log(vaultHoldings);
+  console.log('Above is the current vault holdings and the bottom is length holdings');
+  console.log(lengthHoldings);
   try {
     // return the transaction object
-    const tx = await bot.sellLimit();
+
+    const tx = await bot.liquidate(i);
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -44,7 +52,12 @@ async function run(bot: EnzymeBot) {
 
     // commented out to prevent loop  in exchanging tokens
     // setTimeout(() => {
-    //   run(bot);
+    while (i < lengthHoldings) {
+      i++;
+      run(bot);
+      console.log(`Liquidating the ${i}th Token`);
+    }
+
     // }, 1000 * 60);
   }
 
