@@ -161,9 +161,9 @@ export class EnzymeBot {
           sellingToken.amount
         );
         console.log(swapTokensInput);
-        if (swapTokensInput) {
-          this.swapTokens(swapTokensInput).then(() => console.log('Done Liquidating'));
-        }
+        //if (swapTokensInput) {
+        return this.swapTokens(swapTokensInput); //.then(() => console.log('Done Liquidating'));
+        //}
       }
     });
   }
