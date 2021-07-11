@@ -118,7 +118,7 @@ export class EnzymeBot {
   }
 
   public async liquidate(index: number) {
-    let liquidTokenSymbol = 'USDC';
+    let liquidTokenSymbol = 'UNI';
 
     const vaultHoldings = await this.getHoldings();
 

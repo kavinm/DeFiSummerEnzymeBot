@@ -6,13 +6,15 @@ import { getRevertError } from './utils/getRevertError';
 let i = 0;
 let vaultHoldings;
 
-async function start(bot: EnzymeBot) {
+
+// a function to return the length of the vault Holdings and then begin the run bot.
+async function holding(bot: EnzymeBot) {
+  // get the array for the holdings, but we only need the length.
   const vaultHoldings = await bot.getHoldings();
-  const lengthHoldings = vaultHoldings.length;
-  console.log(vaultHoldings);
-  console.log('Above is the current vault holdings and the bottom is length holdings');
-  //console.log(lengthHoldings);
-  return lengthHoldings;
+  
+  // pass on the length of the array to the run function
+  await run(await EnzymeBot.create('KOVAN'), vaultHoldings.length).then((res) => console.log("That's all folks."));
+  return Promise.resolve(true);
 }
 
 
@@ -23,7 +25,6 @@ async function run(bot: EnzymeBot, vlength: number) {
 
   try {
     // return the transaction object
-
     const tx = await bot.liquidate(i);
 
     // if for some reason the transaction is returned as undefined, return
@@ -63,9 +64,10 @@ async function run(bot: EnzymeBot, vlength: number) {
 
     // commented out to prevent loop  in exchanging tokens
     // setTimeout(() => {
-    while (i < vlength) {
+    // vlength - 2 was done to prevent bot from running into undefined error ( function was reading outside the array )
+    while (i <= (vlength - 2)) {
       i++;
-      await run(bot, vlength).then((res) => console.log(`Liquidating the ${i}th Token`));
+      await run(bot, vlength).then((res) => console.log(`Liquidated ${i} Tokens`));
     }
 
     // }, 1000 * 60);
@@ -74,12 +76,13 @@ async function run(bot: EnzymeBot, vlength: number) {
   return Promise.resolve(true);
 }
 
+
 (async function main() {
   console.log('STARTING IT UP');
-
-  vaultHoldings = start(await EnzymeBot.create('KOVAN')) //.then((res) => console.log('finished getting vault holdings'));
-  let vlength = await vaultHoldings;
-  await run(await EnzymeBot.create('KOVAN'), vlength).then((res) => console.log("That's all folks."));
+  // will start bot through holding. allows us to pass the length of the array in one go.
+  // was done using callback to the run function.
+  holding(await EnzymeBot.create('KOVAN'))
+  
 
 })();
 
