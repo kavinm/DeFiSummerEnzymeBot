@@ -116,14 +116,14 @@ export class EnzymeBot {
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
 
-  public async liquidate(index: number, vaultHoldings: any[]) {
+  public async liquidate(index: number, vaultHolding: any) {
     let liquidTokenSymbol = 'BAT';
 
-    // if you have no holdings, return
-    if (vaultHoldings.length === 0) {
-      console.log('Your fund has no assets.');
-      return;
-    }
+    // // if you have no holdings, return
+    // if (vaultHoldings.length === 0) {
+    //   console.log('Your fund has no assets.');
+    //   return;
+    // }
 
     //this will be the token we are liquidating everything into
     const liquidToken = this.tokens.assets.find(

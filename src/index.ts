@@ -7,6 +7,15 @@ let i = 0;
 
 async function getCurrentHoldings(bot: EnzymeBot) {
   const vaultHoldings = await bot.getHoldings();
+  //makes an amount array of numbers from getToken
+  const holdingsAmounts = await Promise.all(
+    vaultHoldings.map((holding) => bot.getTokenBalance(this.vaultAddress, holding!.id, this.network))
+  );
+
+  //combines the vault holdings (list of token objects) with token amounts
+  const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+    return { ...item, amount: holdingsAmounts[index] };
+  });
 
   console.log(vaultHoldings);
   console.log('Above is the current vault holdings and the bottom is length holdings');
@@ -24,7 +33,7 @@ async function run(bot: EnzymeBot, vaultHoldings?: any[]) {
   //const lengthHoldings = vaultHoldings?.length;
   console.log(vaultHoldings);
   vaultHoldings?.forEach((holding, index) => {
-    bot.liquidate(index, vaultHoldings);
+    bot.liquidate(index, holding);
   });
   try {
     // return the transaction object
