@@ -1,19 +1,35 @@
+import { CurveLiquidityAaveAdapter } from '@enzymefinance/protocol';
 import { EnzymeBot } from './EnzymeBot';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 
 let i = 0;
 
-async function run(bot: EnzymeBot) {
+async function getCurrentHoldings(bot: EnzymeBot) {
   const vaultHoldings = await bot.getHoldings();
-  const lengthHoldings = vaultHoldings.length;
+
   console.log(vaultHoldings);
   console.log('Above is the current vault holdings and the bottom is length holdings');
-  console.log(lengthHoldings);
+  //console.log(lengthHoldings);
+
+  return vaultHoldings;
+}
+
+async function run(bot: EnzymeBot, vaultHoldings?: any[]) {
+  // const vaultHoldings = await bot.getHoldings();
+  // const lengthHoldings = vaultHoldings.length;
+  // console.log(vaultHoldings);
+  // console.log('Above is the current vault holdings and the bottom is length holdings');
+  // console.log(lengthHoldings);
+  //const lengthHoldings = vaultHoldings?.length;
+  console.log(vaultHoldings);
+  vaultHoldings?.forEach((holding, index) => {
+    bot.liquidate(index, vaultHoldings);
+  });
   try {
     // return the transaction object
 
-    const tx = await bot.liquidate(i);
+    const tx = await bot.buyLimit();
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -51,14 +67,13 @@ async function run(bot: EnzymeBot) {
     console.log('Scheduling the next iteration...');
 
     // commented out to prevent loop  in exchanging tokens
-    // setTimeout(() => {
-    while (i < lengthHoldings) {
-      i++;
-      run(bot);
-      console.log(`Liquidating the ${i}th Token`);
-    }
-
-    // }, 1000 * 60);
+    setTimeout(() => {
+      while (i < (vaultHoldings?.length || 0)) {
+        i++;
+        run(bot);
+        console.log(`Liquidating the ${i}th Token`);
+      }
+    });
   }
 
   return Promise.resolve(true);
@@ -66,5 +81,7 @@ async function run(bot: EnzymeBot) {
 
 (async function main() {
   console.log('STARTING IT UP');
-  run(await EnzymeBot.create('KOVAN')).then((res) => console.log("That's all folks."));
+  const currentBot = await EnzymeBot.create('KOVAN');
+  const vaultHoldings = await getCurrentHoldings(currentBot);
+  run(currentBot, vaultHoldings).then((res) => console.log("That's all folks."));
 })();

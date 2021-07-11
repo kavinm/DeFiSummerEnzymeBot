@@ -116,10 +116,8 @@ export class EnzymeBot {
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
 
-  public async liquidate(index: number) {
-    let liquidTokenSymbol = 'WETH';
-
-    const vaultHoldings = await this.getHoldings();
+  public async liquidate(index: number, vaultHoldings: any[]) {
+    let liquidTokenSymbol = 'BAT';
 
     // if you have no holdings, return
     if (vaultHoldings.length === 0) {
@@ -142,36 +140,35 @@ export class EnzymeBot {
       return { ...item, amount: holdingsAmounts[index] };
     });
 
-    //for (let i = 0; i < holdingsWithAmounts.length; i++) {
-    //if (holding.symbol !== liquidTokenSymbol) {
-    const sellingToken = holdingsWithAmounts[index];
+    if (holdingsWithAmounts[index].symbol !== liquidTokenSymbol) {
+      const sellingToken = holdingsWithAmounts[index];
 
-    //console.log(sellingToken);
+      //console.log(sellingToken);
 
-    const swapTokensInput = await this.getPrice(
-      { id: liquidToken.id, decimals: liquidToken.decimals, symbol: liquidToken.symbol, name: liquidToken.name },
-      {
-        id: sellingToken.id as string,
-        decimals: sellingToken.decimals as number,
-        symbol: sellingToken.symbol as string,
-        name: sellingToken.name as string,
-      },
-      sellingToken.amount
-    );
-    //console.log(swapTokensInput);
-    if (swapTokensInput) {
-      return this.swapTokens(swapTokensInput); //.then(() => console.log('Done Liquidating'));
+      const swapTokensInput = await this.getPrice(
+        { id: liquidToken.id, decimals: liquidToken.decimals, symbol: liquidToken.symbol, name: liquidToken.name },
+        {
+          id: sellingToken.id as string,
+          decimals: sellingToken.decimals as number,
+          symbol: sellingToken.symbol as string,
+          name: sellingToken.name as string,
+        },
+        sellingToken.amount
+      );
+      //console.log(swapTokensInput);
+      if (swapTokensInput) {
+        this.swapTokens(swapTokensInput); //.then(() => console.log('Done Liquidating'));
+      }
     }
-    //}
   }
 
   public async buyLimit() {
     // writing the function that buys a wanted token and sells held token if the wanted token goes above a certain price
     let tokenPriceLimit = 5;
 
-    let sellTokenSymbol = 'UNI';
+    let sellTokenSymbol = 'WBTC';
 
-    let buyTokenSymbol = 'WETH';
+    let buyTokenSymbol = 'UNI';
 
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
@@ -202,6 +199,8 @@ export class EnzymeBot {
     const sellingToken = holdingsWithAmounts2.find(
       (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
     )!;
+
+    console.log(sellingToken);
 
     // the first input token will be bought, the second will be sold
     // this will create the input needed for our swap
@@ -275,72 +274,72 @@ export class EnzymeBot {
       return this.swapTokens(swapTokensInput);
     }
 
-    // get a random token
-    const randomToken = await this.chooseRandomAsset();
+    // // get a random token
+    // const randomToken = await this.chooseRandomAsset();
 
-    //console.log(randomToken);
+    // //console.log(randomToken);
 
-    // if no random token return, or if the random token is a derivative that's not available on Uniswap
-    if (!randomToken || randomToken.derivativeType) {
-      console.log("The Miner's Delight did not find an appropriate token to buy.");
-      return;
-    }
+    // // if no random token return, or if the random token is a derivative that's not available on Uniswap
+    // if (!randomToken || randomToken.derivativeType) {
+    //   console.log("The Miner's Delight did not find an appropriate token to buy.");
+    //   return;
+    // }
 
-    // get your fund's holdings
-    const vaultHoldings = await this.getHoldings();
+    // // get your fund's holdings
+    // const vaultHoldings = await this.getHoldings();
 
-    // if you have no holdings, return
-    if (vaultHoldings.length === 0) {
-      console.log('Your fund has no assets.');
-      return;
-    }
+    // // if you have no holdings, return
+    // if (vaultHoldings.length === 0) {
+    //   console.log('Your fund has no assets.');
+    //   return;
+    // }
 
-    // if your vault already holds the random token, return
-    if (vaultHoldings.map((holding) => holding?.id.toLowerCase()).includes(randomToken.id.toLowerCase())) {
-      console.log("You already hold the asset that the Miner's Delight randomly selected.");
-      return;
-    }
+    // // if your vault already holds the random token, return
+    // if (vaultHoldings.map((holding) => holding?.id.toLowerCase()).includes(randomToken.id.toLowerCase())) {
+    //   console.log("You already hold the asset that the Miner's Delight randomly selected.");
+    //   return;
+    // }
 
-    // get the amount of each holding
-    const holdingAmounts = await Promise.all(
-      vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
-    );
+    // // get the amount of each holding
+    // const holdingAmounts = await Promise.all(
+    //   vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    // );
 
-    // combine holding token data with amounts
-    const holdingsWithAmounts = vaultHoldings.map((item, index) => {
-      return { ...item, amount: holdingAmounts[index] };
-    });
+    // // combine holding token data with amounts
+    // const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+    //   return { ...item, amount: holdingAmounts[index] };
+    // });
 
-    // find the token you will sell by searching for largest token holding
-    const biggestPosition = holdingsWithAmounts.reduce((carry, current) => {
-      if (current.amount.gte(carry.amount)) {
-        return current;
-      }
-      return carry;
-    }, holdingsWithAmounts[0]);
+    // // find the token you will sell by searching for largest token holding
+    // const biggestPosition = holdingsWithAmounts.reduce((carry, current) => {
+    //   if (current.amount.gte(carry.amount)) {
+    //     return current;
+    //   }
+    //   return carry;
+    // }, holdingsWithAmounts[0]);
 
-    console.log(
-      `The Miner's Delight has chosen. You will trade ${utils.formatUnits(
-        biggestPosition.amount,
-        biggestPosition.decimals
-      )} ${biggestPosition.name} (${biggestPosition.symbol}) for as many ${randomToken.name} (${
-        randomToken.symbol
-      }) as you can get.`
-    );
+    // console.log(
+    //   `The Miner's Delight has chosen. You will trade ${utils.formatUnits(
+    //     biggestPosition.amount,
+    //     biggestPosition.decimals
+    //   )} ${biggestPosition.name} (${biggestPosition.symbol}) for as many ${randomToken.name} (${
+    //     randomToken.symbol
+    //   }) as you can get.`
+    // );
 
-    // get the trade data
-    const price = await this.getPrice(
-      { id: randomToken.id, decimals: randomToken.decimals, symbol: randomToken.symbol, name: randomToken.name },
-      {
-        id: biggestPosition.id as string,
-        decimals: biggestPosition.decimals as number,
-        symbol: biggestPosition.symbol as string,
-        name: biggestPosition.name as string,
-      },
-      biggestPosition.amount
-    );
+    // // get the trade data
+    // const price = await this.getPrice(
+    //   { id: randomToken.id, decimals: randomToken.decimals, symbol: randomToken.symbol, name: randomToken.name },
+    //   {
+    //     id: biggestPosition.id as string,
+    //     decimals: biggestPosition.decimals as number,
+    //     symbol: biggestPosition.symbol as string,
+    //     name: biggestPosition.name as string,
+    //   },
+    //   biggestPosition.amount
+    // );
 
-    // call the transaction
-    return this.swapTokens(price);
+    // // call the transaction
+    // return this.swapTokens(price);
   }
 }
