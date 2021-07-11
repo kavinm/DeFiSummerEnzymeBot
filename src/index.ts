@@ -1,12 +1,30 @@
-// changed import to Test Enzyme Bot make sure to change back
-import { EnzymeBot } from './TestEnzymeBot';
+
+import { EnzymeBot } from './EnzymeBot';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 
-async function run(bot: EnzymeBot) {
+let i = 0;
+let vaultHoldings;
+
+async function start(bot: EnzymeBot) {
+  const vaultHoldings = await bot.getHoldings();
+  const lengthHoldings = vaultHoldings.length;
+  console.log(vaultHoldings);
+  console.log('Above is the current vault holdings and the bottom is length holdings');
+  //console.log(lengthHoldings);
+  return vaultHoldings;
+}
+
+
+
+//const vaultHoldings = start(await EnzymeBot.create('KOVAN'));
+
+async function run(bot: EnzymeBot, vaultHolding: string[]) {
+
   try {
     // return the transaction object
-    const tx = await bot.tradeAlgorithmically();
+
+    const tx = await bot.liquidate(i);
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -42,10 +60,15 @@ async function run(bot: EnzymeBot) {
     console.log(error);
   } finally {
     console.log('Scheduling the next iteration...');
-    
+
     // commented out to prevent loop  in exchanging tokens
     // setTimeout(() => {
-    //   run(bot);
+    while (i < vaultHolding.length) {
+      i++;
+      run(bot, vaultHolding);
+      console.log(`Liquidating the ${i}th Token`);
+    }
+
     // }, 1000 * 60);
   }
 
@@ -54,5 +77,13 @@ async function run(bot: EnzymeBot) {
 
 (async function main() {
   console.log('STARTING IT UP');
-  run(await EnzymeBot.create('KOVAN')).then((res) => console.log("That's all folks."));
+  try{
+    vaultHoldings = start(await EnzymeBot.create('KOVAN')) //.then((res) => console.log('finished getting vault holdings'));
+  }
+  finally{
+    vaultHoldings?.then()
+    console.log(vaultHoldings + "VAULT HOLDINGS");
+  //run(await EnzymeBot.create('KOVAN'),vaultHoldings).then((res) => console.log("That's all folks."));
+  }
 })();
+
