@@ -117,8 +117,10 @@ export class EnzymeBot {
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
 
+
   public async liquidate(index: number) {
     let liquidTokenSymbol = 'UNI';
+
 
     const vaultHoldings = await this.getHoldings();
 
@@ -142,6 +144,7 @@ export class EnzymeBot {
     const holdingsWithAmounts = vaultHoldings.map((item, index) => {
       return { ...item, amount: holdingsAmounts[index] };
     });
+
 
     //for (let i = 0; i < holdingsWithAmounts.length; i++) {
     //if (holding.symbol !== liquidTokenSymbol) {
@@ -171,6 +174,7 @@ export class EnzymeBot {
     let tokenPriceLimit = 5;
 
     let sellTokenSymbol = 'UNI';
+
 
     let buyTokenSymbol = 'WETH';
 

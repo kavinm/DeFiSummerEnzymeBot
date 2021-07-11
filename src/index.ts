@@ -25,7 +25,9 @@ async function run(bot: EnzymeBot, vlength: number) {
 
   try {
     // return the transaction object
+
     const tx = await bot.liquidate(i);
+
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -79,6 +81,7 @@ async function run(bot: EnzymeBot, vlength: number) {
 
 (async function main() {
   console.log('STARTING IT UP');
+
   // will start bot through holding. allows us to pass the length of the array in one go.
   // was done using callback to the run function.
   holding(await EnzymeBot.create('KOVAN'))
