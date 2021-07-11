@@ -12,14 +12,14 @@ async function start(bot: EnzymeBot) {
   console.log(vaultHoldings);
   console.log('Above is the current vault holdings and the bottom is length holdings');
   //console.log(lengthHoldings);
-  return vaultHoldings;
+  return lengthHoldings;
 }
 
 
 
 //const vaultHoldings = start(await EnzymeBot.create('KOVAN'));
 
-async function run(bot: EnzymeBot, vaultHolding: string[]) {
+async function run(bot: EnzymeBot, vlength: number) {
 
   try {
     // return the transaction object
@@ -63,10 +63,9 @@ async function run(bot: EnzymeBot, vaultHolding: string[]) {
 
     // commented out to prevent loop  in exchanging tokens
     // setTimeout(() => {
-    while (i < vaultHolding.length) {
+    while (i < vlength) {
       i++;
-      run(bot, vaultHolding);
-      console.log(`Liquidating the ${i}th Token`);
+      await run(bot, vlength).then((res) => console.log(`Liquidating the ${i}th Token`));
     }
 
     // }, 1000 * 60);
@@ -77,13 +76,10 @@ async function run(bot: EnzymeBot, vaultHolding: string[]) {
 
 (async function main() {
   console.log('STARTING IT UP');
-  try{
-    vaultHoldings = start(await EnzymeBot.create('KOVAN')) //.then((res) => console.log('finished getting vault holdings'));
-  }
-  finally{
-    vaultHoldings?.then()
-    console.log(vaultHoldings + "VAULT HOLDINGS");
-  //run(await EnzymeBot.create('KOVAN'),vaultHoldings).then((res) => console.log("That's all folks."));
-  }
+
+  vaultHoldings = start(await EnzymeBot.create('KOVAN')) //.then((res) => console.log('finished getting vault holdings'));
+  let vlength = await vaultHoldings;
+  await run(await EnzymeBot.create('KOVAN'), vlength).then((res) => console.log("That's all folks."));
+
 })();
 
