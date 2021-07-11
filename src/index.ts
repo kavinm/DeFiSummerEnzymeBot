@@ -2,14 +2,16 @@ import { CurveLiquidityAaveAdapter } from '@enzymefinance/protocol';
 import { EnzymeBot } from './EnzymeBot';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
+import { getTokenBalance } from './utils/getTokenBalance';
 
 let i = 0;
 
 async function getCurrentHoldings(bot: EnzymeBot) {
   const vaultHoldings = await bot.getHoldings();
+
   //makes an amount array of numbers from getToken
   const holdingsAmounts = await Promise.all(
-    vaultHoldings.map((holding) => bot.getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    vaultHoldings.map((holding) => getTokenBalance(bot.vaultAddress, holding!.id, bot.network))
   );
 
   //combines the vault holdings (list of token objects) with token amounts
@@ -17,11 +19,11 @@ async function getCurrentHoldings(bot: EnzymeBot) {
     return { ...item, amount: holdingsAmounts[index] };
   });
 
-  console.log(vaultHoldings);
+  console.log(holdingsWithAmounts);
   console.log('Above is the current vault holdings and the bottom is length holdings');
   //console.log(lengthHoldings);
 
-  return vaultHoldings;
+  return holdingsWithAmounts;
 }
 
 async function run(bot: EnzymeBot, vaultHoldings?: any[]) {
