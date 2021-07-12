@@ -1,33 +1,46 @@
 
+import { CurveLiquidityAaveAdapter } from '@enzymefinance/protocol';
+
 import { EnzymeBot } from './EnzymeBot';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
+import { getTokenBalance } from './utils/getTokenBalance';
 
-let i = 0;
-let vaultHoldings;
+//let i = 0;
 
-
-// a function to return the length of the vault Holdings and then begin the run bot.
-async function holding(bot: EnzymeBot) {
-  // get the array for the holdings, but we only need the length.
+async function getCurrentHoldings(bot: EnzymeBot) {
   const vaultHoldings = await bot.getHoldings();
-  
-  // pass on the length of the array to the run function
-  await run(await EnzymeBot.create('KOVAN'), vaultHoldings.length).then((res) => console.log("That's all folks."));
-  return Promise.resolve(true);
+
+  //makes an amount array of numbers from getToken
+  const holdingsAmounts = await Promise.all(
+    vaultHoldings.map((holding) => getTokenBalance(bot.vaultAddress, holding!.id, bot.network))
+  );
+
+  //combines the vault holdings (list of token objects) with token amounts
+  const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+    return { ...item, amount: holdingsAmounts[index] };
+  });
+
+  console.log(holdingsWithAmounts);
+  console.log('Above is the current vault holdings and the bottom is length holdings');
+  //console.log(lengthHoldings);
+
+  return holdingsWithAmounts;
+  // console.log(holdingsWithAmounts);
 }
 
-
-
-//const vaultHoldings = start(await EnzymeBot.create('KOVAN'));
-
-async function run(bot: EnzymeBot, vlength: number) {
+async function run(bot: EnzymeBot, token: any) {
+  // const vaultHoldings = await bot.getHoldings();
+  // const lengthHoldings = vaultHoldings.length;
+  // console.log(vaultHoldings);
+  // console.log('Above is the current vault holdings and the bottom is length holdings');
+  // console.log(lengthHoldings);
+  //const lengthHoldings = vaultHoldings?.length;
 
   try {
     // return the transaction object
 
-
-    const tx = await bot.liquidate(vlength);
+    const tx = await bot.liquidate(token);
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -66,14 +79,14 @@ async function run(bot: EnzymeBot, vlength: number) {
 
     // commented out to prevent loop  in exchanging tokens
     // setTimeout(() => {
-    // vlength - 2 was done to prevent bot from running into undefined error ( function was reading outside the array )
-   /*
-    while (i <= (vlength - 2)) {
-      i++;
-      await run(bot, vlength).then((res) => console.log(`Liquidated ${i} Tokens`));
-    }*/
 
-    // }, 1000 * 60);
+    //   while (i < (vaultHoldings?.length || 0)) {
+    //     i++;
+    //     run(bot);
+    //     console.log(`Liquidating the ${i}th Token`);
+    //   }
+    // });
+
   }
 
   return Promise.resolve(true);
@@ -81,12 +94,18 @@ async function run(bot: EnzymeBot, vlength: number) {
 
 
 (async function main() {
-  console.log('STARTING IT UP');
 
-  // will start bot through holding. allows us to pass the length of the array in one go.
-  // was done using callback to the run function.
-  holding(await EnzymeBot.create('KOVAN'))
-  
+  const currentBot = await EnzymeBot.create('KOVAN');
+  const vaultHoldings = await getCurrentHoldings(currentBot);
+  const holdingsLength = vaultHoldings.length;
+  console.log('It got past declaring vaultHoldings');
+
+  for (let i = 0; i < holdingsLength; i++) {
+    await console.log(`BEFORE LIQUIDATE This is within the for each loop index of ${i} `);
+    run(currentBot, vaultHoldings[i]).then((res) => console.log("That's all folks."));
+    console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
+  }
+  //console.log('STARTING IT UP');
 
 })();
 
