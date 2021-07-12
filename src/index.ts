@@ -26,7 +26,7 @@ async function run(bot: EnzymeBot, vlength: number) {
   try {
     // return the transaction object
 
-    const tx = await bot.liquidate(i);
+    const tx = await bot.liquidate(vlength);
 
 
     // if for some reason the transaction is returned as undefined, return
@@ -67,10 +67,11 @@ async function run(bot: EnzymeBot, vlength: number) {
     // commented out to prevent loop  in exchanging tokens
     // setTimeout(() => {
     // vlength - 2 was done to prevent bot from running into undefined error ( function was reading outside the array )
+   /*
     while (i <= (vlength - 2)) {
       i++;
       await run(bot, vlength).then((res) => console.log(`Liquidated ${i} Tokens`));
-    }
+    }*/
 
     // }, 1000 * 60);
   }
