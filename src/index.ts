@@ -24,6 +24,7 @@ async function getCurrentHoldings(bot: EnzymeBot) {
   //console.log(lengthHoldings);
 
   return holdingsWithAmounts;
+  // console.log(holdingsWithAmounts);
 }
 
 async function run(bot: EnzymeBot, vaultHoldings?: any[]) {
