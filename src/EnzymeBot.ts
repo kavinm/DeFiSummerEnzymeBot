@@ -292,8 +292,8 @@ export class EnzymeBot {
     let tokenPriceLimit = 1;
 
     let sellTokenSymbol = 'WETH';
-
     let buyTokenSymbol = 'UNI';
+
 
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
@@ -350,7 +350,7 @@ export class EnzymeBot {
     let tokenPriceLimit = 5;
     let sellTokenSymbol = 'UNI';
 
-    let buyTokenSymbol = 'WETH';
+    let buyTokenSymbol = 'WBTC';
 
     // this is getting the price of the sellToken
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, sellTokenSymbol);

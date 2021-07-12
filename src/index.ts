@@ -26,8 +26,8 @@ async function run(bot: EnzymeBot, vlength: number) {
   try {
     // return the transaction object
 
-    const tx = await bot.liquidate(vlength);
 
+    const tx = await bot.liquidate(vlength);
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
