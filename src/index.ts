@@ -1,12 +1,33 @@
+
 import { EnzymeBot } from './EnzymeBot';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 
-async function run(bot: EnzymeBot) {
+let i = 0;
+let vaultHoldings;
+
+
+// a function to return the length of the vault Holdings and then begin the run bot.
+async function holding(bot: EnzymeBot) {
+  // get the array for the holdings, but we only need the length.
+  const vaultHoldings = await bot.getHoldings();
+  
+  // pass on the length of the array to the run function
+  await run(await EnzymeBot.create('KOVAN'), vaultHoldings.length).then((res) => console.log("That's all folks."));
+  return Promise.resolve(true);
+}
+
+
+
+//const vaultHoldings = start(await EnzymeBot.create('KOVAN'));
+
+async function run(bot: EnzymeBot, vlength: number) {
+
   try {
     // return the transaction object
-    const tx = await bot.buyLimit();
-    console.log(tx);
+
+
+    const tx = await bot.liquidate(vlength);
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -45,14 +66,27 @@ async function run(bot: EnzymeBot) {
 
     // commented out to prevent loop  in exchanging tokens
     // setTimeout(() => {
-    //   run(bot);
+    // vlength - 2 was done to prevent bot from running into undefined error ( function was reading outside the array )
+   /*
+    while (i <= (vlength - 2)) {
+      i++;
+      await run(bot, vlength).then((res) => console.log(`Liquidated ${i} Tokens`));
+    }*/
+
     // }, 1000 * 60);
   }
 
   return Promise.resolve(true);
 }
 
+
 (async function main() {
   console.log('STARTING IT UP');
-  run(await EnzymeBot.create('KOVAN')).then((res) => console.log("That's all folks."));
+
+  // will start bot through holding. allows us to pass the length of the array in one go.
+  // was done using callback to the run function.
+  holding(await EnzymeBot.create('KOVAN'))
+  
+
 })();
+
