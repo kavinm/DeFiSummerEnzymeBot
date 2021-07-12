@@ -116,8 +116,8 @@ export class EnzymeBot {
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
 
-  public async liquidate(index: number, vaultHolding: any) {
-    let liquidTokenSymbol = 'BAT';
+  public async liquidate(vaultHolding: any) {
+    let liquidTokenSymbol = 'USDC';
 
     // // if you have no holdings, return
     // if (vaultHoldings.length === 0) {
@@ -155,9 +155,9 @@ export class EnzymeBot {
       },
       sellingToken.amount
     );
-    //console.log(swapTokensInput);
+    console.log(swapTokensInput);
     if (swapTokensInput) {
-      this.swapTokens(swapTokensInput); //.then(() => console.log('Done Liquidating'));
+      return this.swapTokens(swapTokensInput); //.then(() => console.log('Done Liquidating'));
     }
     //}
   }

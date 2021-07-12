@@ -4,7 +4,7 @@ import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 import { getTokenBalance } from './utils/getTokenBalance';
 
-let i = 0;
+//let i = 0;
 
 async function getCurrentHoldings(bot: EnzymeBot) {
   const vaultHoldings = await bot.getHoldings();
@@ -27,21 +27,18 @@ async function getCurrentHoldings(bot: EnzymeBot) {
   // console.log(holdingsWithAmounts);
 }
 
-async function run(bot: EnzymeBot, vaultHoldings?: any[]) {
+async function run(bot: EnzymeBot, token: any) {
   // const vaultHoldings = await bot.getHoldings();
   // const lengthHoldings = vaultHoldings.length;
   // console.log(vaultHoldings);
   // console.log('Above is the current vault holdings and the bottom is length holdings');
   // console.log(lengthHoldings);
   //const lengthHoldings = vaultHoldings?.length;
-  console.log(vaultHoldings);
-  vaultHoldings?.forEach((holding, index) => {
-    bot.liquidate(index, holding);
-  });
+
   try {
     // return the transaction object
 
-    const tx = await bot.buyLimit();
+    const tx = await bot.liquidate(token);
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -79,21 +76,28 @@ async function run(bot: EnzymeBot, vaultHoldings?: any[]) {
     console.log('Scheduling the next iteration...');
 
     // commented out to prevent loop  in exchanging tokens
-    setTimeout(() => {
-      while (i < (vaultHoldings?.length || 0)) {
-        i++;
-        run(bot);
-        console.log(`Liquidating the ${i}th Token`);
-      }
-    });
+    // setTimeout(() => {
+    //   while (i < (vaultHoldings?.length || 0)) {
+    //     i++;
+    //     run(bot);
+    //     console.log(`Liquidating the ${i}th Token`);
+    //   }
+    // });
   }
 
   return Promise.resolve(true);
 }
 
 (async function main() {
-  console.log('STARTING IT UP');
   const currentBot = await EnzymeBot.create('KOVAN');
   const vaultHoldings = await getCurrentHoldings(currentBot);
-  run(currentBot, vaultHoldings).then((res) => console.log("That's all folks."));
+  const holdingsLength = vaultHoldings.length;
+  console.log('It got past declaring vaultHoldings');
+
+  for (let i = 0; i < holdingsLength; i++) {
+    await console.log(`BEFORE LIQUIDATE This is within the for each loop index of ${i} `);
+    run(currentBot, vaultHoldings[i]).then((res) => console.log("That's all folks."));
+    console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
+  }
+  //console.log('STARTING IT UP');
 })();
