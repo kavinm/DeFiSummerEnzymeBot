@@ -1,4 +1,6 @@
+
 import { CurveLiquidityAaveAdapter } from '@enzymefinance/protocol';
+
 import { EnzymeBot } from './EnzymeBot';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
@@ -77,18 +79,22 @@ async function run(bot: EnzymeBot, token: any) {
 
     // commented out to prevent loop  in exchanging tokens
     // setTimeout(() => {
+
     //   while (i < (vaultHoldings?.length || 0)) {
     //     i++;
     //     run(bot);
     //     console.log(`Liquidating the ${i}th Token`);
     //   }
     // });
+
   }
 
   return Promise.resolve(true);
 }
 
+
 (async function main() {
+
   const currentBot = await EnzymeBot.create('KOVAN');
   const vaultHoldings = await getCurrentHoldings(currentBot);
   const holdingsLength = vaultHoldings.length;
@@ -100,4 +106,6 @@ async function run(bot: EnzymeBot, token: any) {
     console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
   }
   //console.log('STARTING IT UP');
+
 })();
+
