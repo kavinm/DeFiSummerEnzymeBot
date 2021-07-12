@@ -170,11 +170,11 @@ export class EnzymeBot {
 
   public async buyLimit() {
     // writing the function that buys a wanted token and sells held token if the wanted token goes above a certain price
-    let tokenPriceLimit = 2000;
+    let tokenPriceLimit = 1;
 
-    let sellTokenSymbol = 'WBTC';
+    let sellTokenSymbol = 'WETH';
 
-    let buyTokenSymbol = 'WETH';
+    let buyTokenSymbol = 'MKR';
 
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
@@ -206,6 +206,8 @@ export class EnzymeBot {
       (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
     )!;
 
+    const hardCodedAmount: BigNumber = BigNumber.from('3');
+
     // the first input token will be bought, the second will be sold
     // this will create the input needed for our swap
     const swapTokensInput = await this.getPrice(
@@ -216,7 +218,7 @@ export class EnzymeBot {
         symbol: sellingToken.symbol as string,
         name: sellingToken.name as string,
       },
-      sellingToken.amount
+      sellingToken.amount.div(hardCodedAmount)
     );
 
     if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
@@ -229,7 +231,7 @@ export class EnzymeBot {
     let tokenPriceLimit = 5;
     let sellTokenSymbol = 'UNI';
 
-    let buyTokenSymbol = 'WETH';
+    let buyTokenSymbol = 'WBTC';
 
     // this is getting the price of the sellToken
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, sellTokenSymbol);

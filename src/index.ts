@@ -5,7 +5,8 @@ import { getRevertError } from './utils/getRevertError';
 async function run(bot: EnzymeBot) {
   try {
     // return the transaction object
-    const tx = await bot.sellLimit();
+    const tx = await bot.buyLimit();
+    console.log(tx);
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
