@@ -135,9 +135,17 @@ export class EnzymeBot {
       return { ...item, amount: holdingsAmounts[index] };
     });
 
-    holdingsWithAmounts.forEach((holding) => {
-      let decimals = holding.decimals;
-    });
+    console.log(holdingsWithAmounts);
+    
+    for (let holding of holdingsWithAmounts){
+      let decimals =  holding.decimals;
+      let DecimalAmount = parseInt(holding.amount._hex,16);
+      let value = DecimalAmount/(10**decimals!);
+      let priceOfCoin = await getPrice2(this.subgraphEndpoint,holding.symbol!);
+      console.log(DecimalAmount);
+      console.log(value);
+      console.log(priceOfCoin);
+    }
   }
 
   public async liquidate(vaultHolding: any) {
