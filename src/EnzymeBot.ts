@@ -117,7 +117,7 @@ export class EnzymeBot {
   }
 
   public async liquidate(vaultHolding: any) {
-    let liquidTokenSymbol = 'USDC';
+    let liquidTokenSymbol = 'WETH';
 
     // // if you have no holdings, return
     // if (vaultHoldings.length === 0) {
@@ -130,18 +130,12 @@ export class EnzymeBot {
       (asset) => !asset.derivativeType && asset.symbol === liquidTokenSymbol
     )!;
 
-    // //makes an amount array of numbers from getToken
-    // const holdingsAmounts = await Promise.all(
-    //   vaultHolding.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
-    // );
-
-    // //combines the vault holdings (list of token objects) with token amounts
-    // const holdingsWithAmounts = vaultHoldings.map((item, index) => {
-    //   return { ...item, amount: holdingsAmounts[index] };
-    // });
-
-    // if (holdingsWithAmounts[index].symbol !== liquidTokenSymbol) {
     const sellingToken = vaultHolding;
+
+    //make sure you are not trying to swap the token with itself
+    if (liquidToken.symbol === sellingToken.symbol) {
+      return;
+    }
 
     //console.log(sellingToken);
 
