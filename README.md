@@ -2,6 +2,8 @@
 
 A naive bot for Enzyme Finance
 
+out take on the enzyme bot
+
 ## Installation
 
 - clone this repo and navigate into it
