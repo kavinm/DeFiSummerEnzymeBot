@@ -115,6 +115,30 @@ export class EnzymeBot {
     const contract = new ComptrollerLib(comptroller, this.wallet);
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
+  public async getVaultValues() {
+    //get holdings of vault
+    const vaultHoldings = await this.getHoldings();
+
+    // if you have no holdings, return
+    if (vaultHoldings.length === 0) {
+      console.log('Your fund has no assets.');
+      return;
+    }
+
+    //makes an amount array of numbers from getToken
+    const holdingsAmounts = await Promise.all(
+      vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    );
+
+    // combine holding token data with amounts
+    const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+      return { ...item, amount: holdingsAmounts[index] };
+    });
+
+    holdingsWithAmounts.forEach((holding) => {
+      let decimals = holding.decimals;
+    });
+  }
 
   public async liquidate(vaultHolding: any) {
     let liquidTokenSymbol = 'WETH';
