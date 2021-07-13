@@ -18,7 +18,7 @@ export async function getPrice2(endpoint: string, token: string) {
   const returnToken = result.assets.find((asset) => asset.symbol === token);
 
   axios.get('https://data.enzyme.finance/api/currency/list').then(function (response) {
-    console.log(response.data.data.find((d: any) => d.id === 'ETH').price.price);
+    //console.log(response.data.data.find((d: any) => d.id === 'ETH').price.price);
   });
 
   // use the price of USDC which is also in ETH to get the price in USD

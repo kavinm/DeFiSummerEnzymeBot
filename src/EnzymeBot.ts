@@ -115,6 +115,38 @@ export class EnzymeBot {
     const contract = new ComptrollerLib(comptroller, this.wallet);
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
+  public async getVaultValues() {
+    //get holdings of vault
+    const vaultHoldings = await this.getHoldings();
+
+    // if you have no holdings, return
+    if (vaultHoldings.length === 0) {
+      console.log('Your fund has no assets.');
+      return;
+    }
+
+    //makes an amount array of numbers from getToken
+    const holdingsAmounts = await Promise.all(
+      vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    );
+
+    // combine holding token data with amounts
+    const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+      return { ...item, amount: holdingsAmounts[index] };
+    });
+
+    console.log(holdingsWithAmounts);
+    
+    for (let holding of holdingsWithAmounts){
+      let decimals =  holding.decimals;
+      let DecimalAmount = parseInt(holding.amount._hex,16);
+      let value = DecimalAmount/(10**decimals!);
+      let priceOfCoin = await getPrice2(this.subgraphEndpoint,holding.symbol!);
+      console.log(DecimalAmount);
+      console.log(value);
+      console.log(priceOfCoin);
+    }
+  }
 
   public async liquidate(vaultHolding: any) {
     let liquidTokenSymbol = 'WETH';
@@ -162,7 +194,7 @@ export class EnzymeBot {
 
     let sellTokenSymbol = 'WBTC';
 
-    let buyTokenSymbol = 'UNI';
+    let buyTokenSymbol = 'YFI';
 
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
