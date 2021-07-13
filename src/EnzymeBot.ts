@@ -125,16 +125,32 @@ export class EnzymeBot {
       (asset) => !asset.derivativeType && asset.symbol === liquidTokenSymbol
     )!;
 
+<<<<<<< HEAD
     
+=======
+  public async liquidate(vaultHolding: any) {
+    let liquidTokenSymbol = 'WETH';
 
-    const vaultHoldings = await this.getHoldings();
+    // // if you have no holdings, return
+    // if (vaultHoldings.length === 0) {
+    //   console.log('Your fund has no assets.');
+    //   return;
+    // }
 
-    // if you have no holdings, return
-    if (vaultHoldings.length === 0) {
-      console.log('Your fund has no assets.');
+    //this will be the token we are liquidating everything into
+    const liquidToken = this.tokens.assets.find(
+      (asset) => !asset.derivativeType && asset.symbol === liquidTokenSymbol
+    )!;
+>>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
+
+    const sellingToken = vaultHolding;
+
+    //make sure you are not trying to swap the token with itself
+    if (liquidToken.symbol === sellingToken.symbol) {
       return;
     }
 
+<<<<<<< HEAD
     //this will be the token we are liquidating everything into
 
     //makes an amount array of num  bers from getToken
@@ -254,16 +270,37 @@ export class EnzymeBot {
       sellingToken.amount
     );
 
+=======
+    //console.log(sellingToken);
+
+    const swapTokensInput = await this.getPrice(
+      { id: liquidToken.id, decimals: liquidToken.decimals, symbol: liquidToken.symbol, name: liquidToken.name },
+      {
+        id: sellingToken.id as string,
+        decimals: sellingToken.decimals as number,
+        symbol: sellingToken.symbol as string,
+        name: sellingToken.name as string,
+      },
+      sellingToken.amount
+    );
+>>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
     console.log(swapTokensInput);
     if (swapTokensInput) {
       return this.swapTokens(swapTokensInput); //.then(() => console.log('Done Liquidating'));
     }
     //}
+<<<<<<< HEAD
 
+=======
+>>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
   }
 
   public async buyLimit() {
     // writing the function that buys a wanted token and sells held token if the wanted token goes above a certain price
+<<<<<<< HEAD
+=======
+    let tokenPriceLimit = 5;
+>>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
 
     let tokenPriceLimit = 5;
 
@@ -304,10 +341,15 @@ export class EnzymeBot {
       (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
     )!;
 
+<<<<<<< HEAD
 
     console.log(sellingToken);
 
 
+=======
+    console.log(sellingToken);
+
+>>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
     // the first input token will be bought, the second will be sold
     // this will create the input needed for our swap
     const swapTokensInput = await this.getPrice(
@@ -331,7 +373,7 @@ export class EnzymeBot {
     let tokenPriceLimit = 5;
     let sellTokenSymbol = 'UNI';
 
-    let buyTokenSymbol = 'WBTC';
+    let buyTokenSymbol = 'WETH';
 
     // this is getting the price of the sellToken
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, sellTokenSymbol);
