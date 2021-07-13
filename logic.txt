@@ -1,0 +1,45 @@
+Liquidate Logic:
+
+1. Liquidate should only be passed the holdingsWithAmount object, not an array
+2. Liquidate should then create the sellToken with the input holdings object
+3. Liquidate performs the swap.
+
+
+Index.ts Current Logic
+
+1.Create static holdings
+
+2.Call the bot with a strategy function
+
+3. . check if transaction is valid, send it, handle errors if there are some 
+
+4. If needed,  run multiple times
+
+5. Main Function creates bot and then calls run with it
+
+Index.ts New logic for Liquidate
+MAIN
+1. Create Static holdings in main
+
+
+2.for each loop within main, foreach will liquidate and iterate 
+through each token
+
+RUN
+3.Call the bot with liquidate function for each token
+
+4.check if transaction is valid, send it, handle errors if there are some 
+
+
+Rebalance Portfolio Logic
+
+Inputs: Tokens that are reduced in holding, amount token is reduced by, Tokens that are increased in holdings, amount token is increased by, total value/amount of all holdings
+
+GET TOTAL USD VALUE OF HOLDINGS (getVaultValue)
+
+_We need to sum up the values of all token - Get value of each token
+1. Check how many decimals the token has, convert into number
+2. Multiply token number by price in usd with getPrice
+3. We will have value of token amount in usd
+4. Sum token values and store in variable
+
