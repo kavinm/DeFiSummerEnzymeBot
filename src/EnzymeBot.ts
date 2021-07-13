@@ -194,7 +194,7 @@ export class EnzymeBot {
 
     let sellTokenSymbol = 'WBTC';
 
-    let buyTokenSymbol = 'UNI';
+    let buyTokenSymbol = 'YFI';
 
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
