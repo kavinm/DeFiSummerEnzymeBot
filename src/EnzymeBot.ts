@@ -136,14 +136,15 @@ export class EnzymeBot {
     });
 
     console.log(holdingsWithAmounts);
-    
-    for (let holding of holdingsWithAmounts){
-      let decimals =  holding.decimals;
-      let DecimalAmount = parseInt(holding.amount._hex,16);
-      let value = DecimalAmount/(10**decimals!);
-      let priceOfCoin = await getPrice2(this.subgraphEndpoint,holding.symbol!);
+
+    for (let holding of holdingsWithAmounts) {
+      let decimals = holding.decimals;
+      let DecimalAmount = parseInt(holding.amount._hex, 16);
+      let value = DecimalAmount / 10 ** decimals!;
+      let priceOfCoin = await getPrice2(this.subgraphEndpoint, holding.symbol!);
       console.log(DecimalAmount);
       console.log(value);
+      console.log('Price from priceOfCoin');
       console.log(priceOfCoin);
     }
   }

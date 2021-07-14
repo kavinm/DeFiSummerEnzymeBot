@@ -16,15 +16,18 @@ import axios from 'axios';
 export async function getPrice2(endpoint: string, token: string) {
   const result = await gql(endpoint).assets();
   const returnToken = result.assets.find((asset) => asset.symbol === token);
+  let priceOfETH: number;
+  const res = await axios.get('https://data.enzyme.finance/api/currency/list');
 
-  axios.get('https://data.enzyme.finance/api/currency/list').then(function (response) {
-    //console.log(response.data.data.find((d: any) => d.id === 'ETH').price.price);
-  });
-
+  priceOfETH = Number(res.data.data.find((d: any) => d.id === 'ETH').price.price);
   // use the price of USDC which is also in ETH to get the price in USD
-  if (returnToken?.type === 'ETH') {
-    const priceOfUSDC = Number(result.assets.find((asset) => asset.symbol === 'USDC')?.price?.price);
-    return Number(result.assets.find((asset) => asset.symbol === token)?.price?.price) / priceOfUSDC;
+  if (returnToken?.type === 'ETH' && priceOfETH !== NaN) {
+    //const priceOfUSDC = Number(result.assets.find((asset) => asset.symbol === 'USDC')?.price?.price);
+
+    let tokenPrice = Number(result.assets.find((asset) => asset.symbol === token)?.price?.price) * priceOfETH;
+    console.log('This is the tokenPrice');
+    console.log(tokenPrice);
+    return tokenPrice;
   }
   //if price is already in USD just return price
   if (returnToken?.type === 'USD') {
