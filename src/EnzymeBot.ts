@@ -198,7 +198,24 @@ export class EnzymeBot {
     //}
   }
 
-  public async rebalancePortfolio() {}
+  public async rebalancePortfolio() {
+    // const vault = new VaultLib(this.vaultAddress, this.wallet);
+    // const vaultHoldings = await vault.getTrackedAssets();
+    // return Promise.all(vaultHoldings.map((item: string) => getToken(this.subgraphEndpoint, 'id', item.toLowerCase())));
+    //  // if you have no holdings, return
+    //  if (vaultHoldings.length === 0) {
+    //   console.log('Your fund has no assets.');
+    //   return;
+    // }
+    // //makes an amount array of numbers from getToken
+    // const holdingsAmounts = await Promise.all(
+    //   vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    // );
+    // // combine holding token data with amounts
+    // const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+    //   return { ...item, amount: holdingsAmounts[index] };
+    // });
+  }
 
   // use this function to add holdings
   public async addHolding() {
