@@ -1,4 +1,3 @@
-
 import {
   callOnIntegrationArgs,
   ComptrollerLib,
@@ -116,18 +115,40 @@ export class EnzymeBot {
     const contract = new ComptrollerLib(comptroller, this.wallet);
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
-/*
-  public async singleIndexHolding(index: number) {
+  public async getVaultValues() {
+    //get holdings of vault
+    const vaultHoldings = await this.getHoldings();
 
-    let liquidTokenSymbol = 'UNI';
+    // if you have no holdings, return
+    if (vaultHoldings.length === 0) {
+      console.log('Your fund has no assets.');
+      return;
+    }
 
-    const liquidToken = this.tokens.assets.find(
-      (asset) => !asset.derivativeType && asset.symbol === liquidTokenSymbol
-    )!;
+    //makes an amount array of numbers from getToken
+    const holdingsAmounts = await Promise.all(
+      vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    );
 
-<<<<<<< HEAD
-    
-=======
+    // combine holding token data with amounts
+    const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+      return { ...item, amount: holdingsAmounts[index] };
+    });
+
+    console.log(holdingsWithAmounts);
+
+    for (let holding of holdingsWithAmounts) {
+      let decimals = holding.decimals;
+      let DecimalAmount = parseInt(holding.amount._hex, 16);
+      let value = DecimalAmount / 10 ** decimals!;
+      let priceOfCoin = await getPrice2(this.subgraphEndpoint, holding.symbol!);
+      console.log(DecimalAmount);
+      console.log(value);
+      console.log('Price from priceOfCoin');
+      console.log(priceOfCoin);
+    }
+  }
+
   public async liquidate(vaultHolding: any) {
     let liquidTokenSymbol = 'WETH';
 
@@ -141,7 +162,6 @@ export class EnzymeBot {
     const liquidToken = this.tokens.assets.find(
       (asset) => !asset.derivativeType && asset.symbol === liquidTokenSymbol
     )!;
->>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
 
     const sellingToken = vaultHolding;
 
@@ -150,59 +170,6 @@ export class EnzymeBot {
       return;
     }
 
-<<<<<<< HEAD
-    //this will be the token we are liquidating everything into
-
-    //makes an amount array of num  bers from getToken
-    const holdingsAmounts = await Promise.all(
-      vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
-    );
-
-    //combines the vault holdings (list of token objects) with token amounts
-    const holdingsWithAmounts = vaultHoldings.map((item, index) => {
-      return { ...item, amount: holdingsAmounts[index] };
-    });
-
-    const sellingToken = holdingsWithAmounts[index];
-
-    const swapTokensInput = await this.getPrice(
-      { id: liquidToken.id, decimals: liquidToken.decimals, symbol: liquidToken.symbol, name: liquidToken.name },
-      {
-        id: sellingToken.id as string,
-        decimals: sellingToken.decimals as number,
-        symbol: sellingToken.symbol as string,
-        name: sellingToken.name as string,
-      },
-      sellingToken.amount
-    );
-    
-    for( let i = 0; i < vaultHoldings.length; i ++){
-    if (holdingsAmounts[i].symbol == liquidTokenSymbol){
-      continue
-    }
-    else{
-      this.SellingOfLiquidate(holdingsAmounts, i, vaultHoldings,liquidTokenSymbol)
-    }
-    
-    }
-
-
-    return (holdingsWithAmounts);
-  }
-  public async SellingOfLiquidate(holdingsAmounts:BigNumber[], index: number, vaultHoldings: string[], TokenSymbol: string){
-    
-    const holdingsWithAmounts = vaultHoldings.map((item, index) => {
-      return { ...item, amount: holdingsAmounts[index] };
-    });
-
-    let liquidTokenSymbol = TokenSymbol;
-
-    const liquidToken = this.tokens.assets.find(
-      (asset) => !asset.derivativeType && asset.symbol === liquidTokenSymbol
-    )!;
-
-    const sellingToken = holdingsWithAmounts[index];
-
     //console.log(sellingToken);
 
     const swapTokensInput = await this.getPrice(
@@ -215,101 +182,20 @@ export class EnzymeBot {
       },
       sellingToken.amount
     );
-    //console.log(swapTokensInput);
-    if (swapTokensInput) {
-      return this.swapTokens(swapTokensInput); //.then(() => console.log('Done Liquidating'));
-    }
-
-  }
-*/
-
-  public async liquidate(index: number) {
-    let liquidTokenSymbol = 'USDC';
-
-
-  public async liquidate(vaultHolding: any) {
-    let liquidTokenSymbol = 'USDC';
-
-
-    // // if you have no holdings, return
-    // if (vaultHoldings.length === 0) {
-    //   console.log('Your fund has no assets.');
-    //   return;
-    // }
-
-    //this will be the token we are liquidating everything into
-    const liquidToken = this.tokens.assets.find(
-      (asset) => !asset.derivativeType && asset.symbol === liquidTokenSymbol
-    )!;
-
-
-    // //makes an amount array of numbers from getToken
-    // const holdingsAmounts = await Promise.all(
-    //   vaultHolding.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
-    // );
-
-    // //combines the vault holdings (list of token objects) with token amounts
-    // const holdingsWithAmounts = vaultHoldings.map((item, index) => {
-    //   return { ...item, amount: holdingsAmounts[index] };
-    // });
-
-    // if (holdingsWithAmounts[index].symbol !== liquidTokenSymbol) {
-    const sellingToken = vaultHolding;
-
-
-    //console.log(sellingToken);
-
-    const swapTokensInput = await this.getPrice(
-      { id: liquidToken.id, decimals: liquidToken.decimals, symbol: liquidToken.symbol, name: liquidToken.name },
-      {
-        id: sellingToken.id as string,
-        decimals: sellingToken.decimals as number,
-        symbol: sellingToken.symbol as string,
-        name: sellingToken.name as string,
-      },
-      sellingToken.amount
-    );
-
-=======
-    //console.log(sellingToken);
-
-    const swapTokensInput = await this.getPrice(
-      { id: liquidToken.id, decimals: liquidToken.decimals, symbol: liquidToken.symbol, name: liquidToken.name },
-      {
-        id: sellingToken.id as string,
-        decimals: sellingToken.decimals as number,
-        symbol: sellingToken.symbol as string,
-        name: sellingToken.name as string,
-      },
-      sellingToken.amount
-    );
->>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
     console.log(swapTokensInput);
     if (swapTokensInput) {
       return this.swapTokens(swapTokensInput); //.then(() => console.log('Done Liquidating'));
     }
     //}
-<<<<<<< HEAD
-
-=======
->>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
   }
 
   public async buyLimit() {
     // writing the function that buys a wanted token and sells held token if the wanted token goes above a certain price
-<<<<<<< HEAD
-=======
-    let tokenPriceLimit = 5;
->>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
-
     let tokenPriceLimit = 5;
 
+    let sellTokenSymbol = 'WBTC';
 
-    let sellTokenSymbol = 'WETH';
-    let buyTokenSymbol = 'UNI';
-
-
-    let buyTokenSymbol = 'UNI';
+    let buyTokenSymbol = 'YFI';
 
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
@@ -341,15 +227,8 @@ export class EnzymeBot {
       (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
     )!;
 
-<<<<<<< HEAD
-
     console.log(sellingToken);
 
-
-=======
-    console.log(sellingToken);
-
->>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
     // the first input token will be bought, the second will be sold
     // this will create the input needed for our swap
     const swapTokensInput = await this.getPrice(
@@ -360,7 +239,7 @@ export class EnzymeBot {
         symbol: sellingToken.symbol as string,
         name: sellingToken.name as string,
       },
-      sellingToken.amount.div(hardCodedAmount)
+      sellingToken.amount
     );
 
     if (realTokenPrice && tokenPriceLimit < realTokenPrice) {

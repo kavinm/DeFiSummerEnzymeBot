@@ -1,20 +1,15 @@
-<<<<<<< HEAD
-
 import { CurveLiquidityAaveAdapter } from '@enzymefinance/protocol';
-
-=======
-import { CurveLiquidityAaveAdapter } from '@enzymefinance/protocol';
->>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
 import { EnzymeBot } from './EnzymeBot';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 import { getTokenBalance } from './utils/getTokenBalance';
-<<<<<<< HEAD
-=======
 import { BigNumber, providers, utils, Wallet } from 'ethers';
->>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
 
 //let i = 0;
+
+async function getDecimal(bot: EnzymeBot){
+  
+}
 
 async function getCurrentHoldings(bot: EnzymeBot) {
   const vaultHoldings = await bot.getHoldings();
@@ -87,57 +82,34 @@ async function run(bot: EnzymeBot, token: any) {
 
     // commented out to prevent loop  in exchanging tokens
     // setTimeout(() => {
-<<<<<<< HEAD
-
-=======
->>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
     //   while (i < (vaultHoldings?.length || 0)) {
     //     i++;
     //     run(bot);
     //     console.log(`Liquidating the ${i}th Token`);
     //   }
     // });
-<<<<<<< HEAD
-
-=======
->>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
   }
 
   return Promise.resolve(true);
 }
 
-
 (async function main() {
-<<<<<<< HEAD
-
-=======
->>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
   const currentBot = await EnzymeBot.create('KOVAN');
-  const vaultHoldings = await getCurrentHoldings(currentBot);
-  const holdingsLength = vaultHoldings.length;
-  console.log('It got past declaring vaultHoldings');
-<<<<<<< HEAD
+  currentBot.getVaultValues();
+  // const vaultHoldings = await getCurrentHoldings(currentBot);
+  // const holdingsLength = vaultHoldings.length;
+  // console.log('It got past declaring vaultHoldings');
+  // const hardCodedAmount: BigNumber = BigNumber.from('0');
 
-  for (let i = 0; i < holdingsLength; i++) {
-    await console.log(`BEFORE LIQUIDATE This is within the for each loop index of ${i} `);
-    run(currentBot, vaultHoldings[i]).then((res) => console.log("That's all folks."));
-    console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
-  }
-  //console.log('STARTING IT UP');
+  // for (let i = 0; i < holdingsLength; i++) {
+  //   await console.log(`BEFORE LIQUIDATE This is within the for each loop index of ${i} `);
+  //   if (!vaultHoldings[i].amount.isZero()) {
+  //     await run(currentBot, vaultHoldings[i]).then((res) => console.log("That's all folks."));
+  //   } else {
+  //     console.log('Amount was zero');
+  //   }
 
-=======
-  const hardCodedAmount: BigNumber = BigNumber.from('0');
-
-  for (let i = 0; i < holdingsLength; i++) {
-    await console.log(`BEFORE LIQUIDATE This is within the for each loop index of ${i} `);
-    if (!vaultHoldings[i].amount.isZero()) {
-      await run(currentBot, vaultHoldings[i]).then((res) => console.log("That's all folks."));
-    } else {
-      console.log('Amount was zero');
-    }
-
-    await console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
-  }
-  //console.log('STARTING IT UP');
->>>>>>> bb8e85c77a6cbf166ae703d372d1bf41be33ce79
+  //   await console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
+  // }
+  // //console.log('STARTING IT UP');
 })();
