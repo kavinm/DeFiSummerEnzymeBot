@@ -17,7 +17,9 @@ export async function getPrice2(endpoint: string, token: string) {
   const result = await gql(endpoint).assets();
   const returnToken = result.assets.find((asset) => asset.symbol === token);
   let priceOfETH: number;
-  const res = await axios.get('https://data.enzyme.finance/api/currency/list');
+
+  //change this to mainnet api later on
+  const res = await axios.get('https://data.kovan.enzyme.finance/api/currency/list');
 
   priceOfETH = Number(res.data.data.find((d: any) => d.id === 'ETH').price.price);
   // use the price of USDC which is also in ETH to get the price in USD

@@ -7,9 +7,7 @@ import { BigNumber, providers, utils, Wallet } from 'ethers';
 
 //let i = 0;
 
-async function getDecimal(bot: EnzymeBot){
-  
-}
+async function getDecimal(bot: EnzymeBot) {}
 
 async function getCurrentHoldings(bot: EnzymeBot) {
   const vaultHoldings = await bot.getHoldings();

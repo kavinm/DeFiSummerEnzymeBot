@@ -33,7 +33,6 @@ RUN
 
 Rebalance Portfolio Logic
 
-Inputs: Tokens that are reduced in holding, amount token is reduced by, Tokens that are increased in holdings, amount token is increased by, total value/amount of all holdings
 
 GET TOTAL USD VALUE OF HOLDINGS (getVaultValue)
 
@@ -42,4 +41,26 @@ _We need to sum up the values of all token - Get value of each token
 2. Multiply token number by price in usd with getPrice
 3. We will have value of token amount in usd
 4. Sum token values and store in variable
+
+
+Inputs: (holdings of tokens and amounts before "rebalancing"),  holdings of tokens and amounts after reblancing
+
+
+
+1. check if totalAmount before equal to total amount after, if not return nothing and front end shows popup
+
+
+FIRST FOREACH
+difference holdings = holdingsBefore - holdingsAfter
+2. for each holding in holdingsBefore, check if it exists in holdingsAfter. If it exists, get difference.
+3.  (if difference is negative, don't sell) Swap difference to WETH. if it does not exist swap entire amount to WETH (call liquidate for that token).
+
+
+
+SECOND FOREACH
+difference holdings = holdingsAfter -holdingsBefore 
+4. for each holding in holdingsAfter, check if it exists in holdingsBefore. If it exists, get difference. If it doesn't just grab amount from holdingsAfter.
+5.  (if difference is negative, don't buy) when swapping from WETH to holding, we need to get the amount into USD value. 
+Then get amount of WETH that we need to swap for that USD value.
+6. Swap the WETH USD amount from WETH to holding. 
 
