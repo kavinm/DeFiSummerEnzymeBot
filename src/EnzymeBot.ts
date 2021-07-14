@@ -71,6 +71,7 @@ export class EnzymeBot {
 
   public async getHoldings() {
     const vault = new VaultLib(this.vaultAddress, this.wallet);
+
     const holdings = await vault.getTrackedAssets();
     return Promise.all(holdings.map((item: string) => getToken(this.subgraphEndpoint, 'id', item.toLowerCase())));
   }
@@ -115,6 +116,7 @@ export class EnzymeBot {
     const contract = new ComptrollerLib(comptroller, this.wallet);
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
+
   public async getVaultValues() {
     //get holdings of vault
     const vaultHoldings = await this.getHoldings();
@@ -135,18 +137,25 @@ export class EnzymeBot {
       return { ...item, amount: holdingsAmounts[index] };
     });
 
-    console.log(holdingsWithAmounts);
+    //console.log(holdingsWithAmounts);
 
+    let totalValue = 0;
     for (let holding of holdingsWithAmounts) {
       let decimals = holding.decimals;
       let DecimalAmount = parseInt(holding.amount._hex, 16);
-      let value = DecimalAmount / 10 ** decimals!;
+      let amount = DecimalAmount / 10 ** decimals!;
       let priceOfCoin = await getPrice2(this.subgraphEndpoint, holding.symbol!);
-      console.log(DecimalAmount);
-      console.log(value);
-      console.log('Price from priceOfCoin');
-      console.log(priceOfCoin);
+
+      // console.log(holding.symbol);
+      // console.log(amount);
+      // console.log(priceOfCoin);
+
+      let value = amount * priceOfCoin!;
+      // console.log(value);
+      totalValue += value;
     }
+    //console.log(totalValue);
+    return totalValue;
   }
 
   public async liquidate(vaultHolding: any) {
@@ -189,8 +198,85 @@ export class EnzymeBot {
     //}
   }
 
+  public async rebalancePortfolio() {
+    // const vault = new VaultLib(this.vaultAddress, this.wallet);
+    // const vaultHoldings = await vault.getTrackedAssets();
+    // return Promise.all(vaultHoldings.map((item: string) => getToken(this.subgraphEndpoint, 'id', item.toLowerCase())));
+    //  // if you have no holdings, return
+    //  if (vaultHoldings.length === 0) {
+    //   console.log('Your fund has no assets.');
+    //   return;
+    // }
+    // //makes an amount array of numbers from getToken
+    // const holdingsAmounts = await Promise.all(
+    //   vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    // );
+    // // combine holding token data with amounts
+    // const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+    //   return { ...item, amount: holdingsAmounts[index] };
+    // });
+  }
+
+  // use this function to add holdings
+  public async addHolding() {
+    let tokenPriceLimit = 0;
+
+    let sellTokenSymbol = 'UNI';
+
+    let buyTokenSymbol = 'WBTC';
+
+    // gets the price of the wanted token
+    let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
+
+    //get holdings of vault
+    const vaultHoldings2 = await this.getHoldings();
+
+    // if you have no holdings, return
+    if (vaultHoldings2.length === 0) {
+      console.log('Your fund has no assets.');
+      return;
+    }
+
+    // define the buy token
+    const buyingToken = this.tokens.assets.find((asset) => !asset.derivativeType && asset.symbol === buyTokenSymbol)!;
+
+    //makes an amount array of numbers from getToken
+    const holdingsAmounts2 = await Promise.all(
+      vaultHoldings2.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    );
+
+    // combine holding token data with amounts
+    const holdingsWithAmounts2 = vaultHoldings2.map((item, index) => {
+      return { ...item, amount: holdingsAmounts2[index] };
+    });
+
+    // find the token you will sell by searching for largest token holding
+    const sellingToken = holdingsWithAmounts2.find(
+      (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
+    )!;
+
+    const hardCodedAmount: BigNumber = BigNumber.from('3'); // divide by 3 to swap
+
+    // the first input token will be bought, the second will be sold
+    // this will create the input needed for our swap
+    const swapTokensInput = await this.getPrice(
+      { id: buyingToken.id, decimals: buyingToken.decimals, symbol: buyingToken.symbol, name: buyingToken.name },
+      {
+        id: sellingToken.id as string,
+        decimals: sellingToken.decimals as number,
+        symbol: sellingToken.symbol as string,
+        name: sellingToken.name as string,
+      },
+      sellingToken.amount.div(hardCodedAmount)
+    );
+
+    if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
+      return this.swapTokens(swapTokensInput);
+    }
+  }
+
+  // writing the function that buys a wanted token and sells held token if the wanted token goes above a certain price
   public async buyLimit() {
-    // writing the function that buys a wanted token and sells held token if the wanted token goes above a certain price
     let tokenPriceLimit = 5;
 
     let sellTokenSymbol = 'WBTC';
