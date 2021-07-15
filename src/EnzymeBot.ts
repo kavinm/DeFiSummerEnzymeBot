@@ -191,7 +191,7 @@ export class EnzymeBot {
       },
       sellingToken.amount
     );
-    console.log(swapTokensInput);
+    //console.log(swapTokensInput);
     if (swapTokensInput) {
       return this.swapTokens(swapTokensInput); //.then(() => console.log('Done Liquidating'));
     }
@@ -275,22 +275,16 @@ export class EnzymeBot {
     }
   }
 
-  // writing the function that buys a wanted token and sells held token if the wanted token goes above a certain price
-  public async buyLimit() {
-    let tokenPriceLimit = 5;
-
-    let sellTokenSymbol = 'WBTC';
-
-    let buyTokenSymbol = 'YFI';
-
+  //Buy limit order function
+  public async buyLimit(sellTokenSymbol: string,buyTokenSymbol: string, tokenPriceLimit: number) {
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
 
     //get holdings of vault
-    const vaultHoldings2 = await this.getHoldings();
+    const vaultHoldings = await this.getHoldings();
 
     // if you have no holdings, return
-    if (vaultHoldings2.length === 0) {
+    if (vaultHoldings.length === 0) {
       console.log('Your fund has no assets.');
       return;
     }
@@ -299,21 +293,19 @@ export class EnzymeBot {
     const buyingToken = this.tokens.assets.find((asset) => !asset.derivativeType && asset.symbol === buyTokenSymbol)!;
 
     //makes an amount array of numbers from getToken
-    const holdingsAmounts2 = await Promise.all(
-      vaultHoldings2.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    const holdingsAmounts = await Promise.all(
+      vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
     );
 
     // combine holding token data with amounts
-    const holdingsWithAmounts2 = vaultHoldings2.map((item, index) => {
-      return { ...item, amount: holdingsAmounts2[index] };
+    const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+      return { ...item, amount: holdingsAmounts[index] };
     });
-
+    
     // find the token you will sell by searching for largest token holding
-    const sellingToken = holdingsWithAmounts2.find(
+    const sellingToken = holdingsWithAmounts.find(
       (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
     )!;
-
-    console.log(sellingToken);
 
     // the first input token will be bought, the second will be sold
     // this will create the input needed for our swap
@@ -332,22 +324,17 @@ export class EnzymeBot {
       return this.swapTokens(swapTokensInput);
     }
   }
-
-  public async sellLimit() {
-    // writing the function that sells your token for another if it goes below a certain price
-    let tokenPriceLimit = 5;
-    let sellTokenSymbol = 'UNI';
-
-    let buyTokenSymbol = 'WETH';
+  //Sell limit order function
+  public async sellLimit(sellTokenSymbol: string,buyTokenSymbol: string, tokenPriceLimit: number) {
 
     // this is getting the price of the sellToken
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, sellTokenSymbol);
 
     //get holdings of vault
-    const vaultHoldings2 = await this.getHoldings();
+    const vaultHoldings = await this.getHoldings();
 
     // if you have no holdings, return
-    if (vaultHoldings2.length === 0) {
+    if (vaultHoldings.length === 0) {
       console.log('Your fund has no assets.');
       return;
     }
@@ -356,17 +343,17 @@ export class EnzymeBot {
     const buyingToken = this.tokens.assets.find((asset) => !asset.derivativeType && asset.symbol === buyTokenSymbol)!;
 
     //makes an amount array of numbers from getToken
-    const holdingsAmounts2 = await Promise.all(
-      vaultHoldings2.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    const holdingsAmounts = await Promise.all(
+      vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
     );
 
     // combine holding token data with amounts
-    const holdingsWithAmounts2 = vaultHoldings2.map((item, index) => {
-      return { ...item, amount: holdingsAmounts2[index] };
+    const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+      return { ...item, amount: holdingsAmounts[index] };
     });
 
     // find the token you will sell by searching for largest token holding
-    const sellingToken = holdingsWithAmounts2.find(
+    const sellingToken = holdingsWithAmounts.find(
       (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
     )!;
 

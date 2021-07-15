@@ -30,7 +30,7 @@ async function getCurrentHoldings(bot: EnzymeBot) {
   // console.log(holdingsWithAmounts);
 }
 
-async function run(bot: EnzymeBot, token: any) {
+async function run(bot: EnzymeBot, token?: any) {
   // const vaultHoldings = await bot.getHoldings();
   // const lengthHoldings = vaultHoldings.length;
   // console.log(vaultHoldings);
@@ -41,7 +41,7 @@ async function run(bot: EnzymeBot, token: any) {
   try {
     // return the transaction object
 
-    const tx = await bot.liquidate(token);
+    const tx = await bot.sellLimit("WBTC", "YFI", 5);
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -92,8 +92,10 @@ async function run(bot: EnzymeBot, token: any) {
 }
 
 (async function main() {
-  const currentBot = await EnzymeBot.create('KOVAN');
-  currentBot.getVaultValues();
+  console.log('STARTING IT UP')
+  //const currentBot = await EnzymeBot.create('KOVAN');
+  run(await EnzymeBot.create('KOVAN')).then((res) => console.log("That's all folks"))
+  //currentBot.getVaultValues();
   // const vaultHoldings = await getCurrentHoldings(currentBot);
   // const holdingsLength = vaultHoldings.length;
   // console.log('It got past declaring vaultHoldings');

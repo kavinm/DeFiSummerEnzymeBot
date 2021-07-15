@@ -27,8 +27,8 @@ export async function getPrice2(endpoint: string, token: string) {
     //const priceOfUSDC = Number(result.assets.find((asset) => asset.symbol === 'USDC')?.price?.price);
 
     let tokenPrice = Number(result.assets.find((asset) => asset.symbol === token)?.price?.price) * priceOfETH;
-    console.log('This is the tokenPrice');
-    console.log(tokenPrice);
+    //console.log('This is the tokenPrice');
+    //console.log(tokenPrice);
     return tokenPrice;
   }
   //if price is already in USD just return price
