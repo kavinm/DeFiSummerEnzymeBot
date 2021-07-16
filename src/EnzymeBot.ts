@@ -279,7 +279,7 @@ export class EnzymeBot {
   }
 
   //Buy limit order function
-  public async buyLimit(sellTokenSymbol: string,buyTokenSymbol: string, tokenPriceLimit: number) {
+  public async buyLimit(sellTokenSymbol: string, buyTokenSymbol: string, tokenPriceLimit: number) {
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
 
@@ -304,7 +304,7 @@ export class EnzymeBot {
     const holdingsWithAmounts = vaultHoldings.map((item, index) => {
       return { ...item, amount: holdingsAmounts[index] };
     });
-    
+
     // find the token you will sell by searching for largest token holding
     const sellingToken = holdingsWithAmounts.find(
       (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
@@ -328,8 +328,7 @@ export class EnzymeBot {
     }
   }
   //Sell limit order function
-  public async sellLimit(sellTokenSymbol: string,buyTokenSymbol: string, tokenPriceLimit: number) {
-
+  public async sellLimit(sellTokenSymbol: string, buyTokenSymbol: string, tokenPriceLimit: number) {
     // this is getting the price of the sellToken
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, sellTokenSymbol);
 
