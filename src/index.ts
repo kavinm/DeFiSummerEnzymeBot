@@ -4,10 +4,14 @@ import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 import { getTokenBalance } from './utils/getTokenBalance';
 import { BigNumber, providers, utils, Wallet } from 'ethers';
+import { SharesBoughtEvent_OrderBy } from './utils/subgraph/subgraph';
+import { defaultFieldResolver } from 'graphql';
 
 //let i = 0;
 
-async function getDecimal(bot: EnzymeBot) {}
+async function getDecimal(bot: EnzymeBot){
+  
+}
 
 async function getCurrentHoldings(bot: EnzymeBot) {
   const vaultHoldings = await bot.getHoldings();
@@ -30,7 +34,7 @@ async function getCurrentHoldings(bot: EnzymeBot) {
   // console.log(holdingsWithAmounts);
 }
 
-async function run(bot: EnzymeBot, func: number) {
+async function run(bot: EnzymeBot, funcName: string) {
   const vaultHoldings = await bot.getHoldings();
   const lengthHoldings = vaultHoldings.length;
   //console.log(vaultHoldings);
@@ -40,8 +44,23 @@ async function run(bot: EnzymeBot, func: number) {
 
   try {
     // return the transaction object
+    let tx;
+    switch (funcName) {
+      case 'liquidate':
+        tx = await bot.liquidate(vaultHoldings);
+        break;
+      case 'buylimit':
+        tx = await bot.buyLimit();
+        break;
+      case 'sell-limit':
+        tx = await bot.sellLimit();
+        break;
+      case 'addHolding':
+        tx = await bot.addHolding();
+        break;
+    }
 
-    const tx = await bot.buyCertainAmount();
+    
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -96,6 +115,24 @@ async function run(bot: EnzymeBot, func: number) {
   //const ennzymefunction = getVaultValues;
   currentBot.getVaultValues();
   //run(await EnzymeBot.create('KOVAN')).then((res) => console.log("That's all folks."));
+  const func2pass: string = 'addHolding';
+
+  switch (func2pass) {
+    case "liquidate":
+      await run(await EnzymeBot.create('KOVAN'),func2pass)//.then((res) => console.log("That's all folks."));
+      break;
+    case "buylimit":
+      await run(await EnzymeBot.create('KOVAN'),func2pass)
+      break;
+    case "sell-limit":
+      await run(await EnzymeBot.create('KOVAN'),func2pass)
+      break;
+    case "addHolding":
+      await run(await EnzymeBot.create('KOVAN'),func2pass)
+      break;
+    default:
+      currentBot.getVaultValues();
+  }
 
 
 
