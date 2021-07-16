@@ -112,26 +112,26 @@ async function run(bot: EnzymeBot, funcName: string) {
 (async function main() {
   const currentBot = await EnzymeBot.create('KOVAN');
   //const ennzymefunction = getVaultValues;
-  currentBot.getVaultValues();
+  currentBot.rebalancePortfolio();
   //run(await EnzymeBot.create('KOVAN')).then((res) => console.log("That's all folks."));
-  const func2pass: string = 'addHolding';
+  // const func2pass: string = 'addHolding';
 
-  switch (func2pass) {
-    case 'liquidate':
-      await run(await EnzymeBot.create('KOVAN'), func2pass); //.then((res) => console.log("That's all folks."));
-      break;
-    case 'buylimit':
-      await run(await EnzymeBot.create('KOVAN'), func2pass);
-      break;
-    case 'sell-limit':
-      await run(await EnzymeBot.create('KOVAN'), func2pass);
-      break;
-    case 'addHolding':
-      await run(await EnzymeBot.create('KOVAN'), func2pass);
-      break;
-    default:
-      currentBot.getVaultValues();
-  }
+  // switch (func2pass) {
+  //   case 'liquidate':
+  //     await run(await EnzymeBot.create('KOVAN'), func2pass); //.then((res) => console.log("That's all folks."));
+  //     break;
+  //   case 'buylimit':
+  //     await run(await EnzymeBot.create('KOVAN'), func2pass);
+  //     break;
+  //   case 'sell-limit':
+  //     await run(await EnzymeBot.create('KOVAN'), func2pass);
+  //     break;
+  //   case 'addHolding':
+  //     await run(await EnzymeBot.create('KOVAN'), func2pass);
+  //     break;
+  //   default:
+  //     currentBot.getVaultValues();
+  // }
 
   // const vaultHoldings = await getCurrentHoldings(currentBot);
   // const holdingsLength = vaultHoldings.length;

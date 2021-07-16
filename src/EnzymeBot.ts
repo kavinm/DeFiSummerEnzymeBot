@@ -202,6 +202,49 @@ export class EnzymeBot {
   }
 
   public async rebalancePortfolio() {
+    let tokens: any[] = [];
+
+    //simulates what we get from front end
+    let token1 = { symbol: 'WBTC', amount: 0.5 };
+
+    tokens.push(token1);
+
+    let token2 = { symbol: 'WETH', amount: 0.5 };
+
+    tokens.push(token2);
+
+    let token3 = { symbol: 'UNI', amount: 0.5 };
+
+    tokens.push(token3);
+
+    let token4 = { symbol: 'MKR', amount: 0.5 };
+
+    tokens.push(token4);
+
+    let rebalancedHoldings: any[] = [];
+
+    let rebalancedAmounts: BigNumber[] = [];
+
+    for (let token of tokens) {
+      //make and push token object for each token string
+      const currentToken = this.tokens.assets.find((asset) => !asset.derivativeType && asset.symbol === token.symbol)!;
+      rebalancedHoldings.push(currentToken);
+
+      // make and get token amount with decimals in BigNumber form
+      let decimals: BigNumber = BigNumber.from(currentToken.decimals);
+      let tokenAmount: BigNumber = BigNumber.from(token.amount.toString()).mul(decimals);
+
+      // rebalancedAmounts.push(tokenAmount);
+      console.log(tokenAmount);
+    }
+    //console.log(rebalancedAmounts);
+
+    // const holdingsWithAmounts = rebalancedHoldings.map((item, index) => {
+    //   return { ...item, amount: rebalancedAmounts[index] };
+    // });
+
+    // console.log(holdingsWithAmounts);
+
     // const vault = new VaultLib(this.vaultAddress, this.wallet);
     // const vaultHoldings = await vault.getTrackedAssets();
     // return Promise.all(vaultHoldings.map((item: string) => getToken(this.subgraphEndpoint, 'id', item.toLowerCase())));
