@@ -1,6 +1,8 @@
 # enzyme-bot
 
-A naive bot for Enzyme Finance
+A an Auto-Manager Bot for Enzyme Finance
+
+our take on the enzyme bot
 
 ## Installation
 
