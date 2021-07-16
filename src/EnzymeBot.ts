@@ -232,9 +232,9 @@ export class EnzymeBot {
 
       // make and get token amount with decimals in BigNumber form
       //let decimals: BigNumber = BigNumber.from(currentToken.decimals);
-      const Hexstring: string= (token.amount*(10**6)).toString(16);
+      const Hexstring: string= '0x'+(token.amount*(10**currentToken.decimals)).toString(16);
       console.log(Hexstring);
-      let tokenAmount: BigNumber = BigNumber.from(Hexstring).mul(currentToken.decimals - 6);
+      let tokenAmount: BigNumber = BigNumber.from(Hexstring)//.mul(decimals);
       // rebalancedAmounts.push(tokenAmount);
       //console.log(tokenAmount);
     }
