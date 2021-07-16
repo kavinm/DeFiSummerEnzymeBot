@@ -34,12 +34,15 @@ async function getCurrentHoldings(bot: EnzymeBot) {
   // console.log(holdingsWithAmounts);
 }
 
+
 async function run(bot: EnzymeBot, funcName: string) {
   const vaultHoldings = await bot.getHoldings();
   const lengthHoldings = vaultHoldings.length;
   //console.log(vaultHoldings);
   console.log('Above is the current vault holdings and the bottom is length holdings');
   //console.log(lengthHoldings);
+
+
   //const lengthHoldings = vaultHoldings?.length;
 
   try {
@@ -61,6 +64,9 @@ async function run(bot: EnzymeBot, funcName: string) {
     }
 
     
+
+    const tx = await bot.sellLimit("WBTC", "YFI", 5);
+
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -111,6 +117,7 @@ async function run(bot: EnzymeBot, funcName: string) {
 }
 
 (async function main() {
+
   const currentBot = await EnzymeBot.create('KOVAN');
   //const ennzymefunction = getVaultValues;
   currentBot.getVaultValues();
@@ -137,6 +144,7 @@ async function run(bot: EnzymeBot, funcName: string) {
 
 
 
+
   // const vaultHoldings = await getCurrentHoldings(currentBot);
   // const holdingsLength = vaultHoldings.length;
 
@@ -157,5 +165,7 @@ async function run(bot: EnzymeBot, funcName: string) {
 
   //   await console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
   // }
+
   //console.log('STARTING IT UP');
 })();
+
