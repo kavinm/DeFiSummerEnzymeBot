@@ -70,10 +70,10 @@ export class EnzymeBot {
   }
 
   public async getHoldings() {
-    //const vault = new VaultLib(this.vaultAddress, this.wallet);
+    const vault = new VaultLib(this.vaultAddress, this.wallet);
 
-    const vaultAddy: string = '0xa731eef1d7687e0cf23fa7d83a7501a142b929fa';
-    const vault = new VaultLib(vaultAddy, this.wallet);
+    //const vaultAddy: string = '0xa731eef1d7687e0cf23fa7d83a7501a142b929fa';
+    //const vault = new VaultLib(vaultAddy, this.wallet);
 
     const holdings = await vault.getTrackedAssets();
     return Promise.all(holdings.map((item: string) => getToken(this.subgraphEndpoint, 'id', item.toLowerCase())));
@@ -140,7 +140,6 @@ export class EnzymeBot {
       return { ...item, amount: holdingsAmounts[index] };
     });
 
-
     //console.log(holdingsWithAmounts);
 
     let totalValue = 0;
@@ -157,7 +156,6 @@ export class EnzymeBot {
       let value = amount * priceOfCoin!;
       // console.log(value);
       totalValue += value;
-
     }
     //console.log(totalValue);
     return totalValue;
@@ -202,7 +200,6 @@ export class EnzymeBot {
     }
     //}
   }
-
 
   public async rebalancePortfolio() {
     // const vault = new VaultLib(this.vaultAddress, this.wallet);
@@ -281,16 +278,8 @@ export class EnzymeBot {
     }
   }
 
-
-  // writing the function that buys a wanted token and sells held token if the wanted token goes above a certain price
-
-  public async buyLimit() {
-    let tokenPriceLimit = 5;
-
-    let sellTokenSymbol = 'WETH';
-
-    let buyTokenSymbol = 'USDC';
-
+  //Buy limit order function
+  public async buyLimit(sellTokenSymbol: string, buyTokenSymbol: string, tokenPriceLimit: number) {
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
 
@@ -315,7 +304,7 @@ export class EnzymeBot {
     const holdingsWithAmounts = vaultHoldings.map((item, index) => {
       return { ...item, amount: holdingsAmounts[index] };
     });
-    
+
     // find the token you will sell by searching for largest token holding
     const sellingToken = holdingsWithAmounts.find(
       (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
@@ -339,8 +328,7 @@ export class EnzymeBot {
     }
   }
   //Sell limit order function
-  public async sellLimit(sellTokenSymbol: string,buyTokenSymbol: string, tokenPriceLimit: number) {
-
+  public async sellLimit(sellTokenSymbol: string, buyTokenSymbol: string, tokenPriceLimit: number) {
     // this is getting the price of the sellToken
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, sellTokenSymbol);
 
