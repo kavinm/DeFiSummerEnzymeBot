@@ -231,11 +231,12 @@ export class EnzymeBot {
       rebalancedHoldings.push(currentToken);
 
       // make and get token amount with decimals in BigNumber form
-      let decimals: BigNumber = BigNumber.from(currentToken.decimals);
-      let tokenAmount: BigNumber = BigNumber.from(token.amount.toString()).mul(decimals);
-
+      //let decimals: BigNumber = BigNumber.from(currentToken.decimals);
+      const Hexstring: string= (token.amount*(10**6)).toString(16);
+      console.log(Hexstring);
+      let tokenAmount: BigNumber = BigNumber.from(Hexstring).mul(currentToken.decimals - 6);
       // rebalancedAmounts.push(tokenAmount);
-      console.log(tokenAmount);
+      //console.log(tokenAmount);
     }
     //console.log(rebalancedAmounts);
 
