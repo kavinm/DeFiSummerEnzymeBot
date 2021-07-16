@@ -140,6 +140,7 @@ export class EnzymeBot {
       return { ...item, amount: holdingsAmounts[index] };
     });
 
+
     //console.log(holdingsWithAmounts);
 
     let totalValue = 0;
@@ -156,6 +157,7 @@ export class EnzymeBot {
       let value = amount * priceOfCoin!;
       // console.log(value);
       totalValue += value;
+
     }
     //console.log(totalValue);
     return totalValue;
@@ -200,6 +202,7 @@ export class EnzymeBot {
     }
     //}
   }
+
 
   public async rebalancePortfolio() {
     // const vault = new VaultLib(this.vaultAddress, this.wallet);
@@ -279,12 +282,13 @@ export class EnzymeBot {
   }
 
   // writing the function that buys a wanted token and sells held token if the wanted token goes above a certain price
+
   public async buyLimit() {
     let tokenPriceLimit = 5;
 
-    let sellTokenSymbol = 'WBTC';
+    let sellTokenSymbol = 'WETH';
 
-    let buyTokenSymbol = 'UNI';
+    let buyTokenSymbol = 'USDC';
 
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);

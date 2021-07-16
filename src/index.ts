@@ -30,18 +30,18 @@ async function getCurrentHoldings(bot: EnzymeBot) {
   // console.log(holdingsWithAmounts);
 }
 
-async function run(bot: EnzymeBot, token: any) {
-  // const vaultHoldings = await bot.getHoldings();
-  // const lengthHoldings = vaultHoldings.length;
-  // console.log(vaultHoldings);
-  // console.log('Above is the current vault holdings and the bottom is length holdings');
-  // console.log(lengthHoldings);
+async function run(bot: EnzymeBot, func: number) {
+  const vaultHoldings = await bot.getHoldings();
+  const lengthHoldings = vaultHoldings.length;
+  //console.log(vaultHoldings);
+  console.log('Above is the current vault holdings and the bottom is length holdings');
+  //console.log(lengthHoldings);
   //const lengthHoldings = vaultHoldings?.length;
 
   try {
     // return the transaction object
 
-    const tx = await bot.liquidate(token);
+    const tx = await bot.buyCertainAmount();
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -93,7 +93,12 @@ async function run(bot: EnzymeBot, token: any) {
 
 (async function main() {
   const currentBot = await EnzymeBot.create('KOVAN');
+  //const ennzymefunction = getVaultValues;
   currentBot.getVaultValues();
+  //run(await EnzymeBot.create('KOVAN')).then((res) => console.log("That's all folks."));
+
+
+
   // const vaultHoldings = await getCurrentHoldings(currentBot);
   // const holdingsLength = vaultHoldings.length;
 
