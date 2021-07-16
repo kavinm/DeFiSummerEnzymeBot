@@ -132,6 +132,7 @@ async function run(bot: EnzymeBot, funcName: string) {
       break;
     default:
       currentBot.getVaultValues();
+      
   }
 
 
