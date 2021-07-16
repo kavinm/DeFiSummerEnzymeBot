@@ -4,6 +4,8 @@ import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 import { getTokenBalance } from './utils/getTokenBalance';
 import { BigNumber, providers, utils, Wallet } from 'ethers';
+import { SharesBoughtEvent_OrderBy } from './utils/subgraph/subgraph';
+import { defaultFieldResolver } from 'graphql';
 
 //let i = 0;
 
@@ -30,18 +32,34 @@ async function getCurrentHoldings(bot: EnzymeBot) {
   // console.log(holdingsWithAmounts);
 }
 
-async function run(bot: EnzymeBot, token?: any) {
-  // const vaultHoldings = await bot.getHoldings();
-  // const lengthHoldings = vaultHoldings.length;
-  // console.log(vaultHoldings);
-  // console.log('Above is the current vault holdings and the bottom is length holdings');
-  // console.log(lengthHoldings);
+async function run(bot: EnzymeBot, funcName: string) {
+  const vaultHoldings = await bot.getHoldings();
+  const lengthHoldings = vaultHoldings.length;
+  //console.log(vaultHoldings);
+  console.log('Above is the current vault holdings and the bottom is length holdings');
+  //console.log(lengthHoldings);
+
   //const lengthHoldings = vaultHoldings?.length;
 
   try {
     // return the transaction object
+    let tx;
+    switch (funcName) {
+      case 'liquidate':
+        tx = await bot.liquidate(vaultHoldings);
+        break;
+      case 'buylimit':
+        tx = await bot.buyLimit('WBTC', 'YFI', 5);
+        break;
+      case 'sell-limit':
+        tx = await bot.sellLimit('WBTC', 'YFI', 5);
+        break;
+      case 'addHolding':
+        tx = await bot.addHolding();
+        break;
+    }
 
-    const tx = await bot.sellLimit('WBTC', 'YFI', 5);
+    //const tx = await bot.sellLimit("WBTC", "YFI", 5);
 
     // if for some reason the transaction is returned as undefined, return
     if (tx) {
@@ -92,10 +110,29 @@ async function run(bot: EnzymeBot, token?: any) {
 }
 
 (async function main() {
-  console.log('STARTING IT UP');
-  //const currentBot = await EnzymeBot.create('KOVAN');
-  run(await EnzymeBot.create('KOVAN')).then((res) => console.log("That's all folks"));
-  //currentBot.getVaultValues();
+  const currentBot = await EnzymeBot.create('KOVAN');
+  //const ennzymefunction = getVaultValues;
+  currentBot.getVaultValues();
+  //run(await EnzymeBot.create('KOVAN')).then((res) => console.log("That's all folks."));
+  const func2pass: string = 'addHolding';
+
+  switch (func2pass) {
+    case 'liquidate':
+      await run(await EnzymeBot.create('KOVAN'), func2pass); //.then((res) => console.log("That's all folks."));
+      break;
+    case 'buylimit':
+      await run(await EnzymeBot.create('KOVAN'), func2pass);
+      break;
+    case 'sell-limit':
+      await run(await EnzymeBot.create('KOVAN'), func2pass);
+      break;
+    case 'addHolding':
+      await run(await EnzymeBot.create('KOVAN'), func2pass);
+      break;
+    default:
+      currentBot.getVaultValues();
+  }
+
   // const vaultHoldings = await getCurrentHoldings(currentBot);
   // const holdingsLength = vaultHoldings.length;
 
@@ -116,5 +153,6 @@ async function run(bot: EnzymeBot, token?: any) {
 
   //   await console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
   // }
+
   //console.log('STARTING IT UP');
 })();
