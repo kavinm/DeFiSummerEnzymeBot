@@ -70,7 +70,10 @@ export class EnzymeBot {
   }
 
   public async getHoldings() {
-    const vault = new VaultLib(this.vaultAddress, this.wallet);
+    //const vault = new VaultLib(this.vaultAddress, this.wallet);
+
+    const vaultAddy: string = '0xa731eef1d7687e0cf23fa7d83a7501a142b929fa';
+    const vault = new VaultLib(vaultAddy, this.wallet);
 
     const holdings = await vault.getTrackedAssets();
     return Promise.all(holdings.map((item: string) => getToken(this.subgraphEndpoint, 'id', item.toLowerCase())));
