@@ -112,7 +112,61 @@ async function run(bot: EnzymeBot, funcName: string) {
 (async function main() {
   const currentBot = await EnzymeBot.create('KOVAN');
   //const ennzymefunction = getVaultValues;
-  currentBot.rebalancePortfolio();
+  const rebalanceHoldingsWithAmout = await currentBot.CreatesRebalanceHoldings();
+  const vaultHoldings = await getCurrentHoldings(currentBot);
+
+  //makes an amount array of numbers from getToken
+  const holdingsAmounts = await Promise.all(
+    vaultHoldings.map((holding) => getTokenBalance(currentBot.vaultAddress, holding!.id, currentBot.network))
+  );
+
+  // combine holding token data with amounts
+  const currentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
+    return { ...item, amount: holdingsAmounts[index] };
+  });
+
+  const holdingsIsEqual =  currentBot.IfHoldingIsEqual(currentHoldingsWithAmounts, rebalanceHoldingsWithAmout);
+
+    if(!holdingsIsEqual) {
+      return;
+    }
+    const symbolsCurrent: string[] = [];
+    const symbolsRebalanced: string[] = [];
+
+    for (let holding of currentHoldingsWithAmounts ) {
+      symbolsCurrent.push(holding.symbol!);
+    }
+
+    for (let holding of rebalanceHoldingsWithAmout) {
+      symbolsRebalanced.push(holding.symbol!);
+    }
+    let i = 0;
+
+    for (let holding of currentHoldingsWithAmounts ){
+
+      if (symbolsRebalanced.includes(holding.symbol!)){
+       const rebalancedIndex = rebalanceHoldingsWithAmout.indexOf(holding);
+       let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
+        if(difference.gt(0)){
+          currentBot.swapWithAmount(holding.symbol, "WETH", difference)
+        }
+      }
+      else
+      {
+        currentBot.buyLimit(holding.symbol, "WETH", 0)
+      }
+    }
+
+
+
+
+
+
+
+
+
+
+
   //run(await EnzymeBot.create('KOVAN')).then((res) => console.log("That's all folks."));
   // const func2pass: string = 'addHolding';
 

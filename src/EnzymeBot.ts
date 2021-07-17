@@ -201,7 +201,7 @@ export class EnzymeBot {
     //}
   }
 
-  public async rebalancePortfolio() {
+  public async CreatesRebalanceHoldings() {
     let tokens: any[] = [];
 
     //simulates what we get from front end
@@ -244,54 +244,56 @@ export class EnzymeBot {
       return { ...item, amount: rebalancedAmounts[index] };
     });
 
-    const vaultHoldings = await this.getHoldings();
+    return RebalancedholdingsWithAmounts;
 
-    const  currentVaultAmount= await Promise.all(
-      vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
-    );
+    // const vaultHoldings = await this.getHoldings();
 
-    // combine holding token data with amounts
-    const CurrentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
-      return { ...item, amount: currentVaultAmount[index] }});
-    //   console.log ('CurrentHoldings:');
-    //   console.log(CurrentHoldingsWithAmounts);
+    // const  currentVaultAmount= await Promise.all(
+    //   vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    // );
+
+    // // combine holding token data with amounts
+    // const CurrentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
+    //   return { ...item, amount: currentVaultAmount[index] }});
+    // //   console.log ('CurrentHoldings:');
+    // //   console.log(CurrentHoldingsWithAmounts);
 
       
-    //   console.log ('Rebalanced Holdings:')
-    // console.log(RebalancedholdingsWithAmounts);
+    // //   console.log ('Rebalanced Holdings:')
+    // // console.log(RebalancedholdingsWithAmounts);
 
-    const holdingsIsEqual = this.IfHoldingIsEqual(CurrentHoldingsWithAmounts, RebalancedholdingsWithAmounts);
+    // const holdingsIsEqual = this.IfHoldingIsEqual(CurrentHoldingsWithAmounts, RebalancedholdingsWithAmounts);
 
-    if(!holdingsIsEqual) {
-      return;
-    }
-    const symbolsCurrent: string[] = [];
-    const symbolsRebalanced: string[] = [];
+    // if(!holdingsIsEqual) {
+    //   return;
+    // }
+    // const symbolsCurrent: string[] = [];
+    // const symbolsRebalanced: string[] = [];
 
-    for (let holding of CurrentHoldingsWithAmounts ) {
-      symbolsCurrent.push(holding.symbol!);
-    }
+    // for (let holding of CurrentHoldingsWithAmounts ) {
+    //   symbolsCurrent.push(holding.symbol!);
+    // }
 
-    for (let holding of RebalancedholdingsWithAmounts) {
-      symbolsRebalanced.push(holding.symbol!);
-    }
-    let i = 0;
+    // for (let holding of RebalancedholdingsWithAmounts) {
+    //   symbolsRebalanced.push(holding.symbol!);
+    // }
+    // let i = 0;
 
-    for (let holding of CurrentHoldingsWithAmounts ){
+    // for (let holding of CurrentHoldingsWithAmounts ){
 
-      if (symbolsRebalanced.includes(holding.symbol!)){
-       const rebalancedIndex = RebalancedholdingsWithAmounts.indexOf(holding);
-       let difference = holding.amount.sub(RebalancedholdingsWithAmounts[rebalancedIndex].amount);
-        if(difference.gt(0))
-        {
+    //   if (symbolsRebalanced.includes(holding.symbol!)){
+    //    const rebalancedIndex = RebalancedholdingsWithAmounts.indexOf(holding);
+    //    let difference = holding.amount.sub(RebalancedholdingsWithAmounts[rebalancedIndex].amount);
+    //     if(difference.gt(0))
+    //     {
           
-        }
-      }
-      else
-      {
+    //     }
+    //   }
+    //   else
+    //   {
 
-      }
-    }
+    //   }
+    // }
 
 
   }
@@ -487,7 +489,54 @@ export class EnzymeBot {
     if (realTokenPrice && realTokenPrice > tokenPriceLimit) {
       return this.swapTokens(swapTokensInput);
     }
+  }
 
+
+    public async swapWithAmount(sellTokenSymbol: string, buyTokenSymbol: string, tokenAmount: BigNumber) {
+      // gets the price of the wanted token
+      let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
+  
+      //get holdings of vault
+      const vaultHoldings = await this.getHoldings();
+  
+      // if you have no holdings, return
+      if (vaultHoldings.length === 0) {
+        console.log('Your fund has no assets.');
+        return;
+      }
+  
+      // define the buy token
+      const buyingToken = this.tokens.assets.find((asset) => !asset.derivativeType && asset.symbol === buyTokenSymbol)!;
+  
+      //makes an amount array of numbers from getToken
+      const holdingsAmounts = await Promise.all(
+        vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+      );
+  
+      // combine holding token data with amounts
+      const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+        return { ...item, amount: holdingsAmounts[index] };
+      });
+  
+      // find the token you will sell by searching for largest token holding
+      const sellingToken = holdingsWithAmounts.find(
+        (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
+      )!;
+  
+      // the first input token will be bought, the second will be sold
+      // this will create the input needed for our swap
+      const swapTokensInput = await this.getPrice(
+        { id: buyingToken.id, decimals: buyingToken.decimals, symbol: buyingToken.symbol, name: buyingToken.name },
+        {
+          id: sellingToken.id as string,
+          decimals: sellingToken.decimals as number,
+          symbol: sellingToken.symbol as string,
+          name: sellingToken.name as string,
+        },
+        tokenAmount
+      );
+        return this.swapTokens(swapTokensInput);
+    }
     // // get a random token
     // const randomToken = await this.chooseRandomAsset();
 

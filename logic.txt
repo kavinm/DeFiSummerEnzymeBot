@@ -44,7 +44,10 @@ _We need to sum up the values of all token - Get value of each token
 
 
 Inputs: (holdings of tokens and amounts before "rebalancing"),  holdings of tokens and amounts after reblancing
-
+1. Create rebalance holdings from front end in EnzymeBot.ts
+2. Pass rebalance holdings to main()
+3. All rebalancing logic in main()
+4. Create new swap functions with amount parameter
 
 
 1. check if totalAmount before equal to total amount after, if not return nothing and front end shows popup
