@@ -32,7 +32,7 @@ async function getCurrentHoldings(bot: EnzymeBot) {
   // console.log(holdingsWithAmounts);
 }
 
-async function run(bot: EnzymeBot, funcName: string) {
+async function run(bot: EnzymeBot, funcName: string, token?: any) {
   const vaultHoldings = await bot.getHoldings();
   const lengthHoldings = vaultHoldings.length;
   //console.log(vaultHoldings);
@@ -46,7 +46,7 @@ async function run(bot: EnzymeBot, funcName: string) {
     let tx;
     switch (funcName) {
       case 'liquidate':
-        tx = await bot.liquidate(vaultHoldings);
+        tx = await bot.liquidate(token);
         break;
       case 'buylimit':
         tx = await bot.buyLimit('WBTC', 'YFI', 5);
@@ -111,81 +111,135 @@ async function run(bot: EnzymeBot, funcName: string) {
 
 (async function main() {
   const currentBot = await EnzymeBot.create('KOVAN');
-  //const ennzymefunction = getVaultValues;
-  const rebalanceHoldingsWithAmout = await currentBot.CreatesRebalanceHoldings();
-  const vaultHoldings = await getCurrentHoldings(currentBot);
 
-  //makes an amount array of numbers from getToken
-  const holdingsAmounts = await Promise.all(
-    vaultHoldings.map((holding) => getTokenBalance(currentBot.vaultAddress, holding!.id, currentBot.network))
-  );
+  // //const ennzymefunction = getVaultValues;
+  // const rebalanceHoldingsWithAmout = await currentBot.CreatesRebalanceHoldings();
+  // const vaultHoldings = await getCurrentHoldings(currentBot);
 
-  // combine holding token data with amounts
-  const currentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
-    return { ...item, amount: holdingsAmounts[index] };
-  });
+  // //makes an amount array of numbers from getToken
+  // const holdingsAmounts = await Promise.all(
+  //   vaultHoldings.map((holding) => getTokenBalance(currentBot.vaultAddress, holding.id!, currentBot.network))
+  // );
 
-  const holdingsIsEqual =  currentBot.IfHoldingIsEqual(currentHoldingsWithAmounts, rebalanceHoldingsWithAmout);
+  // // combine holding token data with amounts
+  // const currentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
+  //   return { ...item, amount: holdingsAmounts[index] };
+  // });
 
-    if(!holdingsIsEqual) {
-      return;
-    }
-    const symbolsCurrent: string[] = [];
-    const symbolsRebalanced: string[] = [];
+  // const holdingsIsEqual = currentBot.IfHoldingIsEqual(currentHoldingsWithAmounts, rebalanceHoldingsWithAmout);
 
-    for (let holding of currentHoldingsWithAmounts ) {
-      symbolsCurrent.push(holding.symbol!);
-    }
-
-    for (let holding of rebalanceHoldingsWithAmout) {
-      symbolsRebalanced.push(holding.symbol!);
-    }
-    let i = 0;
-
-    for (let holding of currentHoldingsWithAmounts ){
-
-      if (symbolsRebalanced.includes(holding.symbol!)){
-       const rebalancedIndex = rebalanceHoldingsWithAmout.indexOf(holding);
-       let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
-        if(difference.gt(0)){
-          currentBot.swapWithAmount(holding.symbol, "WETH", difference)
-        }
-      }
-      else
-      {
-        currentBot.buyLimit(holding.symbol, "WETH", 0)
-      }
-    }
-
-
-
-
-
-
-
-
-
-
-
-  //run(await EnzymeBot.create('KOVAN')).then((res) => console.log("That's all folks."));
-  // const func2pass: string = 'addHolding';
-
-  // switch (func2pass) {
-  //   case 'liquidate':
-  //     await run(await EnzymeBot.create('KOVAN'), func2pass); //.then((res) => console.log("That's all folks."));
-  //     break;
-  //   case 'buylimit':
-  //     await run(await EnzymeBot.create('KOVAN'), func2pass);
-  //     break;
-  //   case 'sell-limit':
-  //     await run(await EnzymeBot.create('KOVAN'), func2pass);
-  //     break;
-  //   case 'addHolding':
-  //     await run(await EnzymeBot.create('KOVAN'), func2pass);
-  //     break;
-  //   default:
-  //     currentBot.getVaultValues();
+  // if (!holdingsIsEqual) {
+  //   console.log('The holding values are not equal!');
+  //   return;
   // }
+  // const symbolsCurrent: string[] = [];
+  // const symbolsRebalanced: string[] = [];
+
+  // for (let holding of currentHoldingsWithAmounts) {
+  //   symbolsCurrent.push(holding.symbol!);
+  // }
+
+  // for (let holding of rebalanceHoldingsWithAmout) {
+  //   symbolsRebalanced.push(holding.symbol!);
+  // }
+  // let i = 0;
+
+  // for (let holding of currentHoldingsWithAmounts) {
+  //   if (symbolsRebalanced.includes(holding.symbol!)) {
+  //     const rebalancedIndex = rebalanceHoldingsWithAmout.indexOf(holding);
+  //     let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
+  //     if (difference.gt(0)) {
+  //       currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
+  //     }
+  //   } else {
+  //     currentBot.buyLimit(holding.symbol!, 'WETH', 0);
+  //   }
+  // }
+
+  //this is where we change to the function we need
+  const func2pass: string = 'liquidate';
+
+  switch (func2pass) {
+    case 'liquidate':
+      const vaultHoldings = await getCurrentHoldings(currentBot);
+      const holdingsLength = vaultHoldings.length;
+
+      //only liquidate the tokens in here
+      const tokensToLiquidate: string[] = ['MKR', 'UNI', 'WBTC', 'YFI'];
+
+      console.log('It got past declaring vaultHoldings');
+      const hardCodedAmount: BigNumber = BigNumber.from('0');
+
+      for (let i = 0; i < holdingsLength; i++) {
+        await console.log(`BEFORE LIQUIDATE This is within the for each loop index of ${i} `);
+        //check the token we are swapping is not zero and is a token that should be liquidated
+        if (!vaultHoldings[i].amount.isZero() || !tokensToLiquidate.includes(vaultHoldings[i].symbol!)) {
+          await run(currentBot, func2pass, vaultHoldings[i]).then((res) => console.log("That's all folks."));
+        } else {
+          console.log('Amount was zero');
+        }
+
+        await console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
+      }
+      await run(await EnzymeBot.create('KOVAN'), func2pass); //.then((res) => console.log("That's all folks."));
+      break;
+    case 'buylimit':
+      await run(await EnzymeBot.create('KOVAN'), func2pass);
+      break;
+    case 'sell-limit':
+      await run(await EnzymeBot.create('KOVAN'), func2pass);
+      break;
+    case 'addHolding':
+      await run(await EnzymeBot.create('KOVAN'), func2pass);
+      break;
+
+    case 'rebalancePortfolio':
+    //     const rebalanceHoldingsWithAmout = await currentBot.CreatesRebalanceHoldings();
+    // const vaultHoldings = await getCurrentHoldings(currentBot);
+
+    // //makes an amount array of numbers from getToken
+    // const holdingsAmounts = await Promise.all(
+    //   vaultHoldings.map((holding) => getTokenBalance(currentBot.vaultAddress, holding.id!, currentBot.network))
+    // );
+
+    // // combine holding token data with amounts
+    // const currentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
+    //   return { ...item, amount: holdingsAmounts[index] };
+    // });
+
+    // const holdingsIsEqual = currentBot.IfHoldingIsEqual(currentHoldingsWithAmounts, rebalanceHoldingsWithAmout);
+
+    // if (!holdingsIsEqual) {
+    //   console.log('The holding values are not equal!');
+    //   return;
+    // }
+    // const symbolsCurrent: string[] = [];
+    // const symbolsRebalanced: string[] = [];
+
+    // for (let holding of currentHoldingsWithAmounts) {
+    //   symbolsCurrent.push(holding.symbol!);
+    // }
+
+    // for (let holding of rebalanceHoldingsWithAmout) {
+    //   symbolsRebalanced.push(holding.symbol!);
+    // }
+    // let i = 0;
+
+    // for (let holding of currentHoldingsWithAmounts) {
+    //   if (symbolsRebalanced.includes(holding.symbol!)) {
+    //     const rebalancedIndex = rebalanceHoldingsWithAmout.indexOf(holding);
+    //     let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
+    //     if (difference.gt(0)) {
+    //       currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
+    //     }
+    //   } else {
+    //     currentBot.buyLimit(holding.symbol!, 'WETH', 0);
+    //   }
+    // }
+
+    default:
+      currentBot.getVaultValues();
+  }
 
   // const vaultHoldings = await getCurrentHoldings(currentBot);
   // const holdingsLength = vaultHoldings.length;
