@@ -233,35 +233,103 @@ export class EnzymeBot {
       // make and get token amount with decimals in BigNumber form
       //let decimals: BigNumber = BigNumber.from(currentToken.decimals);
       const Hexstring: string= '0x'+(token.amount*(10**currentToken.decimals)).toString(16);
-      console.log(Hexstring);
+      //console.log(Hexstring);
       let tokenAmount: BigNumber = BigNumber.from(Hexstring)//.mul(decimals);
-      // rebalancedAmounts.push(tokenAmount);
+      rebalancedAmounts.push(tokenAmount);
       //console.log(tokenAmount);
     }
-    //console.log(rebalancedAmounts);
+    console.log(rebalancedAmounts);
 
-    // const holdingsWithAmounts = rebalancedHoldings.map((item, index) => {
-    //   return { ...item, amount: rebalancedAmounts[index] };
-    // });
+    const RebalancedholdingsWithAmounts = rebalancedHoldings.map((item, index) => {
+      return { ...item, amount: rebalancedAmounts[index] };
+    });
 
-    // console.log(holdingsWithAmounts);
+    const vaultHoldings = await this.getHoldings();
 
-    // const vault = new VaultLib(this.vaultAddress, this.wallet);
-    // const vaultHoldings = await vault.getTrackedAssets();
-    // return Promise.all(vaultHoldings.map((item: string) => getToken(this.subgraphEndpoint, 'id', item.toLowerCase())));
-    //  // if you have no holdings, return
-    //  if (vaultHoldings.length === 0) {
-    //   console.log('Your fund has no assets.');
-    //   return;
-    // }
-    // //makes an amount array of numbers from getToken
-    // const holdingsAmounts = await Promise.all(
-    //   vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
-    // );
-    // // combine holding token data with amounts
-    // const holdingsWithAmounts = vaultHoldings.map((item, index) => {
-    //   return { ...item, amount: holdingsAmounts[index] };
-    // });
+    const  currentVaultAmount= await Promise.all(
+      vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    );
+
+    // combine holding token data with amounts
+    const CurrentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
+      return { ...item, amount: currentVaultAmount[index] }});
+    //   console.log ('CurrentHoldings:');
+    //   console.log(CurrentHoldingsWithAmounts);
+
+      
+    //   console.log ('Rebalanced Holdings:')
+    // console.log(RebalancedholdingsWithAmounts);
+
+    const holdingsIsEqual = this.IfHoldingIsEqual(CurrentHoldingsWithAmounts, RebalancedholdingsWithAmounts);
+
+    if(!holdingsIsEqual) {
+      return;
+    }
+    const symbolsCurrent: string[] = [];
+    const symbolsRebalanced: string[] = [];
+
+    for (let holding of CurrentHoldingsWithAmounts ) {
+      symbolsCurrent.push(holding.symbol!);
+    }
+
+    for (let holding of RebalancedholdingsWithAmounts) {
+      symbolsRebalanced.push(holding.symbol!);
+    }
+    let i = 0;
+
+    for (let holding of CurrentHoldingsWithAmounts ){
+
+      if (symbolsRebalanced.includes(holding.symbol!)){
+       const rebalancedIndex = RebalancedholdingsWithAmounts.indexOf(holding);
+       let difference = holding.amount.sub(RebalancedholdingsWithAmounts[rebalancedIndex].amount);
+        if(difference.gt(0))
+        {
+          
+        }
+      }
+      else
+      {
+
+      }
+    }
+
+
+  }
+
+  public async IfHoldingIsEqual(currentPortfolio:any[], rebalancedPortfolio:any[]) {
+
+    let currentTotalValue = 0;
+    for (let holding of currentPortfolio) {
+      let decimals = holding.decimals;
+      let DecimalAmount = parseInt(holding.amount._hex, 16);
+      let amount = DecimalAmount / 10 ** decimals!;
+      let priceOfCoin = await getPrice2(this.subgraphEndpoint, holding.symbol!);
+      let value = amount * priceOfCoin!;
+      currentTotalValue += value;
+    }
+
+    let rebalancedtotalValue = 0;
+    for (let holding of rebalancedPortfolio) {
+      let decimals = holding.decimals;
+      let DecimalAmount = parseInt(holding.amount._hex, 16);
+      let amount = DecimalAmount / 10 ** decimals!;
+      let priceOfCoin = await getPrice2(this.subgraphEndpoint, holding.symbol!);
+      let value = amount * priceOfCoin!;
+      rebalancedtotalValue += value;
+    }
+    console.log(currentTotalValue);
+    console.log('-----------------');
+    console.log(rebalancedtotalValue);
+
+    if( currentTotalValue === rebalancedtotalValue)
+    {
+        return true;
+    }
+    else{
+        return false;
+    }
+
+
   }
 
   // use this function to add holdings
