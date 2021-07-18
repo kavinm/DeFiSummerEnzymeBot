@@ -418,7 +418,6 @@ export class EnzymeBot {
 
     // the first input token will be bought, the second will be sold
     // this will create the input needed for our swap
-    let bigNumberSample = BigNumber.from("50000000000000000");
     const swapTokensInput = await this.getPrice(
       { id: buyingToken.id, decimals: buyingToken.decimals, symbol: buyingToken.symbol, name: buyingToken.name },
       {
@@ -427,10 +426,8 @@ export class EnzymeBot {
         symbol: sellingToken.symbol as string,
         name: sellingToken.name as string,
       },
-      //sellingToken.amount
-      bigNumberSample
+      sellingToken.amount
     );
-
     if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
       return this.swapTokens(swapTokensInput);
     }
@@ -500,7 +497,6 @@ export class EnzymeBot {
 
     // define the buy token
     const buyingToken = this.tokens.assets.find((asset) => !asset.derivativeType && asset.symbol === buyTokenSymbol)!;
-console.log(buyingToken)
     //makes an amount array of numbers from getToken
     const holdingsAmounts = await Promise.all(
       vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
@@ -515,7 +511,6 @@ console.log(buyingToken)
     const sellingToken = holdingsWithAmounts.find(
       (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
     )!;
-console.log(sellingToken)
     // the first input token will be bought, the second will be sold
     // this will create the input needed for our swap
     const swapTokensInput = await this.getPrice(
@@ -528,7 +523,6 @@ console.log(sellingToken)
       },
       tokenAmount
     );
-    console.log(swapTokensInput)
     return this.swapTokens(swapTokensInput);
   }
   // // get a random token

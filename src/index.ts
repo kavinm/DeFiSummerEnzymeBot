@@ -49,7 +49,7 @@ async function run(bot: EnzymeBot, funcName: string, token?: any) {
         tx = await bot.liquidate(token);
         break;
       case 'buyLimit':
-        tx = await bot.buyLimit('YFI', 'WETH', 5);
+        tx = await bot.buyLimit('YFI', 'USDC', 0);
         break;
       case 'sellLimit':
         tx = await bot.sellLimit('WBTC', 'YFI', 5);
@@ -58,9 +58,8 @@ async function run(bot: EnzymeBot, funcName: string, token?: any) {
         tx = await bot.addHolding();
         break;
       case 'swapWithAmount':
-        let bigNumberSample = BigNumber.from("4000000")
-        console.log(bigNumberSample)
-        tx = await bot.swapWithAmount("WETH", "WBTC", bigNumberSample);
+        //amount in wei
+        tx = await bot.swapWithAmount("WETH", "WBTC", BigNumber.from("3000000000000000000"));
         break;
     }
 
@@ -162,7 +161,7 @@ async function run(bot: EnzymeBot, funcName: string, token?: any) {
   // }
 
   //this is where we change to the function we need
-  const func2pass: string = 'buyLimit';
+  const func2pass: string = 'swapWithAmount';
 
   switch (func2pass) {
     case 'liquidate':
