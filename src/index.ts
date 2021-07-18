@@ -36,7 +36,7 @@ async function run(bot: EnzymeBot, funcName: string, token?: any) {
   const vaultHoldings = await bot.getHoldings();
   const lengthHoldings = vaultHoldings.length;
   //console.log(vaultHoldings);
-  console.log('Above is the current vault holdings and the bottom is length holdings');
+  //console.log('Above is the current vault holdings and the bottom is length holdings');
   //console.log(lengthHoldings);
 
   //const lengthHoldings = vaultHoldings?.length;
@@ -48,14 +48,19 @@ async function run(bot: EnzymeBot, funcName: string, token?: any) {
       case 'liquidate':
         tx = await bot.liquidate(token);
         break;
-      case 'buylimit':
-        tx = await bot.buyLimit('WBTC', 'YFI', 5);
+      case 'buyLimit':
+        tx = await bot.buyLimit('YFI', 'WETH', 5);
         break;
-      case 'sell-limit':
+      case 'sellLimit':
         tx = await bot.sellLimit('WBTC', 'YFI', 5);
         break;
       case 'addHolding':
         tx = await bot.addHolding();
+        break;
+      case 'swapWithAmount':
+        let bigNumberSample = BigNumber.from("4000000")
+        console.log(bigNumberSample)
+        tx = await bot.swapWithAmount("WETH", "WBTC", bigNumberSample);
         break;
     }
 
@@ -157,7 +162,7 @@ async function run(bot: EnzymeBot, funcName: string, token?: any) {
   // }
 
   //this is where we change to the function we need
-  const func2pass: string = 'liquidate';
+  const func2pass: string = 'buyLimit';
 
   switch (func2pass) {
     case 'liquidate':
@@ -183,15 +188,18 @@ async function run(bot: EnzymeBot, funcName: string, token?: any) {
       }
       await run(await EnzymeBot.create('KOVAN'), func2pass); //.then((res) => console.log("That's all folks."));
       break;
-    case 'buylimit':
+    case 'buyLimit':
       await run(await EnzymeBot.create('KOVAN'), func2pass);
       break;
-    case 'sell-limit':
+    case 'sellLimit':
       await run(await EnzymeBot.create('KOVAN'), func2pass);
       break;
     case 'addHolding':
       await run(await EnzymeBot.create('KOVAN'), func2pass);
       break;
+    case 'swapWithAmount':
+      await run(await EnzymeBot.create('KOVAN'), func2pass);
+      break;      
 
     case 'rebalancePortfolio':
     //     const rebalanceHoldingsWithAmout = await currentBot.CreatesRebalanceHoldings();
