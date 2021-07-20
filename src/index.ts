@@ -32,7 +32,7 @@ async function getCurrentHoldings(bot: EnzymeBot) {
   // console.log(holdingsWithAmounts);
 }
 
-async function run(bot: EnzymeBot, funcName: string, token?: any) {
+async function run(bot: EnzymeBot, funcName: string, tokenSell?: any,tokenBuy?: any, amount?: any) {
   const vaultHoldings = await bot.getHoldings();
   const lengthHoldings = vaultHoldings.length;
   //console.log(vaultHoldings);
@@ -46,21 +46,22 @@ async function run(bot: EnzymeBot, funcName: string, token?: any) {
     let tx;
     switch (funcName) {
       case 'liquidate':
-        tx = await bot.liquidate(token);
+        tx = await bot.liquidate(tokenSell);
         break;
       case 'buyLimit':
-        tx = await bot.buyLimit('YFI', 'WETH', 5);
+        tx = await bot.buyLimit(tokenSell, tokenBuy, 0);
         break;
       case 'sellLimit':
-        tx = await bot.sellLimit('WBTC', 'YFI', 5);
+        tx = await bot.sellLimit(tokenSell, tokenBuy, 0);
         break;
       case 'addHolding':
         tx = await bot.addHolding();
         break;
       case 'swapWithAmount':
-        let bigNumberSample = BigNumber.from("4000000")
-        console.log(bigNumberSample)
-        tx = await bot.swapWithAmount("WETH", "WBTC", bigNumberSample);
+        //let bigNumberSample = BigNumber.from("83700000000000000")
+        //console.log("big number sample \n ------------------------------")
+        //console.log(bigNumberSample)
+        tx = await bot.swapWithAmount(tokenSell, tokenBuy, amount);
         break;
     }
 
@@ -162,15 +163,15 @@ async function run(bot: EnzymeBot, funcName: string, token?: any) {
   // }
 
   //this is where we change to the function we need
-  const func2pass: string = 'buyLimit';
-
+  const func2pass: string = 'sellLimit';
+  const vaultHoldings = await getCurrentHoldings(currentBot);
+  const holdingsLength = vaultHoldings.length;
   switch (func2pass) {
     case 'liquidate':
-      const vaultHoldings = await getCurrentHoldings(currentBot);
-      const holdingsLength = vaultHoldings.length;
+      
 
       //only liquidate the tokens in here
-      const tokensToLiquidate: string[] = ['MKR', 'UNI', 'WBTC', 'YFI'];
+      const tokensToLiquidate: string[] = ['YFI','WETH'];
 
       console.log('It got past declaring vaultHoldings');
       const hardCodedAmount: BigNumber = BigNumber.from('0');
@@ -192,7 +193,7 @@ async function run(bot: EnzymeBot, funcName: string, token?: any) {
       await run(await EnzymeBot.create('KOVAN'), func2pass);
       break;
     case 'sellLimit':
-      await run(await EnzymeBot.create('KOVAN'), func2pass);
+      await run(await EnzymeBot.create('KOVAN'), func2pass,'WETH', 'DAI');
       break;
     case 'addHolding':
       await run(await EnzymeBot.create('KOVAN'), func2pass);
@@ -202,48 +203,58 @@ async function run(bot: EnzymeBot, funcName: string, token?: any) {
       break;      
 
     case 'rebalancePortfolio':
-    //     const rebalanceHoldingsWithAmout = await currentBot.CreatesRebalanceHoldings();
-    // const vaultHoldings = await getCurrentHoldings(currentBot);
+    const rebalanceHoldingsWithAmout = await currentBot.CreatesRebalanceHoldings();
+    //const vaultHoldings = await getCurrentHoldings(currentBot);
 
-    // //makes an amount array of numbers from getToken
-    // const holdingsAmounts = await Promise.all(
-    //   vaultHoldings.map((holding) => getTokenBalance(currentBot.vaultAddress, holding.id!, currentBot.network))
-    // );
+    //makes an amount array of numbers from getToken
+    const holdingsAmounts = await Promise.all(
+      vaultHoldings.map((holding) => getTokenBalance(currentBot.vaultAddress, holding.id!, currentBot.network))
+    );
 
-    // // combine holding token data with amounts
-    // const currentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
-    //   return { ...item, amount: holdingsAmounts[index] };
-    // });
+    // combine holding token data with amounts
+    const currentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
+      return { ...item, amount: holdingsAmounts[index] };
+    });
 
-    // const holdingsIsEqual = currentBot.IfHoldingIsEqual(currentHoldingsWithAmounts, rebalanceHoldingsWithAmout);
+    const holdingsIsEqual = currentBot.IfHoldingIsEqual(currentHoldingsWithAmounts, rebalanceHoldingsWithAmout);
 
-    // if (!holdingsIsEqual) {
-    //   console.log('The holding values are not equal!');
-    //   return;
-    // }
-    // const symbolsCurrent: string[] = [];
-    // const symbolsRebalanced: string[] = [];
+    if (!holdingsIsEqual) {
+      console.log('The holding values are not equal!');
+      return;
+    }
+    const symbolsCurrent: string[] = [];
+    const symbolsRebalanced: string[] = [];
 
-    // for (let holding of currentHoldingsWithAmounts) {
-    //   symbolsCurrent.push(holding.symbol!);
-    // }
+    for (let holding of currentHoldingsWithAmounts) {
+      symbolsCurrent.push(holding.symbol!);
+    }
 
-    // for (let holding of rebalanceHoldingsWithAmout) {
-    //   symbolsRebalanced.push(holding.symbol!);
-    // }
-    // let i = 0;
+    for (let holding of rebalanceHoldingsWithAmout) {
+      symbolsRebalanced.push(holding.symbol!);
+    }
+    let i = 0;
 
-    // for (let holding of currentHoldingsWithAmounts) {
-    //   if (symbolsRebalanced.includes(holding.symbol!)) {
-    //     const rebalancedIndex = rebalanceHoldingsWithAmout.indexOf(holding);
-    //     let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
-    //     if (difference.gt(0)) {
-    //       currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
-    //     }
-    //   } else {
-    //     currentBot.buyLimit(holding.symbol!, 'WETH', 0);
-    //   }
-    // }
+    for (let holding of currentHoldingsWithAmounts) {
+      if (symbolsRebalanced.includes(holding.symbol!)) {
+        console.log(holding);
+        const rebalancedIndex = symbolsRebalanced.indexOf(holding.symbol!);
+        console.log('REBALANCED HOLDING WITH AMOUNT ---------- \n')
+        console.log(rebalancedIndex)
+        //console.log(rebalanceHoldingsWithAmout[rebalancedIndex]);
+        let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
+        if (difference.gt(0)) {
+          console.log("Swap With Amount")
+          await run(currentBot,'swapWithAmount', holding.symbol, 'WETH', difference)
+          //currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
+        }
+      } else {
+        console.log("Buy Limit");
+        currentBot.buyLimit(holding.symbol!, 'WETH', 0)
+        await run(currentBot,'buyLimit', );
+      }
+    }
+
+    break;
 
     default:
       currentBot.getVaultValues();
