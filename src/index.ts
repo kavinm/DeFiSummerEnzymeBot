@@ -24,8 +24,8 @@ async function getCurrentHoldings(bot: EnzymeBot) {
     return { ...item, amount: holdingsAmounts[index] };
   });
 
-  console.log(holdingsWithAmounts);
-  console.log('Above is the current vault holdings and the bottom is length holdings');
+  //console.log(holdingsWithAmounts);
+  //console.log('Above is the current vault holdings and the bottom is length holdings');
   //console.log(lengthHoldings);
 
   return holdingsWithAmounts;
@@ -163,7 +163,7 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any,tokenBuy?: 
   // }
 
   //this is where we change to the function we need
-  const func2pass: string = 'sellLimit';
+  const func2pass: string = 'rebalancePortfolio';
   const vaultHoldings = await getCurrentHoldings(currentBot);
   const holdingsLength = vaultHoldings.length;
   switch (func2pass) {
@@ -203,9 +203,10 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any,tokenBuy?: 
       break;      
 
     case 'rebalancePortfolio':
+      console.log("hello")
     const rebalanceHoldingsWithAmout = await currentBot.CreatesRebalanceHoldings();
     //const vaultHoldings = await getCurrentHoldings(currentBot);
-
+    console.log("got rebalanceHoldings"+ rebalanceHoldingsWithAmout)
     //makes an amount array of numbers from getToken
     const holdingsAmounts = await Promise.all(
       vaultHoldings.map((holding) => getTokenBalance(currentBot.vaultAddress, holding.id!, currentBot.network))
@@ -217,7 +218,7 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any,tokenBuy?: 
     });
 
     const holdingsIsEqual = currentBot.IfHoldingIsEqual(currentHoldingsWithAmounts, rebalanceHoldingsWithAmout);
-
+    console.log("gets value of holdings"+ holdingsIsEqual )
     if (!holdingsIsEqual) {
       console.log('The holding values are not equal!');
       return;
@@ -233,25 +234,30 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any,tokenBuy?: 
       symbolsRebalanced.push(holding.symbol!);
     }
     let i = 0;
-
+    console.log("before loop")
     for (let holding of currentHoldingsWithAmounts) {
-      if (symbolsRebalanced.includes(holding.symbol!)) {
-        console.log(holding);
-        const rebalancedIndex = symbolsRebalanced.indexOf(holding.symbol!);
-        console.log('REBALANCED HOLDING WITH AMOUNT ---------- \n')
-        console.log(rebalancedIndex)
-        //console.log(rebalanceHoldingsWithAmout[rebalancedIndex]);
-        let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
-        if (difference.gt(0)) {
-          console.log("Swap With Amount")
-          await run(currentBot,'swapWithAmount', holding.symbol, 'WETH', difference)
-          //currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
+      //Skips over holding that are zero value
+      if(holding.symbol != "WETH"){
+        console.log(holding.symbol)
+        console.log(symbolsRebalanced)
+        if (symbolsRebalanced.includes(holding.symbol!)) {
+          console.log(holding);
+          const rebalancedIndex = symbolsRebalanced.indexOf(holding.symbol!);
+          console.log('REBALANCED HOLDING WITH AMOUNT ---------- \n')
+          console.log(rebalancedIndex)
+          //console.log(rebalanceHoldingsWithAmout[rebalancedIndex]);
+          let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
+          if (difference.gt(0)) {
+            console.log("Swap With Amount")
+            await run(currentBot,'swapWithAmount', holding.symbol, 'WETH', difference)
+            //currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
+          }
+        } else {
+          console.log("Removed all holding: "+ holding.symbol);
+          await run(currentBot,'buyLimit', holding.symbol!, 'WETH', 0);
         }
-      } else {
-        console.log("Buy Limit");
-        currentBot.buyLimit(holding.symbol!, 'WETH', 0)
-        await run(currentBot,'buyLimit', );
       }
+      
     }
 
     break;

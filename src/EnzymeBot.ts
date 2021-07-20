@@ -213,7 +213,7 @@ export class EnzymeBot {
 
     tokens.push(token1);
 
-    let token2 = { symbol: 'DAI', amount: 7500.1295};
+    let token2 = { symbol: 'MKR', amount: 3.480};
 
     tokens.push(token2);
 
@@ -236,7 +236,7 @@ export class EnzymeBot {
 
       // make and get token amount with decimals in BigNumber form
       //let decimals: BigNumber = BigNumber.from(currentToken.decimals);
-      const Hexstring: string = '0x' + (token.amount * 10 ** currentToken.decimals).toString(16);
+      const Hexstring: string = '0x' + (Number(token.amount.toFixed(currentToken.decimals)) * 10 ** currentToken.decimals).toString(16);
       //console.log(Hexstring);
       let tokenAmount: BigNumber = BigNumber.from(Hexstring); //.mul(decimals);
       rebalancedAmounts.push(tokenAmount);
@@ -436,8 +436,8 @@ export class EnzymeBot {
         symbol: sellingToken.symbol as string,
         name: sellingToken.name as string,
       },
-      //sellingToken.amount
-      bigNumberSample
+      sellingToken.amount
+      //bigNumberSample
     );
 
     if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
