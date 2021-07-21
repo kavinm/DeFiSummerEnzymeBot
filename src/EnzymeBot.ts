@@ -93,7 +93,6 @@ export class EnzymeBot {
     const adapter = this.contracts.network?.currentRelease?.uniswapV2Adapter;
     const integrationManager = this.contracts.network?.currentRelease?.integrationManager;
     const comptroller = this.vault.fund?.accessor.id;
-   
 
     if (!adapter || !integrationManager || !comptroller) {
       console.log(
@@ -105,15 +104,11 @@ export class EnzymeBot {
       return;
     }
 
-    
-
     const takeOrderArgs = uniswapV2TakeOrderArgs({
       path: trade.path,
       minIncomingAssetAmount: trade.minIncomingAssetAmount,
       outgoingAssetAmount: trade.outgoingAssetAmount,
     });
-
-    
 
     const callArgs = callOnIntegrationArgs({
       adapter,
@@ -213,13 +208,13 @@ export class EnzymeBot {
 
     tokens.push(token1);
 
-    let token2 = { symbol: 'MKR', amount: 3.480};
+    let token2 = { symbol: 'UNI', amount: 166.82298136 };
 
     tokens.push(token2);
 
-    //let token3 = { symbol: 'WBTC', amount: 0.5 };
+    let token3 = { symbol: 'WBTC', amount: 0.2071803 };
 
-    //tokens.push(token3);
+    tokens.push(token3);
 
     //let token4 = { symbol: 'MKR', amount: 0.5 };
 
@@ -236,7 +231,8 @@ export class EnzymeBot {
 
       // make and get token amount with decimals in BigNumber form
       //let decimals: BigNumber = BigNumber.from(currentToken.decimals);
-      const Hexstring: string = '0x' + (Number(token.amount.toFixed(currentToken.decimals)) * 10 ** currentToken.decimals).toString(16);
+      const Hexstring: string =
+        '0x' + (Number(token.amount.toFixed(currentToken.decimals)) * 10 ** currentToken.decimals).toString(16);
       //console.log(Hexstring);
       let tokenAmount: BigNumber = BigNumber.from(Hexstring); //.mul(decimals);
       rebalancedAmounts.push(tokenAmount);
@@ -324,15 +320,14 @@ export class EnzymeBot {
     console.log(rebalancedtotalValue);
     //let fivePercent = (rebalancedtotalValue * 0.05);
 
-    // allows trades within 5% 
-    const withinFivePercent = rebalancedtotalValue > currentTotalValue *0.95 && rebalancedtotalValue<=currentTotalValue;
-    const value = ((currentTotalValue === rebalancedtotalValue) || withinFivePercent);
-    if (value == false) {
-      console.log("\n The amounts are not equal or within 5 percent \n")
+    // allows trades within 5%
+    const withinFivePercent =
+      rebalancedtotalValue > currentTotalValue * 0.95 && rebalancedtotalValue <= currentTotalValue;
+    const value = currentTotalValue === rebalancedtotalValue || withinFivePercent;
+    if (value === false) {
+      console.log('\n The amounts are not equal or within 5 percent \n');
     }
     return value;
-    
-    
   }
 
   // use this function to add holdings
@@ -427,7 +422,7 @@ export class EnzymeBot {
 
     // the first input token will be bought, the second will be sold
     // this will create the input needed for our swap
-    let bigNumberSample = BigNumber.from("50000000000000000");
+    let bigNumberSample = BigNumber.from('50000000000000000');
     const swapTokensInput = await this.getPrice(
       { id: buyingToken.id, decimals: buyingToken.decimals, symbol: buyingToken.symbol, name: buyingToken.name },
       {
@@ -509,8 +504,8 @@ export class EnzymeBot {
 
     // define the buy token
     const buyingToken = this.tokens.assets.find((asset) => !asset.derivativeType && asset.symbol === buyTokenSymbol)!;
-    console.log("Buying token \n ------------------------------")
-    console.log(buyingToken)
+    console.log('Buying token \n ------------------------------');
+    console.log(buyingToken);
     //makes an amount array of numbers from getToken
     const holdingsAmounts = await Promise.all(
       vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
@@ -525,8 +520,8 @@ export class EnzymeBot {
     const sellingToken = holdingsWithAmounts.find(
       (asset) => !asset?.derivativeType && asset?.symbol === sellTokenSymbol
     )!;
-    console.log("Selling Token \n ------------------------------")
-console.log(sellingToken)
+    console.log('Selling Token \n ------------------------------');
+    console.log(sellingToken);
 
     // the first input token will be bought, the second will be sold
     // this will create the input needed for our swap
@@ -540,8 +535,8 @@ console.log(sellingToken)
       },
       tokenAmount
     );
-    console.log("Swap Tokens Input \n ------------------------------")
-    console.log(swapTokensInput)
+    console.log('Swap Tokens Input \n ------------------------------');
+    console.log(swapTokensInput);
     return this.swapTokens(swapTokensInput);
   }
   // // get a random token
