@@ -212,7 +212,7 @@ export class EnzymeBot {
 
     tokens.push(token2);
 
-    let token3 = { symbol: 'WBTC', amount: 0.2071803 };
+    let token3 = { symbol: 'WBTC', amount: 0.23046610 };
 
     tokens.push(token3);
 

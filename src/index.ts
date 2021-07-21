@@ -6,6 +6,8 @@ import { getTokenBalance } from './utils/getTokenBalance';
 import { BigNumber, providers, utils, Wallet } from 'ethers';
 import { SharesBoughtEvent_OrderBy } from './utils/subgraph/subgraph';
 import { defaultFieldResolver } from 'graphql';
+import { gql } from './utils/subgraph/sdk';
+import { AssetBlacklistSetting_OrderBy } from './utils/subgraph/subgraph';
 
 //let i = 0;
 
@@ -193,7 +195,7 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?:
       await run(await EnzymeBot.create('KOVAN'), func2pass);
       break;
     case 'sellLimit':
-      await run(await EnzymeBot.create('KOVAN'), func2pass, 'BUSD', 'UNI');
+      await run(await EnzymeBot.create('KOVAN'), func2pass, 'WETH', 'UNI');
       break;
     case 'addHolding':
       await run(await EnzymeBot.create('KOVAN'), func2pass);
@@ -245,8 +247,9 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?:
             console.log('REBALANCED HOLDING WITH AMOUNT ---------- \n');
             console.log(rebalancedIndex);
             //console.log(rebalanceHoldingsWithAmout[rebalancedIndex]);
+            if (holding.amount.gt(rebalanceHoldingsWithAmout[rebalancedIndex].amount)) {
             let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
-            if (difference.gt(0)) {
+              console.log("The difference for current Holding"+difference);
               console.log('Swap With Amount');
               await run(currentBot, 'swapWithAmount', holding.symbol, 'WETH', difference);
               //currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
@@ -255,6 +258,36 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?:
             console.log('Removed all holding: ' + holding.symbol);
             await run(currentBot, 'buyLimit', holding.symbol!, 'WETH', 0);
           }
+        }
+      }
+      const result = await gql(currentBot.subgraphEndpoint).assets();
+      for (let holding of rebalanceHoldingsWithAmout) {
+        if(symbolsCurrent.includes(holding.symbol!)){
+          const currentindex = symbolsCurrent.indexOf(holding.symbol!);
+          let holdingPrice = Number(result.assets.find((asset) => asset.symbol === holding.symbol)?.price?.price);
+          if (holding.amount.gt(currentHoldingsWithAmounts[currentindex].amount)) {
+            let difference  = holding.amount.sub(currentHoldingsWithAmounts[currentindex].amount);
+            console.log("The difference for the Rebalanced Holding" + difference);
+            console.log('Swap With Amount');
+            let DecimalDifference = parseInt(difference._hex, 16);
+              let  amountInDecimal= DecimalDifference / 10 ** holding.decimals!;
+              let EthAmount =  amountInDecimal* holdingPrice;
+                await run(currentBot, 'swapWithAmount', 'WETH', holding.symbol,EthAmount);
+          }
+          
+
+        }
+        else {
+          let holdingPrice = Number(result.assets.find((asset) => asset.symbol === holding.symbol)?.price?.price);
+            let difference = holding.amount;
+            console.log(difference);
+            console.log('Swap With Amount');
+            let DecimalDifference = parseInt(difference._hex, 16);
+            let  amountInDecimal= DecimalDifference / 10 ** holding.decimals!;
+            let EthAmount =  amountInDecimal* holdingPrice;
+            await run(currentBot, 'swapWithAmount', 'WETH', holding.symbol,EthAmount);
+
+
         }
       }
 
