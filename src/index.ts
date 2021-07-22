@@ -238,7 +238,7 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?:
       console.log('before loop');
       for (let holding of currentHoldingsWithAmounts) {
         //Skips over holding that are zero value
-        if (holding.symbol != 'WETH') {
+        if (holding.amount._hex != '0x00') {
           //console.log(holding.symbol);
           //console.log(symbolsRebalanced);
           if (symbolsRebalanced.includes(holding.symbol!)) {
@@ -290,9 +290,6 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?:
             const DecimalDifference = parseInt(difference._hex, 16);
             // converts to 
             const  amountInDecimal= DecimalDifference / 10 ** holding.decimals!;
-            console.log("Amount in decimal: "+ amountInDecimal);
-            console.log ("holding price: " + holdingPrice);
-            console.log("Holdig symbol: " + holding.symbol);
             const totalAmountHex = '0x' + ((amountInDecimal* holdingPrice) * (10**18)).toString(16);
             let EthAmount =  BigNumber.from(totalAmountHex);
             console.log("EthAmount: " + EthAmount);

@@ -204,15 +204,15 @@ export class EnzymeBot {
     let tokens: any[] = [];
 
     //simulates what we get from front end
-    let token1 = { symbol: 'USDC', amount: 95992.717 };
+    let token1 = { symbol: 'USDC', amount: 47996.3585};
 
     tokens.push(token1);
 
-    let token2 = { symbol: 'UNI', amount: 166.82298136 };
+    let token2 = { symbol: 'WETH', amount: 8.29816679105 };
 
     tokens.push(token2);
 
-    let token3 = { symbol: 'WBTC', amount: 0.23046610 };
+    let token3 = { symbol: 'UNI', amount: 1174.079219667319 };
 
     tokens.push(token3);
 
