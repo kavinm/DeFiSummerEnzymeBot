@@ -267,11 +267,16 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?:
           let holdingPrice = Number(result.assets.find((asset) => asset.symbol === holding.symbol)?.price?.price);
           if (holding.amount.gt(currentHoldingsWithAmounts[currentindex].amount)) {
             let difference  = holding.amount.sub(currentHoldingsWithAmounts[currentindex].amount);
-            console.log("The difference for the Rebalanced Holding" + difference);
-            console.log('Swap With Amount');
-            let DecimalDifference = parseInt(difference._hex, 16);
-              let  amountInDecimal= DecimalDifference / 10 ** holding.decimals!;
-              let EthAmount =  amountInDecimal* holdingPrice;
+            const DecimalDifference = parseInt(difference._hex, 16);
+              const  amountInDecimal= DecimalDifference / 10 ** holding.decimals!;
+              console.log("Amount in decimal: "+ amountInDecimal);
+              console.log ("holding price: " + holdingPrice);
+              console.log("Holdig symbol: " + holding.symbol);
+              const vartosix = BigNumber.from(10**6);
+            let EthAmount =  BigNumber.from((amountInDecimal* holdingPrice)).mul(vartosix);
+            EthAmount = EthAmount.mul(vartosix);
+            EthAmount = EthAmount.mul(vartosix);
+              console.log("EthAmount: " + EthAmount);
                 await run(currentBot, 'swapWithAmount', 'WETH', holding.symbol,EthAmount);
           }
           
@@ -282,9 +287,15 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?:
             let difference = holding.amount;
             console.log(difference);
             console.log('Swap With Amount');
-            let DecimalDifference = parseInt(difference._hex, 16);
-            let  amountInDecimal= DecimalDifference / 10 ** holding.decimals!;
-            let EthAmount =  amountInDecimal* holdingPrice;
+            const DecimalDifference = parseInt(difference._hex, 16);
+            // converts to 
+            const  amountInDecimal= DecimalDifference / 10 ** holding.decimals!;
+            console.log("Amount in decimal: "+ amountInDecimal);
+            console.log ("holding price: " + holdingPrice);
+            console.log("Holdig symbol: " + holding.symbol);
+            const totalAmountHex = '0x' + ((amountInDecimal* holdingPrice) * (10**18)).toString(16);
+            let EthAmount =  BigNumber.from(totalAmountHex);
+            console.log("EthAmount: " + EthAmount);
             await run(currentBot, 'swapWithAmount', 'WETH', holding.symbol,EthAmount);
 
 
