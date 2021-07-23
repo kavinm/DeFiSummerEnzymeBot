@@ -200,21 +200,24 @@ export class EnzymeBot {
     //}
   }
 
-  public async CreatesRebalanceHoldings() {
+  public async CreatesRebalanceHoldings(tokensArray: { symbol: string; amount: number }[] = []) {
     let tokens: any[] = [];
 
+    for (let token in tokensArray) {
+      tokens.push(token);
+    }
     //simulates what we get from front end
-    let token1 = { symbol: 'USDC', amount: 47996.3585};
+    // let token1 = { symbol: 'USDC', amount: 47996.3585};
 
-    tokens.push(token1);
+    // tokens.push(token1);
 
-    let token2 = { symbol: 'WETH', amount: 8.29816679105 };
+    // let token2 = { symbol: 'WETH', amount: 8.29816679105 };
 
-    tokens.push(token2);
+    // tokens.push(token2);
 
-    let token3 = { symbol: 'UNI', amount: 1174.079219667319 };
+    // let token3 = { symbol: 'UNI', amount: 1174.079219667319 };
 
-    tokens.push(token3);
+    // tokens.push(token3);
 
     //let token4 = { symbol: 'MKR', amount: 0.5 };
 
