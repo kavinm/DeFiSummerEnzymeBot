@@ -9,7 +9,7 @@ import RebalancePortfolio from './pages/RebalancePortfolio';
 const App: React.FC = () => {
   return (
     <Switch>
-      <Route exact path="/connect">
+      <Route exact path="/">
         <Connect />
       </Route>
       <Route exact path="/automated-strategy">

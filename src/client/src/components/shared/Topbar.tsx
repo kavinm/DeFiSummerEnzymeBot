@@ -15,7 +15,7 @@ const Topbar: React.FC<TopbarProps> = ({ name }) => {
       alignItems="center"
       justifyContent="space-between"
     >
-      <Text as="span" display="block" color="headers" fontSize="xl" fontWeight="bold" my="auto">
+      <Text as="span" display="block" color="headers" fontSize="2xl" fontWeight="bold" my="auto">
         {name}
       </Text>
       <Button
