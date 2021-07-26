@@ -30,7 +30,6 @@ const Sidebar: React.FC = () => {
                 height="40px"
                 borderRadius="6px"
                 mb="0.25rem"
-                fontSize="sm"
                 color="gray.300"
                 {...(location.pathname === link.url && { backgroundColor: 'accentSurface', color: 'white' })}
               >
