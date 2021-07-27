@@ -2,6 +2,7 @@ import React from 'react';
 import { Box, Text } from '@chakra-ui/react';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
+import { useHistory } from 'react-router-dom';
 import * as yup from 'yup';
 
 import { Navbar, ThemedButton, ThemedInput } from '../components/shared';
@@ -23,8 +24,10 @@ const Connect: React.FC = () => {
     resolver: yupResolver(schema),
   });
 
+  const history = useHistory();
+
   const onSubmit = (data: FormData) => {
-    console.log(data);
+    history.push('/automated-strategy');
   };
 
   return (
@@ -61,7 +64,7 @@ const Connect: React.FC = () => {
           <Text as="span" color="error" display="block" h="2rem">
             {errors.vaultAddress?.message}
           </Text>
-          <ThemedButton color="white" type="submit" mt="2rem" mx="auto">
+          <ThemedButton color="white" type="submit" mt="2rem" mx="auto" display="block">
             Connect Wallet
           </ThemedButton>
         </form>

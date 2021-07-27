@@ -15,7 +15,7 @@ const ThemedButton: React.FC<ButtonProps> = ({ children, ...props }) => {
         borderColor: 'primaryLight',
       }}
       fontWeight="500"
-      display="block"
+      color="white"
       {...props}
     >
       {children}
