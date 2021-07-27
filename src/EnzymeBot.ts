@@ -203,7 +203,9 @@ export class EnzymeBot {
   public async CreatesRebalanceHoldings(tokensArray: { symbol: string; amount: number }[] = []) {
     let tokens: any[] = [];
 
-    for (let token in tokensArray) {
+    for (let token of tokensArray) {
+      console.log('This is the token in  for loop:' + token);
+
       tokens.push(token);
     }
     //simulates what we get from front end

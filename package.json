@@ -11,7 +11,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development ts-node --require dotenv-extended/config --transpile-only src/index.ts",
     "codegen": "dotenv -- graphql-codegen --config codegen.yaml",
-    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha -r ts-node/register 'tests/**/*.ts'"
+    "test": "env TS_NODE_COMPILER_OPTIONS='{\"module\": \"commonjs\" }' mocha --timeout 15000 -r ts-node/register --require dotenv-extended/config 'tests/**/*.ts'"
   },
   "dependencies": {
     "@enzymefinance/protocol": "^2.0.1",

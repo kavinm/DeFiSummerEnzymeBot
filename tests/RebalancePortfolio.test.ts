@@ -2,8 +2,6 @@ import { EnzymeBot } from '../src/EnzymeBot';
 
 import { BigNumber, providers, utils, Wallet } from 'ethers';
 
-import { loadEnv } from '../src/utils/loadEnv';
-
 import 'mocha';
 
 const assert = require('assert');
@@ -23,18 +21,37 @@ const tokensArray: token[] = [
 describe('Creates rebalanced holdings', () => {
   //describe('Creates rebalanced holdings', () => {
 
-  const symbols = [tokensArray[0].symbol, tokensArray[1].symbol];
+  const symbols: string[] = [];
+  const amounts: BigNumber[] = [];
 
-  const amounts = [BigNumber.from(tokensArray[0].amount), BigNumber.from(tokensArray[1].amount)];
+  for (let token of tokensArray) {
+    symbols.push(token.symbol);
+    amounts.push(BigNumber.from(token.amount));
+  }
+
   console.log;
 
   it('should include the correct token symbols in rebalanced holdings ', async () => {
     const currentBot = await EnzymeBot.create('KOVAN');
+
     const rebalancedHoldings = await currentBot.CreatesRebalanceHoldings(tokensArray);
-    //for (let holding of rebalancedHoldings) {
-    for (let symbol of symbols) {
-      //expect(symbols.includes(holding.symbol)).to.be.true;
-      expect(true).to.be.true;
+    for (let holding of rebalancedHoldings) {
+      for (let symbol of symbols) {
+        expect(symbols.includes(holding.symbol)).to.be.true;
+        //expect(true).to.be.true;
+      }
+    }
+  });
+
+  it('should include the correct token amounts in rebalanced holdings ', async () => {
+    const currentBot = await EnzymeBot.create('KOVAN');
+    console.log('These are the amounts' + amounts);
+    const rebalancedHoldings = await currentBot.CreatesRebalanceHoldings(tokensArray);
+    for (let holding of rebalancedHoldings) {
+      for (let amount of amounts) {
+        expect(amounts.includes(holding.amount)).to.be.true;
+        //expect(true).to.be.true;
+      }
     }
   });
 });
