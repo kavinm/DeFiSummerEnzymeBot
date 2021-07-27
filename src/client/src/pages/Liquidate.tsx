@@ -1,7 +1,7 @@
 import React from 'react';
 import DefaultLayout from '../layouts/DefaultLayout';
 import { Box, Text,Flex,Center,Select} from '@chakra-ui/react';
-import { ThemedButton, ThemedInput,Table } from '../components/shared';
+import { ThemedButton,Table } from '../components/shared';
 import uuid from 'react-uuid';
 import styled from '@emotion/styled';
 
@@ -41,7 +41,7 @@ const Liquidate: React.FC = () => {
         padding="10px"
         borderRadius="8px"
         w="850px"
-        mt={{ base: '4rem', xl: '2.5rem' }}
+        mt={{ base: '4rem', xl: '1.5rem' }}
         mx={{ base: '1rem', sm: '1.5rem' }}>
     <form> 
     <Text
@@ -64,14 +64,14 @@ const Liquidate: React.FC = () => {
     {/* {errors.vaultAddress?.message} */}
   </Text>
   < Center>
-  <ThemedButton color="white" type="submit" mt="2rem" mx="auto" width="180px" height="50px">
+  <ThemedButton color="white" type="submit" mt="0.5rem" mx="auto" width="180px" height="50px">
     Liquadate
   </ThemedButton>
   </Center>
 </form>
 </Box>
 
-<Table rows={vaultHoldingsRows} shownAs="vaultHoldingsTable" />
+<Table rows={vaultHoldingsRows} shownAs="vaultHoldingsTable" mt="1.5rem" />
 </Flex>
 </DefaultLayout>;
 };
