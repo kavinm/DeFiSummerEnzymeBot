@@ -1,3 +1,7 @@
+/*
+A testing suite to verify the createsRebalancedHoldings function
+*/
+
 import { EnzymeBot } from '../src/EnzymeBot';
 
 import { BigNumber, providers, utils, Wallet } from 'ethers';
@@ -13,6 +17,7 @@ const expect = chai.expect;
 
 type token = { symbol: string; amount: number };
 
+//input for CreatesRebalancedHoldings
 const tokensArray: token[] = [
   { symbol: 'USDC', amount: 1000 },
   { symbol: 'WBTC', amount: 2 },
@@ -21,6 +26,7 @@ const tokensArray: token[] = [
 describe('Creates rebalanced holdings', () => {
   //describe('Creates rebalanced holdings', () => {
 
+  //create symbols and amounts arrays to verify against created holdings
   const symbols: string[] = [];
   const amounts: BigNumber[] = [];
 
@@ -36,29 +42,24 @@ describe('Creates rebalanced holdings', () => {
 
     const rebalancedHoldings = await currentBot.CreatesRebalanceHoldings(tokensArray);
     for (let holding of rebalancedHoldings) {
-      for (let symbol of symbols) {
-        expect(symbols.includes(holding.symbol)).to.be.true;
-        //expect(true).to.be.true;
-      }
+      expect(symbols.includes(holding.symbol)).to.be.true;
     }
   });
 
   it('should include the correct token amounts in rebalanced holdings ', async () => {
     const currentBot = await EnzymeBot.create('KOVAN');
-    console.log('These are the amounts' + amounts);
     const rebalancedHoldings = await currentBot.CreatesRebalanceHoldings(tokensArray);
     for (let holding of rebalancedHoldings) {
-      for (let amount of amounts) {
-        expect(amounts.includes(holding.amount)).to.be.true;
-        //expect(true).to.be.true;
-      }
+      //amount is converted back into scaled down form
+      const holdingAmountReduced = holding.amount.div(BigNumber.from(10 ** holding.decimals));
+
+      expect(amounts.some((amount) => amount.eq(holdingAmountReduced))).to.be.true;
     }
   });
-});
 
-describe('Test if this is working', () => {
-  it('should return hello world', () => {
-    const result = 'Hello world!';
-    expect(result).to.equal('Hello world!');
+  it('should include the correct number of holdings', async () => {
+    const currentBot = await EnzymeBot.create('KOVAN');
+    const rebalancedHoldings = await currentBot.CreatesRebalanceHoldings(tokensArray);
+    expect(rebalancedHoldings.length).to.equal(tokensArray.length);
   });
 });

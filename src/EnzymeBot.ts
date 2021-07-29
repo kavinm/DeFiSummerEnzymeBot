@@ -204,8 +204,6 @@ export class EnzymeBot {
     let tokens: any[] = [];
 
     for (let token of tokensArray) {
-      console.log('This is the token in  for loop:' + token);
-
       tokens.push(token);
     }
     //simulates what we get from front end
@@ -243,7 +241,7 @@ export class EnzymeBot {
       rebalancedAmounts.push(tokenAmount);
       //console.log(tokenAmount);
     }
-    console.log(rebalancedAmounts);
+    console.log('These are the rebalanced amounts  from function: ' + typeof rebalancedAmounts);
 
     const RebalancedholdingsWithAmounts = rebalancedHoldings.map((item, index) => {
       return { ...item, amount: rebalancedAmounts[index] };
