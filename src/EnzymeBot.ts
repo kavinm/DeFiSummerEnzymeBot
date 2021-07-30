@@ -236,12 +236,10 @@ export class EnzymeBot {
       //let decimals: BigNumber = BigNumber.from(currentToken.decimals);
       const Hexstring: string =
         '0x' + (Number(token.amount.toFixed(currentToken.decimals)) * 10 ** currentToken.decimals).toString(16);
-      //console.log(Hexstring);
+
       let tokenAmount: BigNumber = BigNumber.from(Hexstring); //.mul(decimals);
       rebalancedAmounts.push(tokenAmount);
-      //console.log(tokenAmount);
     }
-    console.log('These are the rebalanced amounts  from function: ' + typeof rebalancedAmounts);
 
     const RebalancedholdingsWithAmounts = rebalancedHoldings.map((item, index) => {
       return { ...item, amount: rebalancedAmounts[index] };

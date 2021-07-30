@@ -35,8 +35,6 @@ describe('Creates rebalanced holdings', () => {
     amounts.push(BigNumber.from(token.amount));
   }
 
-  console.log;
-
   it('should include the correct token symbols in rebalanced holdings ', async () => {
     const currentBot = await EnzymeBot.create('KOVAN');
 
