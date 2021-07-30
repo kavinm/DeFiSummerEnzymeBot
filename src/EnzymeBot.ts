@@ -423,13 +423,9 @@ export class EnzymeBot {
 
     // the first input token will be bought, the second will be sold
     // this will create the input needed for our swap
-    //let bigNumberSample = BigNumber.from('50000000000000000');
+    let bigNumberSample = BigNumber.from('50000000000000000');
     const swapTokensInput = await this.getPrice(
-      { id: buyingToken.id, 
-        decimals: buyingToken.decimals, 
-        symbol: buyingToken.symbol, 
-        name: buyingToken.name 
-      },
+      { id: buyingToken.id, decimals: buyingToken.decimals, symbol: buyingToken.symbol, name: buyingToken.name },
       {
         id: sellingToken.id as string,
         decimals: sellingToken.decimals as number,
@@ -439,16 +435,10 @@ export class EnzymeBot {
       sellingToken.amount
       //bigNumberSample
     );
-      //@dev commented out the return function to test the function
+
     if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
       return this.swapTokens(swapTokensInput);
     }
-
-    // @dev the following are test functions. 
-    let sellTokenHolder = sellingToken?.name;
-    let buyTokenHolder = buyingToken.name;
-    return (sellTokenHolder);
-
   }
   //Sell limit order function
   public async sellLimit(sellTokenSymbol: string, buyTokenSymbol: string, tokenPriceLimit: number) {
@@ -548,9 +538,7 @@ export class EnzymeBot {
     );
     console.log('Swap Tokens Input \n ------------------------------');
     console.log(swapTokensInput);
-    //return this.swapTokens(swapTokensInput);
-    return swapTokensInput
-    
+    return this.swapTokens(swapTokensInput);
   }
   // // get a random token
   // const randomToken = await this.chooseRandomAsset();
