@@ -14,8 +14,8 @@ import { AssetBlacklistSetting_OrderBy } from './utils/subgraph/subgraph';
 async function getDecimal(bot: EnzymeBot) {}
 
 async function getCurrentHoldings(bot: EnzymeBot) {
-  const vaultHoldings = await bot.getHoldings();
-
+  const vaultHoldings = await bot.getHoldings()//.then(res => {console.log('This is the v holdings\n' )}
+  console.log(await vaultHoldings);
   //makes an amount array of numbers from getToken
   const holdingsAmounts = await Promise.all(
     vaultHoldings.map((holding) => getTokenBalance(bot.vaultAddress, holding!.id, bot.network))
