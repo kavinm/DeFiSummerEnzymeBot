@@ -443,15 +443,15 @@ export class EnzymeBot {
       sellingToken.amount
       //bigNumberSample
     );
-
+      //@dev commented out the return function to test the function
     if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
-      //return this.swapTokens(swapTokensInput);
+      return this.swapTokens(swapTokensInput);
     }
 
     // @dev the following are test functions. 
-    let sellTokenHolder = sellingToken.id;
+    let sellTokenHolder = sellingToken?.name;
     let buyTokenHolder = buyingToken.name;
-    return (buyTokenHolder);
+    return (sellTokenHolder);
 
   }
   //Sell limit order function
@@ -552,7 +552,9 @@ export class EnzymeBot {
     );
     console.log('Swap Tokens Input \n ------------------------------');
     console.log(swapTokensInput);
-    return this.swapTokens(swapTokensInput);
+    //return this.swapTokens(swapTokensInput);
+    return swapTokensInput
+    
   }
   // // get a random token
   // const randomToken = await this.chooseRandomAsset();
