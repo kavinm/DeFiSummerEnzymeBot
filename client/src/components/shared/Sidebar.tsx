@@ -1,15 +1,15 @@
-import React from 'react';
-import { Box, Flex, Text } from '@chakra-ui/react';
-import { Link, useLocation } from 'react-router-dom';
-import uuid from 'react-uuid';
+import React from "react";
+import { Box, Flex, Text } from "@chakra-ui/react";
+import { Link, useLocation } from "react-router-dom";
+import uuid from "react-uuid";
 
-import { ReactComponent as EnzymeLogo } from '../../assets/logo/enzyme.svg';
-import { ReactComponent as Avatar } from '../../assets/logo/avatar.svg';
+import { ReactComponent as EnzymeLogo } from "../../assets/logo/enzyme.svg";
+import { ReactComponent as Avatar } from "../../assets/logo/avatar.svg";
 
 const links = [
-  { id: uuid(), label: 'Automated Strategy', url: '/automated-strategy' },
-  { id: uuid(), label: 'Liquidate', url: '/liquidate' },
-  { id: uuid(), label: 'Rebalance Portfolio', url: '/rebalance-portfolio' },
+  { id: uuid(), label: "Automated Strategy", url: "/automated-strategy" },
+  { id: uuid(), label: "Liquidate", url: "/liquidate" },
+  { id: uuid(), label: "Rebalance Portfolio", url: "/rebalance-portfolio" },
 ];
 
 const Sidebar: React.FC = () => {
@@ -31,7 +31,10 @@ const Sidebar: React.FC = () => {
                 borderRadius="6px"
                 mb="0.25rem"
                 color="gray.300"
-                {...(location.pathname === link.url && { backgroundColor: 'accentSurface', color: 'white' })}
+                {...(location.pathname === link.url && {
+                  backgroundColor: "accentSurface",
+                  color: "white",
+                })}
               >
                 {link.label}
               </Box>
@@ -39,25 +42,36 @@ const Sidebar: React.FC = () => {
           ))}
         </Box>
       </Box>
+      <Box h="calc(100vh - 170px)" />
       <Flex
         alignItems="center"
         justifyContent="space-around"
         px="0.75rem"
-        position="fixed"
-        bottom="0px"
         height="72px"
         borderTop="1px solid"
         borderColor="accentOutlines"
-        w="230px"
+        w="228px"
       >
         <Box w="40px" h="40px">
           <Avatar />
         </Box>
         <Box>
-          <Text as="span" display="block" fontSize="sm" fontWeight="semibold" color="white">
+          <Text
+            as="span"
+            display="block"
+            fontSize="sm"
+            fontWeight="semibold"
+            color="white"
+          >
             Tom Cook
           </Text>
-          <Text as="span" display="block" fontSize="sm" fontWeight="medium" color="gray.500">
+          <Text
+            as="span"
+            display="block"
+            fontSize="sm"
+            fontWeight="medium"
+            color="gray.500"
+          >
             0x86fb84e92c1ee...
           </Text>
         </Box>

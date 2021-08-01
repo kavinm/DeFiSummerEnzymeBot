@@ -3,7 +3,15 @@ import { Input, InputProps } from '@chakra-ui/react';
 
 const ThemedInput: React.FC<InputProps> = React.forwardRef(
   ({ onChange, onBlur, name, children, ...props }, ref: any) => (
-    <Input color="white" onBlur={onBlur} onChange={onChange} name={name} ref={ref} {...props}>
+    <Input
+      color="white"
+      onBlur={onBlur}
+      onChange={onChange}
+      name={name}
+      ref={ref}
+      _focus={{ border: '1px solid white' }}
+      {...props}
+    >
       {children}
     </Input>
   )

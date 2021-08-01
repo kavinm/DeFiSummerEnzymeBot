@@ -1,18 +1,20 @@
-import React from 'react';
-import { Box, Text } from '@chakra-ui/react';
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
-import { useHistory } from 'react-router-dom';
-import * as yup from 'yup';
+import { useEffect } from "react";
+import { Box, Text } from "@chakra-ui/react";
+import { useForm } from "react-hook-form";
+import { yupResolver } from "@hookform/resolvers/yup";
+import { useHistory } from "react-router-dom";
+import * as yup from "yup";
 
-import { Navbar, ThemedButton, ThemedInput } from '../components/shared';
+import { greetUser } from "enzyme-autotrader-bot";
+
+import { Navbar, ThemedButton, ThemedInput } from "../components/shared";
 
 type FormData = {
   vaultAddress: string;
 };
 
 const schema = yup.object().shape({
-  vaultAddress: yup.string().required('Required.'),
+  vaultAddress: yup.string().required("Required."),
 });
 
 const Connect: React.FC = () => {
@@ -27,8 +29,12 @@ const Connect: React.FC = () => {
   const history = useHistory();
 
   const onSubmit = (data: FormData) => {
-    history.push('/automated-strategy');
+    history.push("/automated-strategy");
   };
+
+  useEffect(() => {
+    alert(greetUser("Stradford"));
+  }, []);
 
   return (
     <Box backgroundColor="accentCards" minHeight="100vh">
@@ -40,13 +46,25 @@ const Connect: React.FC = () => {
         padding="30px"
         borderRadius="8px"
         maxW="460px"
-        mt={{ base: '4rem', xl: '6rem' }}
-        mx={{ base: '1rem', sm: 'auto' }}
+        mt={{ base: "4rem", xl: "6rem" }}
+        mx={{ base: "1rem", sm: "auto" }}
       >
-        <Text as="span" fontSize="3xl" fontWeight="bold" color="headers" lineHeight="36px">
+        <Text
+          as="span"
+          fontSize="3xl"
+          fontWeight="bold"
+          color="headers"
+          lineHeight="36px"
+        >
           Connect to your wallet.
         </Text>
-        <Text as="p" fontWeight="medium" color="subHeaders" mt="1.5rem" mb="2.5rem">
+        <Text
+          as="p"
+          fontWeight="medium"
+          color="subHeaders"
+          mt="1.5rem"
+          mb="2.5rem"
+        >
           To interact with the Enzyme protocol, please connect to your wallet.
         </Text>
         <form onSubmit={handleSubmit(onSubmit)}>
@@ -60,11 +78,22 @@ const Connect: React.FC = () => {
           >
             Vault address
           </Text>
-          <ThemedInput {...register('vaultAddress')} mt="0.25rem" id="vaultAddress" placeholder="Enter vault address" />
+          <ThemedInput
+            {...register("vaultAddress")}
+            mt="0.25rem"
+            id="vaultAddress"
+            placeholder="Enter vault address"
+          />
           <Text as="span" color="error" display="block" h="2rem">
             {errors.vaultAddress?.message}
           </Text>
-          <ThemedButton color="white" type="submit" mt="2rem" mx="auto" display="block">
+          <ThemedButton
+            color="white"
+            type="submit"
+            mt="2rem"
+            mx="auto"
+            display="block"
+          >
             Connect Wallet
           </ThemedButton>
         </form>

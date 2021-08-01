@@ -9,12 +9,10 @@ import { defaultFieldResolver } from 'graphql';
 import { gql } from './utils/subgraph/sdk';
 import { AssetBlacklistSetting_OrderBy } from './utils/subgraph/subgraph';
 
-//let i = 0;
+export const getDecimal = (bot: EnzymeBot) => {};
 
-async function getDecimal(bot: EnzymeBot) {}
-
-async function getCurrentHoldings(bot: EnzymeBot) {
-  const vaultHoldings = await bot.getHoldings()//.then(res => {console.log('This is the v holdings\n' )}
+export const getCurrentHoldings = async (bot: EnzymeBot) => {
+  const vaultHoldings = await bot.getHoldings(); //.then(res => {console.log('This is the v holdings\n' )}
   console.log(await vaultHoldings);
   //makes an amount array of numbers from getToken
   const holdingsAmounts = await Promise.all(
@@ -32,9 +30,9 @@ async function getCurrentHoldings(bot: EnzymeBot) {
 
   return holdingsWithAmounts;
   // console.log(holdingsWithAmounts);
-}
+};
 
-async function run(bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?: any, amount?: any) {
+export const run = async (bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?: any, amount?: any) => {
   const vaultHoldings = await bot.getHoldings();
   const lengthHoldings = vaultHoldings.length;
   //console.log(vaultHoldings);
@@ -115,9 +113,9 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?:
   }
 
   return Promise.resolve(true);
-}
+};
 
-(async function main() {
+export const main = async () => {
   const currentBot = await EnzymeBot.create('KOVAN');
 
   // //const ennzymefunction = getVaultValues;
@@ -322,4 +320,18 @@ async function run(bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?:
   // }
 
   //console.log('STARTING IT UP');
-})();
+};
+
+export const greetUser = (user: string) => {
+  return `Hello, ${user}`;
+};
+
+export const goodbyeUser = (user: string) => {
+  return `Goodbye, ${user}`;
+};
+
+main();
+
+// npm install --production=false
+// npm run codegen
+// npm run dev
