@@ -8,6 +8,7 @@ import * as yup from "yup";
 import { greetUser } from "enzyme-autotrader-bot";
 
 import { Navbar, ThemedButton, ThemedInput } from "../components/shared";
+import { EnzymeBot } from "../../../enzyme-autotrader-bot/build/EnzymeBot";
 
 type FormData = {
     vaultAddress: string;
@@ -28,8 +29,11 @@ const Connect: React.FC = () => {
 
     const history = useHistory();
 
-    const onSubmit = (data: FormData) => {
+    const onSubmit = async (data: FormData) => {
         history.push("/automated-strategy");
+        const currentBot = EnzymeBot.createFromInput("KOVAN");
+        const currentBot2 = EnzymeBot.create("KOVAN");
+        //const hello = await currentBot.createFromInput();
     };
 
     useEffect(() => {
