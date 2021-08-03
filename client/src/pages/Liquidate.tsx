@@ -1,9 +1,12 @@
-import React from 'react';
-import DefaultLayout from '../layouts/DefaultLayout';
-import { Box, Text,Flex,Center,Select} from '@chakra-ui/react';
-import { ThemedButton,Table } from '../components/shared';
-import uuid from 'react-uuid';
-import styled from '@emotion/styled';
+import React from "react";
+import { Box, Text, Flex, Select } from "@chakra-ui/react";
+import uuid from "react-uuid";
+import styled from "@emotion/styled";
+import { useForm } from "react-hook-form";
+import { BsArrowDown } from "react-icons/bs";
+
+import { Table, ThemedButton, ThemedInput } from "../components/shared";
+import DefaultLayout from "../layouts/DefaultLayout";
 
 const StyledSelect = styled(Select)`
   & {
@@ -17,14 +20,14 @@ const StyledSelect = styled(Select)`
 const vaultHoldingsRows = [
   {
     id: uuid(),
-    asset: 'AXS',
+    asset: "AXS",
     balance: 50.1,
     allocation: 14073.4836,
     price: 1990.16,
   },
   {
     id: uuid(),
-    asset: 'steCRV-gauge',
+    asset: "steCRV-gauge",
     balance: 49.9,
     allocation: 13783.5404,
     price: 2024.08,
@@ -32,48 +35,103 @@ const vaultHoldingsRows = [
 ];
 
 const Liquidate: React.FC = () => {
-  return <DefaultLayout name="Liquidate">
-    
-    <Flex>
-    <Box backgroundColor="accentSurface"
-        border="1px solid"
-        borderColor="accentOutlines"
-        padding="10px"
-        borderRadius="8px"
-        w="850px"
-        mt={{ base: '4rem', xl: '1.5rem' }}
-        mx={{ base: '1rem', sm: '1.5rem' }}>
-    <form> 
-    <Text
-            as="label"
-            htmlFor="vaultAddress"
-            fontSize="lg"
-            fontWeight="medium"
-            color="gray.300"
-            lineHeight="1.25rem"
-          >
-            ERC Token
-          </Text>     
-          <StyledSelect id="ercToken" color="gray.600" mt="0.25rem" borderColor="gray.600">
-            <option>MLN</option>
-            <option>UNI</option>
-            <option>AXS</option>
-            <option>WETH</option>
-          </StyledSelect>
-  <Text as="span" color="error" display="block" h="2rem">
-    {/* {errors.vaultAddress?.message} */}
-  </Text>
-  < Center>
-  <ThemedButton color="white" type="submit" mt="0.5rem" mx="auto" width="180px" height="50px">
-    Liquadate
-  </ThemedButton>
-  </Center>
-</form>
-</Box>
+  const { handleSubmit } = useForm();
 
-<Table rows={vaultHoldingsRows} shownAs="vaultHoldingsTable" mt="1.5rem" />
-</Flex>
-</DefaultLayout>;
+  const onSubmit = (data: any) => {
+    console.log({ data });
+  };
+
+  return (
+    <DefaultLayout name="Liquidate">
+      <Flex mt="40px" justifyContent="center">
+        <Box
+          backgroundColor="accentCards"
+          border="1px solid"
+          borderColor="accentOutlines"
+          p="2rem"
+          borderRadius="8px"
+          mr="20px"
+        >
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <Text
+              display="block"
+              as="label"
+              fontSize="sm"
+              fontWeight=""
+              color="headers"
+            >
+              ERC Token
+            </Text>
+            <Flex alignItems="center">
+              <ThemedInput
+                type="text"
+                borderColor="gray.600"
+                w="16rem"
+                borderTopRightRadius="0px"
+                borderBottomRightRadius="0px"
+                borderRight="0px"
+              />
+              <StyledSelect
+                id="ercToken"
+                color="gray.600"
+                borderColor="gray.600"
+                w="6rem"
+                borderTopLeftRadius="0px"
+                borderBottomLeftRadius="0px"
+              >
+                <option>MLN</option>
+                <option>UNI</option>
+                <option>AXS</option>
+                <option>WETH</option>
+              </StyledSelect>
+            </Flex>
+            {/* ARROW  */}
+            <Flex justifyContent="center" mt="1.5rem" mb="0.5rem">
+              <BsArrowDown color="white" fontSize="1.25rem" />
+            </Flex>
+            <Text
+              mt="1rem"
+              display="block"
+              as="label"
+              fontSize="sm"
+              fontWeight=""
+              color="headers"
+            >
+              ERC Token
+            </Text>
+            <Flex alignItems="center">
+              <ThemedInput
+                type="text"
+                borderColor="gray.600"
+                w="16rem"
+                borderTopRightRadius="0px"
+                borderBottomRightRadius="0px"
+                borderRight="0px"
+              />
+              <StyledSelect
+                id="ercToken"
+                color="gray.600"
+                borderColor="gray.600"
+                w="6rem"
+                borderTopLeftRadius="0px"
+                borderBottomLeftRadius="0px"
+              >
+                <option>MLN</option>
+                <option>UNI</option>
+                <option>AXS</option>
+                <option>WETH</option>
+              </StyledSelect>
+            </Flex>
+            <ThemedButton type="submit" w="full" mt="2.5rem" py="1.5rem">
+              Liquidate
+            </ThemedButton>
+          </form>
+        </Box>
+
+        <Table rows={vaultHoldingsRows} shownAs="vaultHoldingsTable" />
+      </Flex>
+    </DefaultLayout>
+  );
 };
 
 export default Liquidate;

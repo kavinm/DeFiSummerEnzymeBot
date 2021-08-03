@@ -42,7 +42,7 @@ const Sidebar: React.FC = () => {
           ))}
         </Box>
       </Box>
-      <Box h="calc(100vh - 170px)" />
+      <Box h="calc(100vh - 100px)" />
       <Flex
         alignItems="center"
         justifyContent="space-around"
