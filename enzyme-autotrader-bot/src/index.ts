@@ -115,7 +115,7 @@ export const run = async (bot: EnzymeBot, funcName: string, tokenSell?: any, tok
   return Promise.resolve(true);
 };
 
-export const main = async () => {
+export const main = async (inputFunction: string) => {
   const currentBot = await EnzymeBot.create('KOVAN');
 
   // //const ennzymefunction = getVaultValues;
@@ -163,7 +163,7 @@ export const main = async () => {
   // }
 
   //this is where we change to the function we need
-  const func2pass: string = 'rebalancePortfolio';
+  const func2pass = inputFunction;
   //
   //
   const vaultHoldings = await getCurrentHoldings(currentBot);
@@ -330,7 +330,8 @@ export const goodbyeUser = (user: string) => {
   return `Goodbye, ${user}`;
 };
 
-main();
+export { EnzymeBot };
+//main();
 
 // npm install --production=false
 // npm run codegen

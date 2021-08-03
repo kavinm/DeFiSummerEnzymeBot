@@ -32,6 +32,28 @@ export class EnzymeBot {
 
     return new this(network, contracts, tokens, wallet, vaultAddress, vault, provider, subgraphEndpoint);
   }
+  public static async createFromInput(network: 'KOVAN' | 'MAINNET', inputVaultAddress?: string) {
+    const subgraphEndpoint =
+      network === 'MAINNET' ? loadEnv('MAINNET_SUBGRAPH_ENDPOINT') : loadEnv('KOVAN_SUBGRAPH_ENDPOINT');
+    const key = network === 'MAINNET' ? loadEnv('MAINNET_PRIVATE_KEY') : loadEnv('KOVAN_PRIVATE_KEY');
+    const contracts = await getDeployment(subgraphEndpoint);
+    const tokens = await getTokens(subgraphEndpoint);
+    const provider = getProvider(network);
+    const wallet = getWallet(key, provider);
+    const vaultAddress = inputVaultAddress;
+    const vault = await getVaultInfo(subgraphEndpoint, vaultAddress || '0x6221e604a94143798834faed4788687aa37aaf9a');
+
+    return new this(
+      network,
+      contracts,
+      tokens,
+      wallet,
+      vaultAddress || '0x6221e604a94143798834faed4788687aa37aaf9a',
+      vault,
+      provider,
+      subgraphEndpoint
+    );
+  }
 
   private constructor(
     public readonly network: 'KOVAN' | 'MAINNET',

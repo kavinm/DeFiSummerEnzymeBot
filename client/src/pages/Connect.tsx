@@ -33,7 +33,6 @@ const Connect: React.FC = () => {
         history.push("/automated-strategy");
         const currentBot = EnzymeBot.createFromInput("KOVAN");
         const currentBot2 = EnzymeBot.create("KOVAN");
-        //const hello = await currentBot.createFromInput();
     };
 
     useEffect(() => {
