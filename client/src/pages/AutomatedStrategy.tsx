@@ -2,34 +2,21 @@ import React from "react";
 import {
   Box,
   Text,
-  Select,
   Flex,
-  Input,
-  InputGroup,
-  InputLeftElement,
-  InputRightElement,
+  Tab,
+  TabList,
+  TabPanel,
+  TabPanels,
+  Tabs,
 } from "@chakra-ui/react";
-import styled from "@emotion/styled";
+
 import uuid from "react-uuid";
-import { BsArrowDown } from "react-icons/bs";
-import { CheckIcon } from "@chakra-ui/icons";
 
 import DefaultLayout from "../layouts/DefaultLayout";
 import { ThemedButton, ThemedInput, Table } from "../components/shared";
 import { StopLimitActions } from "../enums";
-import { useForm } from "react-hook-form";
-
-const StyledSelect = styled(Select)`
-  & {
-    color: white;
-    option {
-      color: black !important;
-    }
-    :focus {
-      border: 1px solid white;
-    }
-  }
-`;
+import BuyToken from "../components/partial/BuyToken";
+import SellToken from "../components/partial/SellToken";
 
 const stopLimitRows = [
   {
@@ -73,19 +60,10 @@ const vaultHoldingsRows = [
 ];
 
 const AutomatedStrategy: React.FC = () => {
-  const { handleSubmit } = useForm();
-
-  const onSubmit = (data: any) => {
-    console.log({ data });
-  };
-
   return (
     <DefaultLayout name="Automated Strategy">
-      <Flex mt="40px" justifyContent="center" px="20px">
+      <Flex mt="40px" justifyContent="center">
         <Box mr="20px">
-          <Text as="span" color="white" mb="0.5rem" display="block">
-            Strategy
-          </Text>
           <Box
             backgroundColor="accentCards"
             border="1px solid"
@@ -94,165 +72,26 @@ const AutomatedStrategy: React.FC = () => {
             p="2rem"
             borderRadius="8px"
           >
-            <form onSubmit={handleSubmit(onSubmit)}>
-              {/* FROM */}
-              <Text as="label" fontSize="lg" fontWeight="bold" color="headers">
-                From
-              </Text>
-              <Text
-                mt="1rem"
-                display="block"
-                as="label"
-                fontSize="sm"
-                fontWeight=""
-                color="headers"
-              >
-                Token
-              </Text>
-              <Flex alignItems="center">
-                <ThemedInput
-                  type="text"
-                  borderColor="gray.600"
-                  w="16rem"
-                  borderTopRightRadius="0px"
-                  borderBottomRightRadius="0px"
-                  borderRight="0px"
-                />
-                <StyledSelect
-                  id="ercToken"
-                  color="gray.600"
-                  borderColor="gray.600"
-                  w="6rem"
-                  borderTopLeftRadius="0px"
-                  borderBottomLeftRadius="0px"
-                >
-                  <option>MLN</option>
-                  <option>UNI</option>
-                  <option>AXS</option>
-                  <option>WETH</option>
-                </StyledSelect>
-              </Flex>
-              <Text
-                as="label"
-                fontSize="sm"
-                fontWeight=""
-                color="headers"
-                mt="0.5rem"
-                display="block"
-              >
-                When Price Is
-              </Text>
-              <InputGroup borderColor="gray.600">
-                <InputLeftElement
-                  pointerEvents="none"
-                  color="gray.300"
-                  fontSize="1.2em"
-                  children="$"
-                />
-                <Input
-                  placeholder="Enter amount"
-                  _focus={{
-                    border: "1px solid white",
-                  }}
-                  color="white"
-                  type="number"
-                  pattern="^\(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?$"
-                />
-                <InputRightElement children={<CheckIcon color="green.500" />} />
-              </InputGroup>
-              {/* ARROW  */}
-              <Flex justifyContent="center" mt="1.5rem" mb="0.5rem">
-                <BsArrowDown color="white" fontSize="1.25rem" />
-              </Flex>
-              {/* TO */}
-              <Text
-                display="block"
-                as="label"
-                fontSize="lg"
-                fontWeight="bold"
-                color="headers"
-              >
-                To
-              </Text>
-              <Text
-                mt="1rem"
-                display="block"
-                as="label"
-                fontSize="sm"
-                fontWeight=""
-                color="headers"
-              >
-                Token
-              </Text>
-              <Flex alignItems="center">
-                <ThemedInput
-                  type="text"
-                  borderColor="gray.600"
-                  w="16rem"
-                  borderTopRightRadius="0px"
-                  borderBottomRightRadius="0px"
-                  borderRight="0px"
-                />
-                <StyledSelect
-                  id="ercToken"
-                  color="gray.600"
-                  borderColor="gray.600"
-                  w="6rem"
-                  borderTopLeftRadius="0px"
-                  borderBottomLeftRadius="0px"
-                >
-                  <option>MLN</option>
-                  <option>UNI</option>
-                  <option>AXS</option>
-                  <option>WETH</option>
-                </StyledSelect>
-              </Flex>
-              <Text
-                as="label"
-                fontSize="sm"
-                fontWeight=""
-                color="headers"
-                mt="0.5rem"
-                display="block"
-              >
-                When Price Is
-              </Text>
-              <InputGroup borderColor="gray.600">
-                <InputLeftElement
-                  pointerEvents="none"
-                  color="gray.300"
-                  fontSize="1.2em"
-                  children="$"
-                />
-                <Input
-                  placeholder="Enter amount"
-                  _focus={{
-                    border: "1px solid white",
-                  }}
-                  color="white"
-                  type="number"
-                  pattern="^\(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?$"
-                />
-                <InputRightElement children={<CheckIcon color="green.500" />} />
-              </InputGroup>
-              <ThemedButton type="submit" w="full" mt="2.5rem" py="1.5rem">
-                Trade
-              </ThemedButton>
-            </form>
+            <Tabs isFitted>
+              <TabList>
+                <Tab color="gray.400">Buy</Tab>
+                <Tab color="gray.400">Sell</Tab>
+              </TabList>
+              <TabPanels>
+                <TabPanel>
+                  <BuyToken />
+                </TabPanel>
+                <TabPanel>
+                  <SellToken />
+                </TabPanel>
+              </TabPanels>
+            </Tabs>
           </Box>
         </Box>
         <Box mr="20px">
-          <Text as="span" color="white" mb="0.5rem" display="block">
-            Orders
-          </Text>
           <Table rows={stopLimitRows} shownAs="stopLimitTable" />
         </Box>
-        <Box mr="20px">
-          <Text as="span" color="white" mb="0.5rem" display="block">
-            Vault Holdings
-          </Text>
-          <Table rows={vaultHoldingsRows} shownAs="vaultHoldingsTable" />
-        </Box>
+        <Table rows={vaultHoldingsRows} shownAs="vaultHoldingsTable" />
       </Flex>
     </DefaultLayout>
   );
