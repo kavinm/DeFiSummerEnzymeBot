@@ -24,22 +24,12 @@ export const getCurrentHoldings = async (bot: EnzymeBot) => {
     return { ...item, amount: holdingsAmounts[index] };
   });
 
-  //console.log(holdingsWithAmounts);
-  //console.log('Above is the current vault holdings and the bottom is length holdings');
-  //console.log(lengthHoldings);
-
   return holdingsWithAmounts;
-  // console.log(holdingsWithAmounts);
 };
 
 export const run = async (bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?: any, amount?: any) => {
   const vaultHoldings = await bot.getHoldings();
   const lengthHoldings = vaultHoldings.length;
-  //console.log(vaultHoldings);
-  //console.log('Above is the current vault holdings and the bottom is length holdings');
-  //console.log(lengthHoldings);
-
-  //const lengthHoldings = vaultHoldings?.length;
 
   try {
     // return the transaction object
@@ -58,9 +48,6 @@ export const run = async (bot: EnzymeBot, funcName: string, tokenSell?: any, tok
         tx = await bot.addHolding();
         break;
       case 'swapWithAmount':
-        //let bigNumberSample = BigNumber.from("83700000000000000")
-        //console.log("big number sample \n ------------------------------")
-        //console.log(bigNumberSample)
         tx = await bot.swapWithAmount(tokenSell, tokenBuy, amount);
         break;
     }
@@ -118,54 +105,9 @@ export const run = async (bot: EnzymeBot, funcName: string, tokenSell?: any, tok
 export const main = async (inputFunction: string) => {
   const currentBot = await EnzymeBot.create('KOVAN');
 
-  // //const ennzymefunction = getVaultValues;
-  // const rebalanceHoldingsWithAmout = await currentBot.CreatesRebalanceHoldings();
-  // const vaultHoldings = await getCurrentHoldings(currentBot);
-
-  // //makes an amount array of numbers from getToken
-  // const holdingsAmounts = await Promise.all(
-  //   vaultHoldings.map((holding) => getTokenBalance(currentBot.vaultAddress, holding.id!, currentBot.network))
-  // );
-
-  // // combine holding token data with amounts
-  // const currentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
-  //   return { ...item, amount: holdingsAmounts[index] };
-  // });
-
-  // const holdingsIsEqual = currentBot.IfHoldingIsEqual(currentHoldingsWithAmounts, rebalanceHoldingsWithAmout);
-
-  // if (!holdingsIsEqual) {
-  //   console.log('The holding values are not equal!');
-  //   return;
-  // }
-  // const symbolsCurrent: string[] = [];
-  // const symbolsRebalanced: string[] = [];
-
-  // for (let holding of currentHoldingsWithAmounts) {
-  //   symbolsCurrent.push(holding.symbol!);
-  // }
-
-  // for (let holding of rebalanceHoldingsWithAmout) {
-  //   symbolsRebalanced.push(holding.symbol!);
-  // }
-  // let i = 0;
-
-  // for (let holding of currentHoldingsWithAmounts) {
-  //   if (symbolsRebalanced.includes(holding.symbol!)) {
-  //     const rebalancedIndex = rebalanceHoldingsWithAmout.indexOf(holding);
-  //     let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
-  //     if (difference.gt(0)) {
-  //       currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
-  //     }
-  //   } else {
-  //     currentBot.buyLimit(holding.symbol!, 'WETH', 0);
-  //   }
-  // }
-
-  //this is where we change to the function we need
+  //inputFunction
   const func2pass = inputFunction;
-  //
-  //
+
   const vaultHoldings = await getCurrentHoldings(currentBot);
   const holdingsLength = vaultHoldings.length;
   switch (func2pass) {
@@ -297,29 +239,6 @@ export const main = async (inputFunction: string) => {
     default:
       currentBot.getVaultValues();
   }
-
-  // const vaultHoldings = await getCurrentHoldings(currentBot);
-  // const holdingsLength = vaultHoldings.length;
-
-  // //only liquidate the tokens in here
-  // const tokensToLiquidate: string[] = ['MKR', 'UNI', 'WBTC'];
-
-  // console.log('It got past declaring vaultHoldings');
-  // const hardCodedAmount: BigNumber = BigNumber.from('0');
-
-  // for (let i = 0; i < holdingsLength; i++) {
-  //   await console.log(`BEFORE LIQUIDATE This is within the for each loop index of ${i} `);
-  //   //check the token we are swapping is not zero and is a token that should be liquidated
-  //   if (!vaultHoldings[i].amount.isZero() || !tokensToLiquidate.includes(vaultHoldings[i].symbol!)) {
-  //     await run(currentBot, vaultHoldings[i]).then((res) => console.log("That's all folks."));
-  //   } else {
-  //     console.log('Amount was zero');
-  //   }
-
-  //   await console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
-  // }
-
-  //console.log('STARTING IT UP');
 };
 
 export const greetUser = (user: string) => {
