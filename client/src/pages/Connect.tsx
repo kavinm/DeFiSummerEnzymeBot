@@ -8,7 +8,7 @@ import * as yup from "yup";
 import { greetUser } from "enzyme-autotrader-bot";
 
 import { Navbar, ThemedButton, ThemedInput } from "../components/shared";
-import { EnzymeBot } from "../../../enzyme-autotrader-bot/build/EnzymeBot";
+import { EnzymeBot } from "enzyme-autotrader-bot";
 
 type FormData = {
     vaultAddress: string;
