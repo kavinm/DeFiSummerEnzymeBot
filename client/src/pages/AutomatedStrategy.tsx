@@ -74,8 +74,18 @@ const AutomatedStrategy: React.FC = () => {
           >
             <Tabs isFitted>
               <TabList>
-                <Tab color="gray.400">Buy</Tab>
-                <Tab color="gray.400">Sell</Tab>
+                <Tab
+                  color="gray.400"
+                  _active={{ backgroudColor: "transparent" }}
+                >
+                  Buy
+                </Tab>
+                <Tab
+                  color="gray.400"
+                  _active={{ backgroudColor: "transparent" }}
+                >
+                  Sell
+                </Tab>
               </TabList>
               <TabPanels>
                 <TabPanel>
