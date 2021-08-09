@@ -1,6 +1,6 @@
 import React from "react";
 import { Flex, Box } from "@chakra-ui/react";
-import { Sidebar, Topbar, Footer } from "../components/shared";
+import { Sidebar, Topbar } from "../components/shared";
 
 const DefaultLayout: React.FC<{ name: string }> = ({ children, name }) => {
   return (

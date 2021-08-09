@@ -1,7 +1,6 @@
 import React from "react";
 import {
   Box,
-  Text,
   Flex,
   Tab,
   TabList,
@@ -13,7 +12,7 @@ import {
 import uuid from "react-uuid";
 
 import DefaultLayout from "../layouts/DefaultLayout";
-import { ThemedButton, ThemedInput, Table } from "../components/shared";
+import { Table } from "../components/shared";
 import { StopLimitActions } from "../enums";
 import BuyToken from "../components/partial/BuyToken";
 import SellToken from "../components/partial/SellToken";
