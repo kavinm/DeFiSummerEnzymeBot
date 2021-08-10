@@ -5,8 +5,8 @@ import { useHistory } from "react-router-dom";
 import * as yup from "yup";
 
 import { Navbar, ThemedButton, ThemedInput } from "../components/shared";
-import { EnzymeBot } from "enzyme-autotrader-bot";
-import { main } from "enzyme-autotrader-bot";
+// import { EnzymeBot } from "enzyme-autotrader-bot";
+// import { main } from "enzyme-autotrader-bot";
 
 type FormData = {
   vaultAddress: string;

@@ -1,197 +1,241 @@
 import React from "react";
 import DefaultLayout from "../layouts/DefaultLayout";
 import {
-    Table,
-    Thead,
-    Tbody,
-    Tfoot,
-    Tr,
-    Th,
-    Td,
-    TableCaption,
-    Input,
-    InputGroup,
-    InputLeftElement,
-    InputRightElement,
+  Table,
+  Thead,
+  Tbody,
+  Tr,
+  Th,
+  Td,
+  Text,
+  Box,
+  Flex,
+  NumberInput,
+  NumberInputField,
 } from "@chakra-ui/react";
+import uuid from "react-uuid";
+import styled from "@emotion/styled";
+import numeral from "numeral";
+
+import { ReactComponent as Avatar } from "../assets/logo/avatar.svg";
+
+const StyledTable = styled(Table)`
+  & {
+    th {
+      border-bottom: 1px solid transparent;
+    }
+    tr {
+      td {
+        border: 1px solid;
+        border-right: 1px solid transparent;
+      }
+    }
+    tr:not(:last-child) td {
+      border-bottom: 1px solid #374151;
+    }
+  }
+`;
+
+const vaultHoldingsRows = [
+  {
+    id: uuid(),
+    name: "Wrapped Ether",
+    symbol: "WETH",
+    price: 62313599.18,
+    currentBalance: 0,
+    currentValue: 62313599.18,
+  },
+  {
+    id: uuid(),
+    name: "Uniswap",
+    symbol: "UNI",
+    price: 62313599.18,
+    currentBalance: 1000,
+    currentValue: 0,
+  },
+  {
+    id: uuid(),
+    name: "Compound",
+    symbol: "COMP",
+    price: 62313599.18,
+    currentBalance: 0,
+    currentValue: 0,
+  },
+  {
+    id: uuid(),
+    name: "1inch",
+    symbol: "1INCH",
+    price: 62313599.18,
+    currentBalance: 0,
+    currentValue: 0,
+  },
+  {
+    id: uuid(),
+    name: "Aave",
+    symbol: "AAVE",
+    price: 62313599.18,
+    currentBalance: 0,
+    currentValue: 0,
+  },
+  {
+    id: uuid(),
+    name: "Banco Network Token",
+    symbol: "BNT",
+    price: 62313599.18,
+    currentBalance: 0,
+    currentValue: 0,
+  },
+  {
+    id: uuid(),
+    name: "1inch",
+    symbol: "1INCH",
+    price: 62313599.18,
+    currentBalance: 0,
+    currentValue: 0,
+  },
+];
 
 const RebalancePortfolio: React.FC = () => {
-    return (
-        <DefaultLayout name="Rebalance Portfolio">
-            <Table variant="unstyled" colorScheme="facebook">
-                <TableCaption></TableCaption>
-                <Thead>
-                    <Tr>
-                        <Th color="#D1D5DB" backgroundColor="accentOutlines">
-                            Token
-                        </Th>
-                        <Th
-                            color="#D1D5DB"
-                            backgroundColor="accentOutlines"
-                            isNumeric
-                        >
-                            Price
-                        </Th>
-                        <Th
-                            color="#D1D5DB"
-                            backgroundColor="accentOutlines"
-                            isNumeric
-                        >
-                            Current Balance
-                        </Th>
-                        <Th
-                            color="#D1D5DB"
-                            backgroundColor="accentOutlines"
-                            isNumeric
-                        >
-                            Current Value
-                        </Th>
-                        <Th
-                            color="#D1D5DB"
-                            backgroundColor="accentOutlines"
-                            isNumeric
-                        >
-                            Desired Weight
-                        </Th>
-                        <Th
-                            color="#D1D5DB"
-                            backgroundColor="accentOutlines"
-                            isNumeric
-                        ></Th>
-                    </Tr>
-                </Thead>
-                <Tbody>
-                    <Tr
-                        border="1px"
-                        borderColor="gray.500"
-                        borderRadius="0.125rem"
-                    >
-                        <Td color="#D1D5DB" backgroundColor="accentSurface">
-                            Total
-                        </Td>
-                        <Td
-                            color="#D1D5DB"
-                            backgroundColor="accentSurface"
-                        ></Td>
-                        <Td
-                            color="#D1D5DB"
-                            backgroundColor="accentSurface"
-                        ></Td>
-                        <Td
-                            color="#D1D5DB"
-                            isNumeric
-                            backgroundColor="accentSurface"
-                        >
-                            999999
-                        </Td>
-                        <Td
-                            color="#D1D5DB"
-                            isNumeric
-                            backgroundColor="accentSurface"
-                        >
-                            100.0
-                        </Td>
-                    </Tr>
-                    <Tr border="1px" borderColor="#4B5563">
-                        <Td color="#F9FAFB">Token1</Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            $9999999
-                        </Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            30.48
-                        </Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            99999
-                        </Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            <Td color="#F9FAFB" isNumeric>
-                                <Input
-                                    placeholder="0"
-                                    _focus={{
-                                        border: "1px solid ",
-                                    }}
-                                    borderColor="#4B5563"
-                                    color="white"
-                                    type="number"
-                                    pattern="^\(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?$"
-                                />
-                            </Td>
-                        </Td>
-                        <Td color="#4B5563" isNumeric>
-                            99999
-                        </Td>
-                    </Tr>
-
-                    <Tr border="1px" borderColor="#4B5563">
-                        <Td color="#F9FAFB">Token2</Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            $9999999
-                        </Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            30.48
-                        </Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            99999
-                        </Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            <Td color="#F9FAFB" isNumeric>
-                                <Input
-                                    placeholder="0"
-                                    _focus={{
-                                        border: "1px solid ",
-                                    }}
-                                    borderColor="#4B5563"
-                                    color="white"
-                                    type="number"
-                                    pattern="^\(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?$"
-                                />
-                            </Td>
-                        </Td>
-                        <Td color="#4B5563" isNumeric>
-                            99999
-                        </Td>
-                    </Tr>
-                    <Tr border="1px" borderColor="#4B5563">
-                        <Td color="#F9FAFB">Token 3</Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            $9999999
-                        </Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            30.48
-                        </Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            99999
-                        </Td>
-                        <Td color="#F9FAFB" isNumeric>
-                            <Td color="#F9FAFB" isNumeric>
-                                <Input
-                                    placeholder="0"
-                                    _focus={{
-                                        border: "1px solid ",
-                                    }}
-                                    borderColor="#4B5563"
-                                    color="white"
-                                    type="number"
-                                    pattern="^\(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?$"
-                                />
-                            </Td>
-                        </Td>
-                        <Td color="#4B5563" isNumeric>
-                            99999
-                        </Td>
-                    </Tr>
-                </Tbody>
-                <Tfoot>
-                    <Tr>
-                        <Th>To convert</Th>
-                        <Th>into</Th>
-                        <Th isNumeric>multiply by</Th>
-                    </Tr>
-                </Tfoot>
-            </Table>
-            ;
-        </DefaultLayout>
-    );
+  return (
+    <DefaultLayout name="Rebalance Portfolio">
+      <Flex mt="40px" justifyContent="center">
+        <Box
+          backgroundColor="accentCards"
+          border="1px solid"
+          borderColor="accentOutlines"
+          p="2rem"
+          borderRadius="8px"
+        >
+          <Text
+            display="block"
+            as="label"
+            fontSize="sm"
+            fontWeight=""
+            color="headers"
+          >
+            Vault Holdings
+          </Text>
+          <Box
+            border="1px solid"
+            borderColor="accentOutlines"
+            borderRadius="8px"
+            padding="0px"
+            mt="0.5rem"
+            maxH="400px !important"
+            overflow="hidden auto"
+          >
+            <StyledTable variant="simple">
+              <Thead>
+                <Tr backgroundColor="accentOutlines">
+                  <Th color="gray.300" fontWeight="500">
+                    TOKEN
+                  </Th>
+                  <Th color="gray.300" fontWeight="500">
+                    PRICE
+                  </Th>
+                  <Th color="gray.300" fontWeight="500">
+                    CURRENT BALANCE
+                  </Th>
+                  <Th color="gray.300" fontWeight="500">
+                    CURRENT VALUE
+                  </Th>
+                  <Th color="gray.300" fontWeight="500">
+                    DESIRED WEIGHT
+                  </Th>
+                  <Th></Th>
+                </Tr>
+              </Thead>
+              <Tbody>
+                {vaultHoldingsRows.map((r) => (
+                  <Tr key={r.id}>
+                    <Td>
+                      <Flex minW="240px">
+                        <Box mr="16px">
+                          <Avatar />
+                        </Box>
+                        <Box>
+                          <Text
+                            as="span"
+                            display="block"
+                            fontSize="sm"
+                            fontWeight="medium"
+                            color="white"
+                          >
+                            {r.name}
+                          </Text>
+                          <Text
+                            as="span"
+                            fontSize="sm"
+                            fontWeight="400"
+                            color="placeholders"
+                          >
+                            {r.symbol}
+                          </Text>
+                        </Box>
+                      </Flex>
+                    </Td>
+                    <Td>
+                      <Text
+                        as="span"
+                        display="block"
+                        fontSize="sm"
+                        fontWeight="500"
+                        color="gray.50"
+                      >
+                        {numeral(r.price).format("$0,0.00")}
+                      </Text>
+                    </Td>
+                    <Td>
+                      <Text
+                        as="span"
+                        display="block"
+                        fontSize="sm"
+                        fontWeight="500"
+                        color="placeholders"
+                      >
+                        {r.currentBalance}
+                      </Text>
+                    </Td>
+                    <Td>
+                      <Text
+                        as="span"
+                        display="block"
+                        fontSize="sm"
+                        fontWeight="500"
+                        color="gray.50"
+                      >
+                        {numeral(r.currentValue).format("$0,0.00")}
+                      </Text>
+                    </Td>
+                    <Td>
+                      <NumberInput w="150px">
+                        <NumberInputField
+                          color="white"
+                          borderColor="accentOutlines"
+                        />
+                      </NumberInput>
+                    </Td>
+                    <Td>
+                      {/* COMPUTATIOn */}
+                      <Text
+                        as="span"
+                        display="block"
+                        fontSize="sm"
+                        fontWeight="500"
+                        color="gray.50"
+                      >
+                        {numeral(r.currentValue).format("$0,0.00")}
+                      </Text>
+                    </Td>
+                  </Tr>
+                ))}
+              </Tbody>
+            </StyledTable>
+          </Box>
+        </Box>
+      </Flex>
+    </DefaultLayout>
+  );
 };
 
 export default RebalancePortfolio;

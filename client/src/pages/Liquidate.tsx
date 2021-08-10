@@ -122,7 +122,6 @@ const Liquidate: React.FC = () => {
           borderColor="accentOutlines"
           p="2rem"
           borderRadius="8px"
-          mr="20px"
         >
           <form onSubmit={handleSubmit(onSubmit)}>
             <Text
