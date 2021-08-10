@@ -61,46 +61,49 @@ const vaultHoldingsRows = [
 const AutomatedStrategy: React.FC = () => {
   return (
     <DefaultLayout name="Automated Strategy">
-      <Flex mt="40px" justifyContent="center">
-        <Box mr="20px">
-          <Box
-            backgroundColor="accentCards"
-            border="1px solid"
-            borderColor="accentOutlines"
-            padding="20px"
-            p="2rem"
-            borderRadius="8px"
-          >
-            <Tabs isFitted>
-              <TabList>
-                <Tab
-                  color="gray.400"
-                  _active={{ backgroudColor: "transparent" }}
-                >
-                  Buy
-                </Tab>
-                <Tab
-                  color="gray.400"
-                  _active={{ backgroudColor: "transparent" }}
-                >
-                  Sell
-                </Tab>
-              </TabList>
-              <TabPanels>
-                <TabPanel>
-                  <BuyToken />
-                </TabPanel>
-                <TabPanel>
-                  <SellToken />
-                </TabPanel>
-              </TabPanels>
-            </Tabs>
-          </Box>
+      <Flex
+        maxW="1000px"
+        mt="40px"
+        mx={{ base: "2rem", md: "auto" }}
+        justifyContent={{ base: "center", xl: "initial" }}
+      >
+        <Box
+          backgroundColor="accentCards"
+          border="1px solid"
+          borderColor="accentOutlines"
+          padding="20px"
+          p="2rem"
+          borderRadius="8px"
+          mr="20px"
+        >
+          <Tabs isFitted>
+            <TabList>
+              <Tab color="gray.400" _active={{ backgroudColor: "transparent" }}>
+                Buy
+              </Tab>
+              <Tab color="gray.400" _active={{ backgroudColor: "transparent" }}>
+                Sell
+              </Tab>
+            </TabList>
+            <TabPanels>
+              <TabPanel>
+                <BuyToken />
+              </TabPanel>
+              <TabPanel>
+                <SellToken />
+              </TabPanel>
+            </TabPanels>
+          </Tabs>
         </Box>
-        <Box mr="20px">
-          <Table rows={stopLimitRows} shownAs="stopLimitTable" />
-        </Box>
-        <Table rows={vaultHoldingsRows} shownAs="vaultHoldingsTable" />
+        <Flex direction={{ base: "column", xl: "row" }} w="min-content">
+          <Table
+            rows={stopLimitRows}
+            shownAs="stopLimitTable"
+            mr={{ base: "0px", xl: "20px" }}
+            mb={{ base: "20px", xl: "0px" }}
+          />
+          <Table rows={vaultHoldingsRows} shownAs="vaultHoldingsTable" />
+        </Flex>
       </Flex>
     </DefaultLayout>
   );
