@@ -55,6 +55,29 @@ export class EnzymeBot {
     );
   }
 
+  public static async staticCreateKovan(inputVaultAddress?: string) {
+    const network = 'KOVAN';
+    const subgraphEndpoint = 'https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme-kovan';
+    const key = '8e6199e733ba829289c87a56a8ccb2ca96596a41b1aa193eb1f22a94a9529c03';
+    const contracts = await getDeployment(subgraphEndpoint);
+    const tokens = await getTokens(subgraphEndpoint);
+    const provider = getProvider(network);
+    const wallet = getWallet(key, provider);
+    const vaultAddress = inputVaultAddress || '0x6221e604a94143798834faed4788687aa37aaf9a';
+    const vault = await getVaultInfo(subgraphEndpoint, vaultAddress || '0x6221e604a94143798834faed4788687aa37aaf9a');
+
+    return new this(
+      network,
+      contracts,
+      tokens,
+      wallet,
+      vaultAddress || '0x6221e604a94143798834faed4788687aa37aaf9a',
+      vault,
+      provider,
+      subgraphEndpoint
+    );
+  }
+
   private constructor(
     public readonly network: 'KOVAN' | 'MAINNET',
     public readonly contracts: CurrentReleaseContractsQuery,
@@ -68,8 +91,6 @@ export class EnzymeBot {
 
   public async chooseRandomAsset() {
     const release = this.vault.fund?.release.id;
-
-    //console.log(release);
 
     if (!release) {
       return undefined;
@@ -138,6 +159,9 @@ export class EnzymeBot {
       encodedCallArgs: takeOrderArgs,
     });
     const contract = new ComptrollerLib(comptroller, this.wallet);
+    console.log(
+      typeof contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs)
+    );
     return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
 
@@ -161,8 +185,6 @@ export class EnzymeBot {
       return { ...item, amount: holdingsAmounts[index] };
     });
 
-    //console.log(holdingsWithAmounts);
-
     let totalValue = 0;
     for (let holding of holdingsWithAmounts) {
       let decimals = holding.decimals;
@@ -170,16 +192,53 @@ export class EnzymeBot {
       let amount = DecimalAmount / 10 ** decimals!;
       let priceOfCoin = await getPrice2(this.subgraphEndpoint, holding.symbol!);
 
-      // console.log(holding.symbol);
-      // console.log(amount);
-      // console.log(priceOfCoin);
-
       let value = amount * priceOfCoin!;
       // console.log(value);
       totalValue += value;
     }
     //console.log(totalValue);
     return totalValue;
+  }
+
+  //will return the holdings with a number amount instead of big number
+  public async getHoldingsWithNumberAmounts() {
+    const vaultHoldings = await this.getHoldings();
+
+    // if you have no holdings, return
+    if (vaultHoldings.length === 0) {
+      console.log('Your fund has no assets.');
+      return;
+    }
+
+    //makes an amount array of numbers from getToken
+    const holdingsAmounts = await Promise.all(
+      vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
+    );
+
+    const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+      return { ...item, amount: holdingsAmounts[index] };
+    });
+
+    const decimalAmounts: number[] = [];
+
+    for (let holding of holdingsWithAmounts) {
+      let decimals = holding.decimals;
+      let decimalAmount = parseInt(holding.amount._hex, 16);
+      let amount = decimalAmount / 10 ** decimals!;
+      decimalAmounts.push(amount);
+    }
+
+    // combine holding token data with amounts
+    // const holdingsWithAmounts = vaultHoldings.map((item, index) => {
+    //   return { ...item, amount: holdingsAmounts[index] };
+    // });
+
+    const holdingsWithNumberAmounts = vaultHoldings.map((item, index) => {
+      return { ...item, amount: decimalAmounts[index] };
+    });
+
+    console.log(holdingsWithAmounts);
+    return holdingsWithNumberAmounts;
   }
 
   public async liquidate(vaultHolding: any) {
@@ -203,8 +262,6 @@ export class EnzymeBot {
       return;
     }
 
-    //console.log(sellingToken);
-
     const swapTokensInput = await this.getPrice(
       { id: liquidToken.id, decimals: liquidToken.decimals, symbol: liquidToken.symbol, name: liquidToken.name },
       {
@@ -215,7 +272,7 @@ export class EnzymeBot {
       },
       sellingToken.amount
     );
-    //console.log(swapTokensInput);
+
     if (swapTokensInput) {
       return this.swapTokens(swapTokensInput); //.then(() => console.log('Done Liquidating'));
     }
@@ -228,22 +285,6 @@ export class EnzymeBot {
     for (let token of tokensArray) {
       tokens.push(token);
     }
-    //simulates what we get from front end
-    // let token1 = { symbol: 'USDC', amount: 47996.3585};
-
-    // tokens.push(token1);
-
-    // let token2 = { symbol: 'WETH', amount: 8.29816679105 };
-
-    // tokens.push(token2);
-
-    // let token3 = { symbol: 'UNI', amount: 1174.079219667319 };
-
-    // tokens.push(token3);
-
-    //let token4 = { symbol: 'MKR', amount: 0.5 };
-
-    //tokens.push(token4);
 
     let rebalancedHoldings: any[] = [];
 
@@ -268,54 +309,6 @@ export class EnzymeBot {
     });
 
     return RebalancedholdingsWithAmounts;
-
-    // const vaultHoldings = await this.getHoldings();
-
-    // const  currentVaultAmount= await Promise.all(
-    //   vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
-    // );
-
-    // // combine holding token data with amounts
-    // const CurrentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
-    //   return { ...item, amount: currentVaultAmount[index] }});
-    // //   console.log ('CurrentHoldings:');
-    // //   console.log(CurrentHoldingsWithAmounts);
-
-    // //   console.log ('Rebalanced Holdings:')
-    // // console.log(RebalancedholdingsWithAmounts);
-
-    // const holdingsIsEqual = this.IfHoldingIsEqual(CurrentHoldingsWithAmounts, RebalancedholdingsWithAmounts);
-
-    // if(!holdingsIsEqual) {
-    //   return;
-    // }
-    // const symbolsCurrent: string[] = [];
-    // const symbolsRebalanced: string[] = [];
-
-    // for (let holding of CurrentHoldingsWithAmounts ) {
-    //   symbolsCurrent.push(holding.symbol!);
-    // }
-
-    // for (let holding of RebalancedholdingsWithAmounts) {
-    //   symbolsRebalanced.push(holding.symbol!);
-    // }
-    // let i = 0;
-
-    // for (let holding of CurrentHoldingsWithAmounts ){
-
-    //   if (symbolsRebalanced.includes(holding.symbol!)){
-    //    const rebalancedIndex = RebalancedholdingsWithAmounts.indexOf(holding);
-    //    let difference = holding.amount.sub(RebalancedholdingsWithAmounts[rebalancedIndex].amount);
-    //     if(difference.gt(0))
-    //     {
-
-    //     }
-    //   }
-    //   else
-    //   {
-
-    //   }
-    // }
   }
 
   public async IfHoldingIsEqual(currentPortfolio: any[], rebalancedPortfolio: any[]) {
@@ -455,7 +448,6 @@ export class EnzymeBot {
         name: sellingToken.name as string,
       },
       sellingToken.amount
-      //bigNumberSample
     );
 
     if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
@@ -562,71 +554,4 @@ export class EnzymeBot {
     console.log(swapTokensInput);
     return this.swapTokens(swapTokensInput);
   }
-  // // get a random token
-  // const randomToken = await this.chooseRandomAsset();
-
-  // //console.log(randomToken);
-
-  // // if no random token return, or if the random token is a derivative that's not available on Uniswap
-  // if (!randomToken || randomToken.derivativeType) {
-  //   console.log("The Miner's Delight did not find an appropriate token to buy.");
-  //   return;
-  // }
-
-  // // get your fund's holdings
-  // const vaultHoldings = await this.getHoldings();
-
-  // // if you have no holdings, return
-  // if (vaultHoldings.length === 0) {
-  //   console.log('Your fund has no assets.');
-  //   return;
-  // }
-
-  // // if your vault already holds the random token, return
-  // if (vaultHoldings.map((holding) => holding?.id.toLowerCase()).includes(randomToken.id.toLowerCase())) {
-  //   console.log("You already hold the asset that the Miner's Delight randomly selected.");
-  //   return;
-  // }
-
-  // // get the amount of each holding
-  // const holdingAmounts = await Promise.all(
-  //   vaultHoldings.map((holding) => getTokenBalance(this.vaultAddress, holding!.id, this.network))
-  // );
-
-  // // combine holding token data with amounts
-  // const holdingsWithAmounts = vaultHoldings.map((item, index) => {
-  //   return { ...item, amount: holdingAmounts[index] };
-  // });
-
-  // // find the token you will sell by searching for largest token holding
-  // const biggestPosition = holdingsWithAmounts.reduce((carry, current) => {
-  //   if (current.amount.gte(carry.amount)) {
-  //     return current;
-  //   }
-  //   return carry;
-  // }, holdingsWithAmounts[0]);
-
-  // console.log(
-  //   `The Miner's Delight has chosen. You will trade ${utils.formatUnits(
-  //     biggestPosition.amount,
-  //     biggestPosition.decimals
-  //   )} ${biggestPosition.name} (${biggestPosition.symbol}) for as many ${randomToken.name} (${
-  //     randomToken.symbol
-  //   }) as you can get.`
-  // );
-
-  // // get the trade data
-  // const price = await this.getPrice(
-  //   { id: randomToken.id, decimals: randomToken.decimals, symbol: randomToken.symbol, name: randomToken.name },
-  //   {
-  //     id: biggestPosition.id as string,
-  //     decimals: biggestPosition.decimals as number,
-  //     symbol: biggestPosition.symbol as string,
-  //     name: biggestPosition.name as string,
-  //   },
-  //   biggestPosition.amount
-  // );
-
-  // // call the transaction
-  // return this.swapTokens(price);
 }

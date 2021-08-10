@@ -5,6 +5,8 @@ import { useHistory } from "react-router-dom";
 import * as yup from "yup";
 
 import { Navbar, ThemedButton, ThemedInput } from "../components/shared";
+// import { EnzymeBot } from "enzyme-autotrader-bot";
+// import { main } from "enzyme-autotrader-bot";
 
 type FormData = {
   vaultAddress: string;
@@ -27,8 +29,6 @@ const Connect: React.FC = () => {
 
   const onSubmit = async (data: FormData) => {
     history.push("/automated-strategy");
-    // const currentBot = EnzymeBot.createFromInput("KOVAN");
-    // const currentBot2 = EnzymeBot.create("KOVAN");
   };
 
   //   useEffect(() => {

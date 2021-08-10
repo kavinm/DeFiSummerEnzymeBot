@@ -1,0 +1,3 @@
+1. Create a new create function for EnzymeBot CreateFromInput that makes a provider with MetaMask and replace the wallet object with the signer object.
+
+2.If we can use swapToken return value for signer.sendTransaction, signer.estimateGas, then add functionality for that in index.ts 
