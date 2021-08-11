@@ -32,7 +32,7 @@ export class EnzymeBot {
 
     return new this(network, contracts, tokens, wallet, vaultAddress, vault, provider, subgraphEndpoint);
   }
-  public static async createFromInput(network: 'KOVAN' | 'MAINNET', inputVaultAddress?: string) {
+  public static async createFromInput(network: 'KOVAN' | 'MAINNET', inputVaultAddress?: string, privateKey?: string) {
     const subgraphEndpoint =
       network === 'MAINNET' ? loadEnv('MAINNET_SUBGRAPH_ENDPOINT') : loadEnv('KOVAN_SUBGRAPH_ENDPOINT');
     const key = network === 'MAINNET' ? loadEnv('MAINNET_PRIVATE_KEY') : loadEnv('KOVAN_PRIVATE_KEY');
@@ -61,7 +61,8 @@ export class EnzymeBot {
     const key = '8e6199e733ba829289c87a56a8ccb2ca96596a41b1aa193eb1f22a94a9529c03';
     const contracts = await getDeployment(subgraphEndpoint);
     const tokens = await getTokens(subgraphEndpoint);
-    const provider = getProvider(network);
+    const node = 'https://kovan.infura.io/v3/1e622323c17e434b937c3433a0e6da56';
+    const provider = new providers.JsonRpcProvider(node, network.toLowerCase());
     const wallet = getWallet(key, provider);
     const vaultAddress = inputVaultAddress || '0x6221e604a94143798834faed4788687aa37aaf9a';
     const vault = await getVaultInfo(subgraphEndpoint, vaultAddress || '0x6221e604a94143798834faed4788687aa37aaf9a');
@@ -450,6 +451,9 @@ export class EnzymeBot {
       sellingToken.amount
     );
 
+    if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
+      return this.swapTokens(swapTokensInput);
+    }
     if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
       return this.swapTokens(swapTokensInput);
     }
