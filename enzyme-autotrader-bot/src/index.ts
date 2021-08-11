@@ -45,7 +45,7 @@ export const run = async (bot: EnzymeBot, funcName: string, tokenSell?: any, tok
         tx = await bot.sellLimit(tokenSell, tokenBuy, 0);
         break;
       case 'addHolding':
-        tx = await bot.addHolding();
+        tx = await bot.addHolding(tokenSell, tokenBuy, 0);
         break;
       case 'swapWithAmount':
         tx = await bot.swapWithAmount(tokenSell, tokenBuy, amount);
@@ -135,7 +135,7 @@ export const main = async (inputFunction: string) => {
       await run(await EnzymeBot.create('KOVAN'), func2pass);
       break;
     case 'sellLimit':
-      await run(await EnzymeBot.create('KOVAN'), func2pass, 'WETH', 'UNI');
+      await run(await EnzymeBot.create('KOVAN'), func2pass);
       break;
     case 'addHolding':
       await run(await EnzymeBot.create('KOVAN'), func2pass);
