@@ -1,5 +1,5 @@
-import React from 'react';
-import { Input, InputProps } from '@chakra-ui/react';
+import React from "react";
+import { Input, InputProps } from "@chakra-ui/react";
 
 const ThemedInput: React.FC<InputProps> = React.forwardRef(
   ({ onChange, onBlur, name, children, ...props }, ref: any) => (
@@ -9,7 +9,12 @@ const ThemedInput: React.FC<InputProps> = React.forwardRef(
       onChange={onChange}
       name={name}
       ref={ref}
-      _focus={{ border: '1px solid white' }}
+      backgroundColor="accentCards"
+      border="1px solid"
+      borderColor="#4B5563"
+      _autofill={{
+        WebkitTextFillColor: "accentCards !important",
+      }}
       {...props}
     >
       {children}
