@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Select,
   Text,
   Flex,
   Input,
@@ -8,21 +7,21 @@ import {
   InputLeftElement,
   InputRightElement,
 } from "@chakra-ui/react";
-import styled from "@emotion/styled";
 import { BsArrowDown } from "react-icons/bs";
 import { CheckIcon } from "@chakra-ui/icons";
 import { useForm } from "react-hook-form";
 
-import { ThemedButton, ThemedInput } from "../shared";
+import { ThemedButton, ThemedTokenSelect } from "../shared";
 
-const StyledSelect = styled(Select)`
-  & {
-    color: white;
-    option {
-      color: black !important;
-    }
-  }
-`;
+const options = [
+  { value: "axs", label: "AXS" },
+  { value: "weth", label: "WETH" },
+  { value: "mln", label: "MLN" },
+  { value: "uni", label: "UNI" },
+  { value: "comp", label: "COMP" },
+  { value: "1inch", label: "1INCH" },
+  { value: "aave", label: "AAVE" },
+];
 
 const SellToken: React.FC = () => {
   const { handleSubmit } = useForm();
@@ -54,27 +53,7 @@ const SellToken: React.FC = () => {
         Token
       </Text>
       <Flex alignItems="center">
-        <ThemedInput
-          type="text"
-          borderColor="gray.600"
-          w="16rem"
-          borderTopRightRadius="0px"
-          borderBottomRightRadius="0px"
-          borderRight="0px"
-        />
-        <StyledSelect
-          id="ercToken"
-          color="gray.600"
-          borderColor="gray.600"
-          w="6rem"
-          borderTopLeftRadius="0px"
-          borderBottomLeftRadius="0px"
-        >
-          <option>MLN</option>
-          <option>UNI</option>
-          <option>AXS</option>
-          <option>WETH</option>
-        </StyledSelect>
+        <ThemedTokenSelect options={options} id="ercToken" />
       </Flex>
       <Text
         as="label"
@@ -92,6 +71,7 @@ const SellToken: React.FC = () => {
           color="gray.300"
           fontSize="1.2em"
           children="$"
+          zIndex="0"
         />
         <Input
           placeholder="Enter amount"
@@ -99,7 +79,10 @@ const SellToken: React.FC = () => {
           type="number"
           pattern="^\(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?$"
         />
-        <InputRightElement children={<CheckIcon color="green.500" />} />
+        <InputRightElement
+          children={<CheckIcon color="green.500" />}
+          zIndex="0"
+        />
       </InputGroup>
       {/* ARROW  */}
       <Flex justifyContent="center" mt="1.5rem" mb="0.5rem">
@@ -126,27 +109,7 @@ const SellToken: React.FC = () => {
         Token
       </Text>
       <Flex alignItems="center">
-        <ThemedInput
-          type="text"
-          borderColor="gray.600"
-          w="16rem"
-          borderTopRightRadius="0px"
-          borderBottomRightRadius="0px"
-          borderRight="0px"
-        />
-        <StyledSelect
-          id="ercToken"
-          color="gray.600"
-          borderColor="gray.600"
-          w="6rem"
-          borderTopLeftRadius="0px"
-          borderBottomLeftRadius="0px"
-        >
-          <option>MLN</option>
-          <option>UNI</option>
-          <option>AXS</option>
-          <option>WETH</option>
-        </StyledSelect>
+        <ThemedTokenSelect options={options} id="ercToken" />
       </Flex>
       <ThemedButton type="submit" w="full" mt="2.5rem" py="1.5rem">
         Trade

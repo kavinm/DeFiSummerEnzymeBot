@@ -76,7 +76,7 @@ const Connect: React.FC = () => {
         >
           To interact with the Enzyme protocol, please connect to your wallet.
         </Text>
-        <form onSubmit={handleSubmit(onSubmit)}>
+        <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
           <Text
             as="label"
             htmlFor="vaultAddress"
@@ -92,12 +92,13 @@ const Connect: React.FC = () => {
             mt="0.25rem"
             id="vaultAddress"
             placeholder="Enter vault address"
+            isInvalid={!!errors.vaultAddress?.message}
           />
           <Text
             as="span"
             color="red.400"
             display="block"
-            h="1.75rem"
+            h="1.5rem"
             fontSize="sm"
           >
             {errors.vaultAddress?.message}
@@ -117,6 +118,7 @@ const Connect: React.FC = () => {
             mt="0.25rem"
             id="privateKey"
             placeholder="Enter private key"
+            isInvalid={!!errors.privateKey?.message}
           />
           <Text
             as="span"

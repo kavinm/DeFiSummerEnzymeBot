@@ -3,7 +3,6 @@ import {
   Box,
   Text,
   Flex,
-  Select,
   Table,
   Tbody,
   Td,
@@ -19,18 +18,19 @@ import { useForm } from "react-hook-form";
 import numeral from "numeral";
 
 import { ReactComponent as Avatar } from "../assets/logo/avatar.svg";
-import { ThemedButton, ThemedInput } from "../components/shared";
+import { ThemedButton, ThemedTokenSelect } from "../components/shared";
 import DefaultLayout from "../layouts/DefaultLayout";
 import LiquidateConfirmationModal from "../components/partial/LiquidateConfirmationModal";
 
-const StyledSelect = styled(Select)`
-  & {
-    color: white;
-    option {
-      color: black !important;
-    }
-  }
-`;
+const options = [
+  { value: "axs", label: "AXS" },
+  { value: "weth", label: "WETH" },
+  { value: "mln", label: "MLN" },
+  { value: "uni", label: "UNI" },
+  { value: "comp", label: "COMP" },
+  { value: "1inch", label: "1INCH" },
+  { value: "aave", label: "AAVE" },
+];
 
 const StyledTable = styled(Table)`
   & {
@@ -250,27 +250,7 @@ const Liquidate: React.FC = () => {
               ERC Token
             </Text>
             <Flex alignItems="center">
-              <ThemedInput
-                type="text"
-                borderColor="gray.600"
-                w="16rem"
-                borderTopRightRadius="0px"
-                borderBottomRightRadius="0px"
-                borderRight="0px"
-              />
-              <StyledSelect
-                id="ercToken"
-                color="gray.600"
-                borderColor="gray.600"
-                w="6rem"
-                borderTopLeftRadius="0px"
-                borderBottomLeftRadius="0px"
-              >
-                <option>MLN</option>
-                <option>UNI</option>
-                <option>AXS</option>
-                <option>WETH</option>
-              </StyledSelect>
+              <ThemedTokenSelect options={options} id="ercToken" />
             </Flex>
             <Flex>
               <ThemedButton

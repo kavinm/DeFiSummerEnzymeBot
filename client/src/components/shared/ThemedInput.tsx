@@ -9,6 +9,12 @@ const ThemedInput: React.FC<InputProps> = React.forwardRef(
       onChange={onChange}
       name={name}
       ref={ref}
+      backgroundColor="accentCards"
+      border="1px solid"
+      borderColor="#4B5563"
+      _autofill={{
+        WebkitTextFillColor: "accentCards !important",
+      }}
       {...props}
     >
       {children}
