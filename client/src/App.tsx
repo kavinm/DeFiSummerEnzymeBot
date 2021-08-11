@@ -1,12 +1,24 @@
-import React from 'react';
-import { Switch, Route } from 'react-router-dom';
+import { useEffect } from "react";
+import { Switch, Route, useHistory } from "react-router-dom";
 
-import Connect from './pages/Connect';
-import AutomatedStrategy from './pages/AutomatedStrategy';
-import Liquidate from './pages/Liquidate';
-import RebalancePortfolio from './pages/RebalancePortfolio';
+import Connect from "./pages/Connect";
+import AutomatedStrategy from "./pages/AutomatedStrategy";
+import Liquidate from "./pages/Liquidate";
+import RebalancePortfolio from "./pages/RebalancePortfolio";
+import useAuthentication from "./utils/useAuthentication";
 
 const App: React.FC = () => {
+  const history = useHistory();
+  const [isAuthenticated] = useAuthentication();
+
+  useEffect(() => {
+    if (isAuthenticated && history.location.pathname === "/") {
+      history.replace("/automated-strategy");
+    } else if (!isAuthenticated && history.location.pathname !== "/") {
+      history.replace("/");
+    }
+  }, [isAuthenticated, history]);
+
   return (
     <Switch>
       <Route exact path="/">

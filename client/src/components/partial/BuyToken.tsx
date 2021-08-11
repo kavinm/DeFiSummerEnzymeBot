@@ -21,9 +21,6 @@ const StyledSelect = styled(Select)`
     option {
       color: black !important;
     }
-    :focus {
-      border: 1px solid white;
-    }
   }
 `;
 
@@ -145,9 +142,6 @@ const BuyToken: React.FC = () => {
         />
         <Input
           placeholder="Enter amount"
-          _focus={{
-            border: "1px solid white",
-          }}
           color="white"
           type="number"
           pattern="^\(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?$"

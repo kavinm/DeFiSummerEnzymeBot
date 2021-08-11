@@ -1,6 +1,7 @@
 import React from "react";
 import { Flex, Text, Button } from "@chakra-ui/react";
 import { useHistory } from "react-router-dom";
+import useAuthentication from "../../utils/useAuthentication";
 
 type TopbarProps = {
   name: string;
@@ -8,8 +9,10 @@ type TopbarProps = {
 
 const Topbar: React.FC<TopbarProps> = ({ name }) => {
   const history = useHistory();
+  const [, , clearAuthentication] = useAuthentication();
 
   const logout = () => {
+    clearAuthentication();
     history.push("/");
   };
 
