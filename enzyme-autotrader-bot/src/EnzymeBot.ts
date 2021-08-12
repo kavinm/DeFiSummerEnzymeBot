@@ -281,8 +281,9 @@ export class EnzymeBot {
 
   public async CreatesRebalanceHoldings(tokensArray: { symbol: string; amount: number }[] = []) {
     let tokens: any[] = [];
-
+    const currentValue = await this.getVaultValues();
     for (let token of tokensArray) {
+      token.amount * currentValue!;
       tokens.push(token);
     }
 

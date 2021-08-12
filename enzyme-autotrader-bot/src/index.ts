@@ -1,5 +1,5 @@
-import { CurveLiquidityAaveAdapter } from '@enzymefinance/protocol';
 import { EnzymeBot } from './EnzymeBot';
+import { CurveLiquidityAaveAdapter } from '@enzymefinance/protocol';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 import { getTokenBalance } from './utils/getTokenBalance';
@@ -253,7 +253,7 @@ export const goodbyeUser = (user: string) => {
 };
 
 export { EnzymeBot };
-main('getHoldings');
+main('rebalancePortfolio');
 
 // npm install --production=false
 // npm run codegen
