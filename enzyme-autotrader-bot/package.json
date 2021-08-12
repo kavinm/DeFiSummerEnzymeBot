@@ -1,10 +1,27 @@
 {
   "main": "build/index.js",
+  "bin": "build/index.js",
   "name": "enzyme-autotrader-bot",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "An enzyme autotrader bot implementation",
   "license": "MIT",
   "private": false,
+  "contributors": [
+    {
+      "name": "Kavin Mohan",
+      "email": "kavin1810@gmail.com",
+      "url": "https://github.com/kavinm"
+    },
+    {
+      "name": "Rhaidzsal Ali",
+      "email": "rhaidzsalali@gmail.com",
+      "url": "https://github.com/rhaicode"
+    }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kavinm/DeFiSummerEnzymeBot.git"
+  },
   "scripts": {
     "dev": "cross-env NODE_ENV=development ts-node --require dotenv-extended/config --transpile-only src/index.ts",
     "codegen": "dotenv -- graphql-codegen --config codegen.yaml",
