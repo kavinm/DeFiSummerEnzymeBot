@@ -243,8 +243,8 @@ export class EnzymeBot {
     return holdingsWithNumberAmounts;
   }
 
-  public async liquidate(vaultHolding: any) {
-    let liquidTokenSymbol = 'WETH';
+  public async liquidate(vaultHolding: any, toBeSwappedTo: string) {
+    let liquidTokenSymbol = toBeSwappedTo;
 
     // // if you have no holdings, return
     // if (vaultHoldings.length === 0) {

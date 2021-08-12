@@ -27,7 +27,11 @@ export const getCurrentHoldings = async (bot: EnzymeBot) => {
   return holdingsWithAmounts;
 };
 
-export const run = async (bot: EnzymeBot, funcName: string, tokenSell?: any, tokenBuy?: any, amount?: any) => {
+export const run = async (
+  bot: EnzymeBot,
+  funcName: string,
+  args: { tokenSell?: any; tokenBuy?: any; amount?: any; toBeSwappedInto?: string; priceLimit?: number }
+) => {
   const vaultHoldings = await bot.getHoldings();
   const lengthHoldings = vaultHoldings.length;
 
@@ -36,19 +40,19 @@ export const run = async (bot: EnzymeBot, funcName: string, tokenSell?: any, tok
     let tx;
     switch (funcName) {
       case 'liquidate':
-        tx = await bot.liquidate(tokenSell);
+        tx = await bot.liquidate(args.tokenSell, args.toBeSwappedInto!);
         break;
       case 'buyLimit':
-        tx = await bot.buyLimit(tokenSell, tokenBuy, 0);
+        tx = await bot.buyLimit(args.tokenSell, args.tokenBuy, args.priceLimit!);
         break;
       case 'sellLimit':
-        tx = await bot.sellLimit(tokenSell, tokenBuy, 0);
+        tx = await bot.sellLimit(args.tokenSell, args.tokenBuy, args.priceLimit!);
         break;
-      case 'addHolding':
-        tx = await bot.addHolding(tokenSell, tokenBuy, 0);
-        break;
+      // case 'addHolding':
+      //   tx = await bot.addHolding(tokenSell, tokenBuy, 0);
+      //   break;
       case 'swapWithAmount':
-        tx = await bot.swapWithAmount(tokenSell, tokenBuy, amount);
+        tx = await bot.swapWithAmount(args.tokenSell, args.tokenBuy, args.amount);
         break;
     }
 
@@ -102,8 +106,20 @@ export const run = async (bot: EnzymeBot, funcName: string, tokenSell?: any, tok
   return Promise.resolve(true);
 };
 
-export const main = async (inputFunction: string) => {
-  const currentBot = await EnzymeBot.staticCreateKovan();
+export const main = async (
+  inputFunction: string,
+  bot: EnzymeBot,
+  args: {
+    liquidateTokens?: string[];
+    rebalancedHoldings?: { symbol: string; percentage: number }[];
+    tokenSell?: any;
+    tokenBuy?: any;
+    amount?: any;
+    toBeSwappedInto?: string;
+    priceLimit?: number;
+  }
+) => {
+  const currentBot = bot;
 
   //inputFunction
   const func2pass = inputFunction;
@@ -114,7 +130,7 @@ export const main = async (inputFunction: string) => {
     case 'liquidate':
       //only liquidate the tokens in here
       console.log('Hello');
-      const tokensToLiquidate: string[] = ['YFI', 'WETH'];
+      const tokensToLiquidate: string[] = args.liquidateTokens!;
 
       console.log('It got past declaring vaultHoldings');
 
@@ -122,33 +138,48 @@ export const main = async (inputFunction: string) => {
         await console.log(`BEFORE LIQUIDATE This is within the for each loop index of ${i} `);
         //check the token we are swapping is not zero and is a token that should be liquidated
         if (!vaultHoldings[i].amount.isZero() || !tokensToLiquidate.includes(vaultHoldings[i].symbol!)) {
-          await run(currentBot, func2pass, vaultHoldings[i]).then((res) => console.log("That's all folks."));
+          await run(currentBot, func2pass, { tokenSell: vaultHoldings[i], toBeSwappedInto: args.toBeSwappedInto }).then(
+            (res) => console.log("That's all folks.")
+          );
         } else {
           console.log('Amount was zero');
         }
 
         await console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
       }
-      await run(await EnzymeBot.create('KOVAN'), func2pass); //.then((res) => console.log("That's all folks."));
+      //await run(await EnzymeBot.create('KOVAN'), func2pass); //.then((res) => console.log("That's all folks."));
       break;
     case 'buyLimit':
-      await run(await EnzymeBot.create('KOVAN'), func2pass);
+      await run(currentBot, func2pass, {
+        tokenSell: args.tokenSell,
+        tokenBuy: args.tokenBuy,
+        priceLimit: args.priceLimit,
+      });
       break;
     case 'sellLimit':
-      await run(await EnzymeBot.create('KOVAN'), func2pass);
+      await run(currentBot, func2pass, {
+        tokenSell: args.tokenSell,
+        tokenBuy: args.tokenBuy,
+        priceLimit: args.priceLimit,
+      });
       break;
-    case 'addHolding':
-      await run(await EnzymeBot.create('KOVAN'), func2pass);
-      break;
+
+    // case 'addHolding':
+    //   await run(await EnzymeBot.create('KOVAN'), func2pass);
+    //   break;
     case 'swapWithAmount':
-      await run(await EnzymeBot.create('KOVAN'), func2pass);
+      await run(currentBot, func2pass, {
+        tokenSell: args.tokenSell,
+        tokenBuy: args.tokenBuy,
+        amount: args.amount,
+      });
       break;
     case 'getHoldings':
       await currentBot.getHoldingsWithNumberAmounts;
       break;
 
     case 'rebalancePortfolio':
-      const rebalanceHoldingsWithAmout = await currentBot.CreatesRebalanceHoldings();
+      const rebalanceHoldingsWithAmout = await currentBot.CreatesRebalanceHoldings(args.rebalancedHoldings);
       //const vaultHoldings = await getCurrentHoldings(currentBot);
       //console.log('got rebalanceHoldings' + rebalanceHoldingsWithAmout);
       //makes an amount array of numbers from getToken
@@ -194,12 +225,20 @@ export const main = async (inputFunction: string) => {
               let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
               console.log('The difference for current Holding' + difference);
               console.log('Swap With Amount');
-              await run(currentBot, 'swapWithAmount', holding.symbol, 'WETH', difference);
+              await run(currentBot, 'swapWithAmount', {
+                tokenSell: holding.symbol,
+                tokenBuy: 'WETH',
+                amount: difference,
+              });
               //currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
             }
           } else {
             console.log('Removed all holding: ' + holding.symbol);
-            await run(currentBot, 'buyLimit', holding.symbol!, 'WETH', 0);
+            await run(currentBot, 'buyLimit', {
+              tokenSell: holding.symbol!,
+              tokenBuy: 'WETH',
+              priceLimit: 0,
+            });
           }
         }
       }
@@ -220,7 +259,11 @@ export const main = async (inputFunction: string) => {
             EthAmount = EthAmount.mul(vartosix);
             EthAmount = EthAmount.mul(vartosix);
             console.log('EthAmount: ' + EthAmount);
-            await run(currentBot, 'swapWithAmount', 'WETH', holding.symbol, EthAmount);
+            await run(currentBot, 'swapWithAmount', {
+              tokenSell: 'WETH',
+              tokenBuy: holding.symbol,
+              amount: EthAmount,
+            });
           }
         } else {
           let holdingPrice = Number(result.assets.find((asset) => asset.symbol === holding.symbol)?.price?.price);
@@ -233,7 +276,11 @@ export const main = async (inputFunction: string) => {
           const totalAmountHex = '0x' + (amountInDecimal * holdingPrice * 10 ** 18).toString(16);
           let EthAmount = BigNumber.from(totalAmountHex);
           console.log('EthAmount: ' + EthAmount);
-          await run(currentBot, 'swapWithAmount', 'WETH', holding.symbol, EthAmount);
+          await run(currentBot, 'swapWithAmount', {
+            tokenSell: 'WETH',
+            tokenBuy: holding.symbol,
+            amount: EthAmount,
+          });
         }
       }
 
@@ -253,7 +300,7 @@ export const goodbyeUser = (user: string) => {
 };
 
 export { EnzymeBot };
-main('rebalancePortfolio');
+//main('rebalancePortfolio');
 
 // npm install --production=false
 // npm run codegen
