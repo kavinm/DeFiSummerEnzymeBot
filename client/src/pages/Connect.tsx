@@ -28,9 +28,18 @@ const Connect: React.FC = () => {
     const history = useHistory();
 
     const onSubmit = async (data: FormData) => {
-        history.push("/automated-strategy");
-        //const currentBot = EnzymeBot.staticCreateKovan();
-        //console.log((await currentBot).getVaultValues);
+        try {
+            const currentBot = await EnzymeBot.createFromInput(
+                data.vaultAddress
+            );
+
+            const objects = await currentBot.getVaultValues();
+            console.log(objects);
+            history.push("/automated-strategy");
+        } catch (error) {
+            console.error(error);
+            alert("Not a valid vault address");
+        }
     };
 
     //   useEffect(() => {
