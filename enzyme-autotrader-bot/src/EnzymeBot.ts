@@ -349,12 +349,7 @@ export class EnzymeBot {
   }
 
   // use this function to add holdings
-  public async addHolding() {
-    let tokenPriceLimit = 0;
-
-    let sellTokenSymbol = 'UNI';
-
-    let buyTokenSymbol = 'WBTC';
+  public async addHolding(sellTokenSymbol: string, buyTokenSymbol: string, tokenPriceLimit: number) {
 
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);

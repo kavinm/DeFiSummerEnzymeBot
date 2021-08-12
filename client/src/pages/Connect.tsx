@@ -1,19 +1,31 @@
 import { Box, Text } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useHistory } from "react-router-dom";
+
 import * as yup from "yup";
 
 import { Navbar, ThemedButton, ThemedInput } from "../components/shared";
-import { EnzymeBot } from "enzyme-autotrader-bot";
-import { main } from "enzyme-autotrader-bot";
+import useAuthentication from "../utils/useAuthentication";
+import { useHistory } from "react-router-dom";
 
 type FormData = {
     vaultAddress: string;
+    privateKey: string;
 };
 
 const schema = yup.object().shape({
-    vaultAddress: yup.string().required("Required."),
+    vaultAddress: yup
+        .string()
+        .required("Required.")
+        .matches(/^0x[a-fA-F0-9]{40}$/, {
+            message: "Please provide a valid vault address format.",
+        }),
+    privateKey: yup
+        .string()
+        .required("Required.")
+        .matches(/^0x[a-fA-F0-9]{40}$/, {
+            message: "Please provide a valid private key format.",
+        }),
 });
 
 const Connect: React.FC = () => {
@@ -26,25 +38,12 @@ const Connect: React.FC = () => {
     });
 
     const history = useHistory();
+    const [, setAuthenticated] = useAuthentication();
 
-    const onSubmit = async (data: FormData) => {
-        try {
-            const currentBot = await EnzymeBot.createFromInput(
-                data.vaultAddress
-            );
-
-            const objects = await currentBot.getVaultValues();
-            console.log(objects);
-            history.push("/automated-strategy");
-        } catch (error) {
-            console.error(error);
-            alert("Not a valid vault address");
-        }
+    const onSubmit = (data: FormData) => {
+        setAuthenticated(data.vaultAddress);
+        history.push("/automated-strategy");
     };
-
-    //   useEffect(() => {
-    //     alert(greetUser("Stradford"));
-    //   }, []);
 
     return (
         <Box backgroundColor="accentCards" minHeight="100vh">
@@ -56,7 +55,7 @@ const Connect: React.FC = () => {
                 padding="30px"
                 borderRadius="8px"
                 maxW="460px"
-                mt={{ base: "4rem", xl: "6rem" }}
+                mt={{ base: "2rem", xl: "2.5rem" }}
                 mx={{ base: "1rem", sm: "auto" }}
             >
                 <Text
@@ -78,7 +77,7 @@ const Connect: React.FC = () => {
                     To interact with the Enzyme protocol, please connect to your
                     wallet.
                 </Text>
-                <form onSubmit={handleSubmit(onSubmit)}>
+                <form onSubmit={handleSubmit(onSubmit)} autoComplete="off">
                     <Text
                         as="label"
                         htmlFor="vaultAddress"
@@ -94,9 +93,42 @@ const Connect: React.FC = () => {
                         mt="0.25rem"
                         id="vaultAddress"
                         placeholder="Enter vault address"
+                        isInvalid={!!errors.vaultAddress?.message}
                     />
-                    <Text as="span" color="error" display="block" h="2rem">
+                    <Text
+                        as="span"
+                        color="red.400"
+                        display="block"
+                        h="1.5rem"
+                        fontSize="sm"
+                    >
                         {errors.vaultAddress?.message}
+                    </Text>
+                    <Text
+                        as="label"
+                        htmlFor="privateKey"
+                        fontSize="sm"
+                        fontWeight="medium"
+                        color="gray.300"
+                        lineHeight="1.25rem"
+                    >
+                        Private key
+                    </Text>
+                    <ThemedInput
+                        {...register("privateKey")}
+                        mt="0.25rem"
+                        id="privateKey"
+                        placeholder="Enter private key"
+                        isInvalid={!!errors.privateKey?.message}
+                    />
+                    <Text
+                        as="span"
+                        color="red.400"
+                        display="block"
+                        h="2rem"
+                        fontSize="sm"
+                    >
+                        {errors.privateKey?.message}
                     </Text>
                     <ThemedButton
                         color="white"
