@@ -7,6 +7,7 @@ import * as yup from "yup";
 import { Navbar, ThemedButton, ThemedInput } from "../components/shared";
 import useAuthentication from "../utils/useAuthentication";
 import { useHistory } from "react-router-dom";
+import { EnzymeBot } from "enzyme-autotrader-bot";
 
 type FormData = {
     vaultAddress: string;
@@ -40,9 +41,20 @@ const Connect: React.FC = () => {
     const history = useHistory();
     const [, setAuthenticated] = useAuthentication();
 
-    const onSubmit = (data: FormData) => {
-        setAuthenticated(data.vaultAddress);
-        history.push("/automated-strategy");
+    const onSubmit = async (data: FormData) => {
+        try {
+            const currentBot = await EnzymeBot.createFromInput(
+                data.vaultAddress,
+                data.privateKey
+            );
+
+            const objects = await currentBot.getVaultValues();
+            console.log(objects);
+            history.push("/automated-strategy");
+        } catch (error) {
+            console.error(error);
+            alert("Not a valid vault address");
+        }
     };
 
     return (

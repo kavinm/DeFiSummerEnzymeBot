@@ -35,7 +35,7 @@ export class EnzymeBot {
   public static async createFromInput(inputVaultAddress?: string, privateKey?: string) {
     const network = 'KOVAN';
     const subgraphEndpoint = 'https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme-kovan';
-    const key = privateKey || '8e6199e733ba829289c87a56a8ccb2ca96596a41b1aa193eb1f22a94a9529c03';
+    const key = privateKey;
     const contracts = await getDeployment(subgraphEndpoint);
     const tokens = await getTokens(subgraphEndpoint);
     const node = 'https://kovan.infura.io/v3/1e622323c17e434b937c3433a0e6da56';
@@ -350,7 +350,6 @@ export class EnzymeBot {
 
   // use this function to add holdings
   public async addHolding(sellTokenSymbol: string, buyTokenSymbol: string, tokenPriceLimit: number) {
-
     // gets the price of the wanted token
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
 
