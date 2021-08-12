@@ -281,10 +281,11 @@ export class EnzymeBot {
     //}
   }
 
-  public async CreatesRebalanceHoldings(tokensArray: { symbol: string; amount: number }[] = []) {
+  public async CreatesRebalanceHoldings(tokensArray: { symbol: string; percentage: number }[] = []) {
     let tokens: any[] = [];
-
+    const currentValue = await this.getVaultValues();
     for (let token of tokensArray) {
+      token.percentage = (token.percentage/100) * currentValue!;
       tokens.push(token);
     }
 
@@ -300,7 +301,7 @@ export class EnzymeBot {
       // make and get token amount with decimals in BigNumber form
       //let decimals: BigNumber = BigNumber.from(currentToken.decimals);
       const Hexstring: string =
-        '0x' + (Number(token.amount.toFixed(currentToken.decimals)) * 10 ** currentToken.decimals).toString(16);
+        '0x' + (Number(token.percentage.toFixed(currentToken.decimals)) * 10 ** currentToken.decimals).toString(16);
 
       let tokenAmount: BigNumber = BigNumber.from(Hexstring); //.mul(decimals);
       rebalancedAmounts.push(tokenAmount);
