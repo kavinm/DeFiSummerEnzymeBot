@@ -3,6 +3,7 @@ import { CurveLiquidityAaveAdapter } from '@enzymefinance/protocol';
 import { getGasPrice } from './utils/getGasPrice';
 import { getRevertError } from './utils/getRevertError';
 import { getTokenBalance } from './utils/getTokenBalance';
+import { getTokens } from './utils/getToken';
 import { BigNumber, providers, Signer, utils, Wallet } from 'ethers';
 import { SharesBoughtEvent_OrderBy } from './utils/subgraph/subgraph';
 import { defaultFieldResolver } from 'graphql';
@@ -129,7 +130,6 @@ export const main = async (
   switch (func2pass) {
     case 'liquidate':
       //only liquidate the tokens in here
-      console.log('Hello');
       const tokensToLiquidate: string[] = args.liquidateTokens!;
 
       console.log('It got past declaring vaultHoldings');
@@ -299,8 +299,31 @@ export const goodbyeUser = (user: string) => {
   return `Goodbye, ${user}`;
 };
 
+//is hard coded to only work with KOVAN right now
+export const getERC20Tokens = async (network: 'KOVAN' | 'MAINNET' = 'KOVAN') => {
+  let tokenRequestResult;
+  if (network === 'KOVAN') {
+    tokenRequestResult = await getTokens('https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme-kovan');
+  } else {
+    tokenRequestResult = await getTokens('https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme');
+  }
+
+  const TokenList = tokenRequestResult.assets.filter((asset) => !asset.derivativeType);
+
+  console.log(TokenList.length);
+  return TokenList;
+};
+
 export { EnzymeBot };
-//main('rebalancePortfolio');
+
+const mainRunner = async () => {
+  const currentBot = await EnzymeBot.staticCreateKovan();
+  //main('liquidate', currentBot, { liquidateTokens: ['WBTC', 'WETH'], toBeSwappedInto: 'WETH' });
+  console.log(await currentBot.getVaultValues());
+  getERC20Tokens('MAINNET');
+};
+
+mainRunner();
 
 // npm install --production=false
 // npm run codegen
