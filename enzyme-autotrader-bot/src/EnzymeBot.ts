@@ -447,8 +447,13 @@ export class EnzymeBot {
       sellingToken.amount
     );
 
-    if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
-      return this.swapTokens(swapTokensInput);
+    let cancelled = false;
+    while(cancelled === false){
+      let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
+      if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
+        cancelled = true;
+        return this.swapTokens(swapTokensInput);
+      }
     }
   }
   //Sell limit order function
@@ -496,8 +501,13 @@ export class EnzymeBot {
       sellingToken.amount
     );
 
-    if (realTokenPrice && realTokenPrice > tokenPriceLimit) {
-      return this.swapTokens(swapTokensInput);
+    let cancelled = false;
+    while(cancelled === false){
+      let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
+      if (realTokenPrice && realTokenPrice > tokenPriceLimit) {
+        cancelled = true;
+        return this.swapTokens(swapTokensInput);
+      }
     }
   }
 
