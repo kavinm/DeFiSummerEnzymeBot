@@ -193,9 +193,9 @@ class EnzymeBot {
             return holdingsWithNumberAmounts;
         });
     }
-    liquidate(vaultHolding) {
+    liquidate(vaultHolding, toBeSwappedTo) {
         return __awaiter(this, void 0, void 0, function* () {
-            let liquidTokenSymbol = 'WETH';
+            let liquidTokenSymbol = toBeSwappedTo;
             // // if you have no holdings, return
             // if (vaultHoldings.length === 0) {
             //   console.log('Your fund has no assets.');

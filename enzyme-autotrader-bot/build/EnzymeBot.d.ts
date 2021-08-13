@@ -101,7 +101,7 @@ export declare class EnzymeBot {
             } & Pick<import("./utils/subgraph/subgraph").Asset, "symbol" | "id" | "decimals">;
         }> | undefined;
     }[] | undefined>;
-    liquidate(vaultHolding: any): Promise<import("@enzymefinance/ethers").Send<(_extension: import("@enzymefinance/ethers").AddressLike, _actionId: import("ethers").BigNumberish, _callArgs: utils.BytesLike) => void, ComptrollerLib> | undefined>;
+    liquidate(vaultHolding: any, toBeSwappedTo: string): Promise<import("@enzymefinance/ethers").Send<(_extension: import("@enzymefinance/ethers").AddressLike, _actionId: import("ethers").BigNumberish, _callArgs: utils.BytesLike) => void, ComptrollerLib> | undefined>;
     CreatesRebalanceHoldings(tokensArray?: {
         symbol: string;
         percentage: number;
