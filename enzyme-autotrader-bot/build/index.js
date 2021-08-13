@@ -9,12 +9,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EnzymeBot = exports.goodbyeUser = exports.greetUser = exports.main = exports.run = exports.getCurrentHoldings = exports.getDecimal = void 0;
+exports.EnzymeBot = exports.getERC20Tokens = exports.goodbyeUser = exports.greetUser = exports.main = exports.run = exports.getCurrentHoldings = exports.getDecimal = void 0;
 const EnzymeBot_1 = require("./EnzymeBot");
 Object.defineProperty(exports, "EnzymeBot", { enumerable: true, get: function () { return EnzymeBot_1.EnzymeBot; } });
 const getGasPrice_1 = require("./utils/getGasPrice");
 const getRevertError_1 = require("./utils/getRevertError");
 const getTokenBalance_1 = require("./utils/getTokenBalance");
+const getToken_1 = require("./utils/getToken");
 const ethers_1 = require("ethers");
 const sdk_1 = require("./utils/subgraph/sdk");
 const getDecimal = (bot) => { };
@@ -31,7 +32,7 @@ const getCurrentHoldings = (bot) => __awaiter(void 0, void 0, void 0, function* 
     return holdingsWithAmounts;
 });
 exports.getCurrentHoldings = getCurrentHoldings;
-const run = (bot, funcName, tokenSell, tokenBuy, amount) => __awaiter(void 0, void 0, void 0, function* () {
+const run = (bot, funcName, args) => __awaiter(void 0, void 0, void 0, function* () {
     var _a, _b;
     const vaultHoldings = yield bot.getHoldings();
     const lengthHoldings = vaultHoldings.length;
@@ -40,19 +41,19 @@ const run = (bot, funcName, tokenSell, tokenBuy, amount) => __awaiter(void 0, vo
         let tx;
         switch (funcName) {
             case 'liquidate':
-                tx = yield bot.liquidate(tokenSell);
+                tx = yield bot.liquidate(args.tokenSell, args.toBeSwappedInto);
                 break;
             case 'buyLimit':
-                tx = yield bot.buyLimit(tokenSell, tokenBuy, 0);
+                tx = yield bot.buyLimit(args.tokenSell, args.tokenBuy, args.priceLimit);
                 break;
             case 'sellLimit':
-                tx = yield bot.sellLimit(tokenSell, tokenBuy, 0);
+                tx = yield bot.sellLimit(args.tokenSell, args.tokenBuy, args.priceLimit);
                 break;
-            case 'addHolding':
-                tx = yield bot.addHolding(tokenSell, tokenBuy, 0);
-                break;
+            // case 'addHolding':
+            //   tx = await bot.addHolding(tokenSell, tokenBuy, 0);
+            //   break;
             case 'swapWithAmount':
-                tx = yield bot.swapWithAmount(tokenSell, tokenBuy, amount);
+                tx = yield bot.swapWithAmount(args.tokenSell, args.tokenBuy, args.amount);
                 break;
         }
         //const tx = await bot.sellLimit("WBTC", "YFI", 5);
@@ -97,9 +98,9 @@ const run = (bot, funcName, tokenSell, tokenBuy, amount) => __awaiter(void 0, vo
     return Promise.resolve(true);
 });
 exports.run = run;
-const main = (inputFunction) => __awaiter(void 0, void 0, void 0, function* () {
+const main = (inputFunction, bot, args) => __awaiter(void 0, void 0, void 0, function* () {
     var _c, _d, _e, _f;
-    const currentBot = yield EnzymeBot_1.EnzymeBot.staticCreateKovan();
+    const currentBot = bot;
     //inputFunction
     const func2pass = inputFunction;
     const vaultHoldings = yield exports.getCurrentHoldings(currentBot);
@@ -107,39 +108,50 @@ const main = (inputFunction) => __awaiter(void 0, void 0, void 0, function* () {
     switch (func2pass) {
         case 'liquidate':
             //only liquidate the tokens in here
-            console.log('Hello');
-            const tokensToLiquidate = ['YFI', 'WETH'];
+            const tokensToLiquidate = args.liquidateTokens;
             console.log('It got past declaring vaultHoldings');
             for (let i = 0; i < holdingsLength; i++) {
                 yield console.log(`BEFORE LIQUIDATE This is within the for each loop index of ${i} `);
                 //check the token we are swapping is not zero and is a token that should be liquidated
                 if (!vaultHoldings[i].amount.isZero() || !tokensToLiquidate.includes(vaultHoldings[i].symbol)) {
-                    yield exports.run(currentBot, func2pass, vaultHoldings[i]).then((res) => console.log("That's all folks."));
+                    yield exports.run(currentBot, func2pass, { tokenSell: vaultHoldings[i], toBeSwappedInto: args.toBeSwappedInto }).then((res) => console.log("That's all folks."));
                 }
                 else {
                     console.log('Amount was zero');
                 }
                 yield console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
             }
-            yield exports.run(yield EnzymeBot_1.EnzymeBot.create('KOVAN'), func2pass); //.then((res) => console.log("That's all folks."));
+            //await run(await EnzymeBot.create('KOVAN'), func2pass); //.then((res) => console.log("That's all folks."));
             break;
         case 'buyLimit':
-            yield exports.run(yield EnzymeBot_1.EnzymeBot.create('KOVAN'), func2pass);
+            yield exports.run(currentBot, func2pass, {
+                tokenSell: args.tokenSell,
+                tokenBuy: args.tokenBuy,
+                priceLimit: args.priceLimit,
+            });
             break;
         case 'sellLimit':
-            yield exports.run(yield EnzymeBot_1.EnzymeBot.create('KOVAN'), func2pass);
+            yield exports.run(currentBot, func2pass, {
+                tokenSell: args.tokenSell,
+                tokenBuy: args.tokenBuy,
+                priceLimit: args.priceLimit,
+            });
             break;
-        case 'addHolding':
-            yield exports.run(yield EnzymeBot_1.EnzymeBot.create('KOVAN'), func2pass);
-            break;
+        // case 'addHolding':
+        //   await run(await EnzymeBot.create('KOVAN'), func2pass);
+        //   break;
         case 'swapWithAmount':
-            yield exports.run(yield EnzymeBot_1.EnzymeBot.create('KOVAN'), func2pass);
+            yield exports.run(currentBot, func2pass, {
+                tokenSell: args.tokenSell,
+                tokenBuy: args.tokenBuy,
+                amount: args.amount,
+            });
             break;
         case 'getHoldings':
             yield currentBot.getHoldingsWithNumberAmounts;
             break;
         case 'rebalancePortfolio':
-            const rebalanceHoldingsWithAmout = yield currentBot.CreatesRebalanceHoldings();
+            const rebalanceHoldingsWithAmout = yield currentBot.CreatesRebalanceHoldings(args.rebalancedHoldings);
             //const vaultHoldings = await getCurrentHoldings(currentBot);
             //console.log('got rebalanceHoldings' + rebalanceHoldingsWithAmout);
             //makes an amount array of numbers from getToken
@@ -179,13 +191,21 @@ const main = (inputFunction) => __awaiter(void 0, void 0, void 0, function* () {
                             let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
                             console.log('The difference for current Holding' + difference);
                             console.log('Swap With Amount');
-                            yield exports.run(currentBot, 'swapWithAmount', holding.symbol, 'WETH', difference);
+                            yield exports.run(currentBot, 'swapWithAmount', {
+                                tokenSell: holding.symbol,
+                                tokenBuy: 'WETH',
+                                amount: difference,
+                            });
                             //currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
                         }
                     }
                     else {
                         console.log('Removed all holding: ' + holding.symbol);
-                        yield exports.run(currentBot, 'buyLimit', holding.symbol, 'WETH', 0);
+                        yield exports.run(currentBot, 'buyLimit', {
+                            tokenSell: holding.symbol,
+                            tokenBuy: 'WETH',
+                            priceLimit: 0,
+                        });
                     }
                 }
             }
@@ -206,7 +226,11 @@ const main = (inputFunction) => __awaiter(void 0, void 0, void 0, function* () {
                         EthAmount = EthAmount.mul(vartosix);
                         EthAmount = EthAmount.mul(vartosix);
                         console.log('EthAmount: ' + EthAmount);
-                        yield exports.run(currentBot, 'swapWithAmount', 'WETH', holding.symbol, EthAmount);
+                        yield exports.run(currentBot, 'swapWithAmount', {
+                            tokenSell: 'WETH',
+                            tokenBuy: holding.symbol,
+                            amount: EthAmount,
+                        });
                     }
                 }
                 else {
@@ -220,7 +244,11 @@ const main = (inputFunction) => __awaiter(void 0, void 0, void 0, function* () {
                     const totalAmountHex = '0x' + (amountInDecimal * holdingPrice * Math.pow(10, 18)).toString(16);
                     let EthAmount = ethers_1.BigNumber.from(totalAmountHex);
                     console.log('EthAmount: ' + EthAmount);
-                    yield exports.run(currentBot, 'swapWithAmount', 'WETH', holding.symbol, EthAmount);
+                    yield exports.run(currentBot, 'swapWithAmount', {
+                        tokenSell: 'WETH',
+                        tokenBuy: holding.symbol,
+                        amount: EthAmount,
+                    });
                 }
             }
             break;
@@ -237,7 +265,27 @@ const goodbyeUser = (user) => {
     return `Goodbye, ${user}`;
 };
 exports.goodbyeUser = goodbyeUser;
-exports.main('rebalancePortfolio');
+//is hard coded to only work with KOVAN right now
+const getERC20Tokens = (network = 'KOVAN') => __awaiter(void 0, void 0, void 0, function* () {
+    let tokenRequestResult;
+    if (network === 'KOVAN') {
+        tokenRequestResult = yield getToken_1.getTokens('https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme-kovan');
+    }
+    else {
+        tokenRequestResult = yield getToken_1.getTokens('https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme');
+    }
+    const TokenList = tokenRequestResult.assets.filter((asset) => !asset.derivativeType);
+    console.log(TokenList.length);
+    return TokenList;
+});
+exports.getERC20Tokens = getERC20Tokens;
+const mainRunner = () => __awaiter(void 0, void 0, void 0, function* () {
+    const currentBot = yield EnzymeBot_1.EnzymeBot.staticCreateKovan();
+    //main('liquidate', currentBot, { liquidateTokens: ['WBTC', 'WETH'], toBeSwappedInto: 'WETH' });
+    console.log(yield currentBot.getVaultValues());
+    exports.getERC20Tokens('MAINNET');
+});
+mainRunner();
 // npm install --production=false
 // npm run codegen
 // npm run dev
