@@ -326,7 +326,7 @@ const mainRunner = async () => {
   //getERC20Tokens('MAINNET');
 };
 
-mainRunner();
+//mainRunner();
 
 // npm install --production=false
 // npm run codegen
