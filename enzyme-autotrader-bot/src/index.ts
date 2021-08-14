@@ -9,9 +9,9 @@ import { SharesBoughtEvent_OrderBy } from './utils/subgraph/subgraph';
 import { defaultFieldResolver } from 'graphql';
 import { gql } from './utils/subgraph/sdk';
 import { AssetBlacklistSetting_OrderBy } from './utils/subgraph/subgraph';
-
+import {getPrice2} from './utils/getPrice';
 export const getDecimal = (bot: EnzymeBot) => {};
-
+export const getPrice = getPrice2
 export const getCurrentHoldings = async (bot: EnzymeBot) => {
   const vaultHoldings = await bot.getHoldings(); //.then(res => {console.log('This is the v holdings\n' )}
   console.log(await vaultHoldings);
