@@ -9,9 +9,9 @@ import { SharesBoughtEvent_OrderBy } from './utils/subgraph/subgraph';
 import { defaultFieldResolver } from 'graphql';
 import { gql } from './utils/subgraph/sdk';
 import { AssetBlacklistSetting_OrderBy } from './utils/subgraph/subgraph';
-
+import {getPrice2} from './utils/getPrice';
 export const getDecimal = (bot: EnzymeBot) => {};
-
+export const getPrice = getPrice2
 export const getCurrentHoldings = async (bot: EnzymeBot) => {
   const vaultHoldings = await bot.getHoldings(); //.then(res => {console.log('This is the v holdings\n' )}
   console.log(await vaultHoldings);
@@ -112,7 +112,7 @@ export const main = async (
   bot: EnzymeBot,
   args: {
     liquidateTokens?: string[];
-    rebalancedHoldings?: { symbol: string; percentage: number }[];
+    rebalancedHoldings?: { symbol: string; amount: number }[];
     tokenSell?: any;
     tokenBuy?: any;
     amount?: any;
@@ -233,12 +233,14 @@ export const main = async (
               //currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
             }
           } else {
+            if( holding.symbol!='WETH'){
             console.log('Removed all holding: ' + holding.symbol);
             await run(currentBot, 'buyLimit', {
               tokenSell: holding.symbol!,
               tokenBuy: 'WETH',
               priceLimit: 0,
             });
+            }
           }
         }
       }
@@ -318,9 +320,10 @@ export { EnzymeBot };
 
 const mainRunner = async () => {
   const currentBot = await EnzymeBot.staticCreateKovan();
-  //main('liquidate', currentBot, { liquidateTokens: ['WBTC', 'WETH'], toBeSwappedInto: 'WETH' });
-  console.log(await currentBot.getVaultValues());
-  getERC20Tokens('MAINNET');
+  //main('rebalancePortfolio', currentBot, {rebalancedHoldings: [{symbol: 'USDC', amount:510000 }]});
+  main('buyLimit', currentBot, {tokenSell: 'UNI', tokenBuy: 'WBTC', priceLimit: 0})
+  //console.log(await currentBot.getVaultValues());
+  //getERC20Tokens('MAINNET');
 };
 
 mainRunner();
