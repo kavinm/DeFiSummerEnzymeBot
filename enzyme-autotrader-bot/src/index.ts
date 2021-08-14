@@ -112,7 +112,7 @@ export const main = async (
   bot: EnzymeBot,
   args: {
     liquidateTokens?: string[];
-    rebalancedHoldings?: { symbol: string; percentage: number }[];
+    rebalancedHoldings?: { symbol: string; amount: number }[];
     tokenSell?: any;
     tokenBuy?: any;
     amount?: any;
@@ -233,12 +233,14 @@ export const main = async (
               //currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
             }
           } else {
+            if( holding.symbol!='WETH'){
             console.log('Removed all holding: ' + holding.symbol);
             await run(currentBot, 'buyLimit', {
               tokenSell: holding.symbol!,
               tokenBuy: 'WETH',
               priceLimit: 0,
             });
+            }
           }
         }
       }
@@ -318,7 +320,8 @@ export { EnzymeBot };
 
 const mainRunner = async () => {
   const currentBot = await EnzymeBot.staticCreateKovan();
-  main('buyLimit', currentBot, { tokenSell: 'WBTC', tokenBuy: 'USDC', priceLimit: 0.5 });
+  //main('rebalancePortfolio', currentBot, {rebalancedHoldings: [{symbol: 'USDC', amount:510000 }]});
+  main('buyLimit', currentBot, {tokenSell: 'UNI', tokenBuy: 'WBTC', priceLimit: 0})
   //console.log(await currentBot.getVaultValues());
   //getERC20Tokens('MAINNET');
 };

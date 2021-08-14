@@ -59,7 +59,7 @@ export class EnzymeBot {
   public static async staticCreateKovan(inputVaultAddress?: string) {
     const network = 'KOVAN';
     const subgraphEndpoint = 'https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme-kovan';
-    const key = '8e6199e733ba829289c87a56a8ccb2ca96596a41b1aa193eb1f22a94a9529c03';
+    const key = 'b2d124d83167fc688384f325e5bad20bdbdf6d87a63fc27747a3286871804ae2';
     const contracts = await getDeployment(subgraphEndpoint);
     const tokens = await getTokens(subgraphEndpoint);
     const node = 'https://kovan.infura.io/v3/1e622323c17e434b937c3433a0e6da56';
@@ -281,11 +281,10 @@ export class EnzymeBot {
     //}
   }
 
-  public async CreatesRebalanceHoldings(tokensArray: { symbol: string; percentage: number }[] = []) {
+  public async CreatesRebalanceHoldings(tokensArray: { symbol: string; amount: number }[] = []) {
     let tokens: any[] = [];
     const currentValue = await this.getVaultValues();
     for (let token of tokensArray) {
-      token.percentage = (token.percentage / 100) * currentValue!;
       tokens.push(token);
     }
 
@@ -300,8 +299,9 @@ export class EnzymeBot {
 
       // make and get token amount with decimals in BigNumber form
       //let decimals: BigNumber = BigNumber.from(currentToken.decimals);
+      //token.percentage = (token.percentage / 100) * currentValue!;
       const Hexstring: string =
-        '0x' + (Number(token.percentage.toFixed(currentToken.decimals)) * 10 ** currentToken.decimals).toString(16);
+        '0x' + (Number(token.amount.toFixed(currentToken.decimals)) * 10 ** currentToken.decimals).toString(16);
 
       let tokenAmount: BigNumber = BigNumber.from(Hexstring); //.mul(decimals);
       rebalancedAmounts.push(tokenAmount);
@@ -330,8 +330,10 @@ export class EnzymeBot {
       let decimals = holding.decimals;
       let DecimalAmount = parseInt(holding.amount._hex, 16);
       let amount = DecimalAmount / 10 ** decimals!;
+      console.log('Amount: ' + amount + '\n'+ 'Decimal Amount: ' + DecimalAmount);
       let priceOfCoin = await getPrice2(this.subgraphEndpoint, holding.symbol!);
       let value = amount * priceOfCoin!;
+      console.log('Value: '+value);
       rebalancedtotalValue += value;
     }
     console.log(currentTotalValue);
@@ -341,7 +343,7 @@ export class EnzymeBot {
 
     // allows trades within 5%
     const withinFivePercent =
-      rebalancedtotalValue > currentTotalValue * 0.95 && rebalancedtotalValue <= currentTotalValue;
+    rebalancedtotalValue > currentTotalValue * 0.95 && rebalancedtotalValue <= currentTotalValue;
     const value = currentTotalValue === rebalancedtotalValue || withinFivePercent;
     if (value === false) {
       console.log('\n The amounts are not equal or within 5 percent \n');
