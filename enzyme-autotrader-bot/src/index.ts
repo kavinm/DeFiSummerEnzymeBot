@@ -9,6 +9,7 @@ import { SharesBoughtEvent_OrderBy } from './utils/subgraph/subgraph';
 import { defaultFieldResolver } from 'graphql';
 import { gql } from './utils/subgraph/sdk';
 import { AssetBlacklistSetting_OrderBy } from './utils/subgraph/subgraph';
+import { getPrice2 } from './utils/getPrice';
 
 export const getDecimal = (bot: EnzymeBot) => {};
 
@@ -314,16 +315,9 @@ export const getERC20Tokens = async (network: 'KOVAN' | 'MAINNET' = 'KOVAN') => 
   return TokenList;
 };
 
+export const getPrice = getPrice2
+
 export { EnzymeBot };
-
-const mainRunner = async () => {
-  const currentBot = await EnzymeBot.staticCreateKovan();
-  //main('liquidate', currentBot, { liquidateTokens: ['WBTC', 'WETH'], toBeSwappedInto: 'WETH' });
-  console.log(await currentBot.getVaultValues());
-  getERC20Tokens('MAINNET');
-};
-
-mainRunner();
 
 // npm install --production=false
 // npm run codegen

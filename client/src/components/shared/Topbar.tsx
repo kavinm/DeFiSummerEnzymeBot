@@ -9,7 +9,7 @@ type TopbarProps = {
 
 const Topbar: React.FC<TopbarProps> = ({ name }) => {
   const history = useHistory();
-  const [, , clearAuthentication] = useAuthentication();
+  const [, , , clearAuthentication] = useAuthentication();
 
   const logout = () => {
     clearAuthentication();

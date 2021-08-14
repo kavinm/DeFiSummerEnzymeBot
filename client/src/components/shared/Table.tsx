@@ -108,10 +108,10 @@ const Table: React.FC<TableProps> = ({ rows, shownAs, ...props }) => {
               fontWeight="semibold"
               textAlign="right"
             >
-              {numeral(row.balance).format("0,0.00% ")}
+              {numeral(row.allocation).format("0,0.00% ")}
             </Text>
             <Text display="block" as="span" fontSize="sm" fontWeight="semibold">
-              {numeral(row.allocation).format("0,0.0000")}
+              {numeral(row.balance).format("0,0.0000")}
             </Text>
             <Text
               display="block"

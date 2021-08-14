@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Flex,
@@ -8,14 +8,15 @@ import {
   TabPanels,
   Tabs,
 } from "@chakra-ui/react";
-
 import uuid from "react-uuid";
+import { EnzymeBot } from "enzyme-autotrader-bot";
 
 import DefaultLayout from "../layouts/DefaultLayout";
 import { Table } from "../components/shared";
 import { StopLimitActions } from "../enums";
 import BuyToken from "../components/partial/BuyToken";
 import SellToken from "../components/partial/SellToken";
+import useAuthentication from "../utils/useAuthentication";
 
 const stopLimitRows = [
   {
@@ -41,24 +42,44 @@ const stopLimitRows = [
   },
 ];
 
-const vaultHoldingsRows = [
-  {
-    id: uuid(),
-    asset: "AXS",
-    balance: 50.1,
-    allocation: 14073.4836,
-    price: 1990.16,
-  },
-  {
-    id: uuid(),
-    asset: "steCRV-gauge",
-    balance: 49.9,
-    allocation: 13783.5404,
-    price: 2024.08,
-  },
-];
+type Holdings = { id: string; [x: string]: any }[];
 
 const AutomatedStrategy: React.FC = () => {
+  const [, , authentication] = useAuthentication();
+  const [vaultHoldings, setVaultHoldings] = useState<Holdings>([]);
+
+  useEffect(() => {
+    try {
+      EnzymeBot.createFromInput(
+        authentication.vaultAddress,
+        authentication.privateKey
+      ).then(async (res) => {
+        const holdingRes = await res.getHoldingsWithNumberAmounts();
+
+        const holdingsAmounts =
+          holdingRes?.reduce((acc, curr) => acc + curr.amount, 0) || 0;
+
+        const holdings =
+          holdingRes?.map((h) => ({
+            id: uuid(),
+            asset: h.symbol,
+            balance: h.amount,
+            allocation: h.amount / holdingsAmounts,
+            price: h.price?.price,
+            // price: h.price?.price, // getPrice()
+          })) || [];
+
+        console.log({ holdingRes });
+        console.log({ holdings });
+
+        setVaultHoldings(holdings);
+      });
+    } catch (error) {
+      console.error(error);
+      alert("Not a valid vault address");
+    }
+  }, [authentication.vaultAddress, authentication.privateKey]);
+
   return (
     <DefaultLayout name="Automated Strategy">
       <Flex
@@ -102,7 +123,7 @@ const AutomatedStrategy: React.FC = () => {
             mr={{ base: "0px", xl: "20px" }}
             mb={{ base: "20px", xl: "0px" }}
           />
-          <Table rows={vaultHoldingsRows} shownAs="vaultHoldingsTable" />
+          <Table rows={vaultHoldings} shownAs="vaultHoldingsTable" />
         </Flex>
       </Flex>
     </DefaultLayout>
