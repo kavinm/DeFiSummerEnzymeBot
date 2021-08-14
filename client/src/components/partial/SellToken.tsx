@@ -132,8 +132,7 @@ const SellToken: React.FC = () => {
         setReload(false);
       }, 300);
     }
-    // eslint-disable-next-line
-  }, [reload]);
+  }, [reload, authentication.vaultAddress, authentication.privateKey]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

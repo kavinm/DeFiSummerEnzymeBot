@@ -180,8 +180,7 @@ const Liquidate: React.FC = () => {
         setReload(false);
       }, 300);
     }
-    // eslint-disable-next-line
-  }, [reload]);
+  }, [reload, authentication.vaultAddress, authentication.privateKey]);
 
   const onSubmit = ({ liquidateTokens, toBeSwappedInto }: FormData) => {
     try {
