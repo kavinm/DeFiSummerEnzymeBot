@@ -1,4 +1,4 @@
-import React from "react";
+import { useEffect, useState } from "react";
 import {
   Text,
   Flex,
@@ -7,29 +7,70 @@ import {
   InputLeftElement,
   InputRightElement,
 } from "@chakra-ui/react";
-
 import { BsArrowDown } from "react-icons/bs";
 import { CheckIcon } from "@chakra-ui/icons";
 import { useForm } from "react-hook-form";
+import { EnzymeBot, getERC20Tokens } from "enzyme-autotrader-bot";
 
 import { ThemedButton, ThemedTokenSelect } from "../shared";
+import useAuthentication from "../../utils/useAuthentication";
 
-const options = [
-  { value: "axs", label: "AXS" },
-  { value: "weth", label: "WETH" },
-  { value: "mln", label: "MLN" },
-  { value: "uni", label: "UNI" },
-  { value: "comp", label: "COMP" },
-  { value: "1inch", label: "1INCH" },
-  { value: "aave", label: "AAVE" },
-];
+type TokenOptions = {
+  from?: {
+    value?: string;
+    label?: string;
+  }[];
+  to?: {
+    value?: string;
+    label?: string;
+  }[];
+};
 
 const BuyToken: React.FC = () => {
   const { handleSubmit } = useForm();
+  const [tokenOptions, setTokenOptions] = useState<TokenOptions>({
+    from: [],
+    to: [],
+  });
+  const [, , authentication] = useAuthentication();
+  const [, setBot] = useState<Partial<EnzymeBot>>({});
 
   const onSubmit = (data: any) => {
     console.log({ data });
   };
+
+  const getFromTokens = async () => {
+    return await getERC20Tokens("KOVAN");
+  };
+
+  useEffect(() => {
+    getFromTokens().then((res) => {
+      const opts = res.map((r) => ({ value: r.symbol, label: r.symbol }));
+      setTokenOptions((prev) => ({ ...prev, to: opts }));
+    });
+    try {
+      EnzymeBot.createFromInput(
+        authentication.vaultAddress,
+        authentication.privateKey
+      )
+        .then((res) => {
+          setBot(res);
+          return res;
+        })
+        .then(async (bot) => {
+          const tokens = await bot.getHoldingsWithNumberAmounts();
+          setTokenOptions((prev) => ({
+            ...prev,
+            from: tokens
+              ?.filter((t) => t.amount)
+              .map((t) => ({ value: t.symbol, label: t.symbol })),
+          }));
+        });
+    } catch (error) {
+      console.error(error);
+      alert("Not a valid vault address");
+    }
+  }, [authentication.vaultAddress, authentication.privateKey]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -54,7 +95,7 @@ const BuyToken: React.FC = () => {
         Token
       </Text>
       <Flex alignItems="center">
-        <ThemedTokenSelect options={options} id="ercToken" />
+        <ThemedTokenSelect options={tokenOptions.from} id="ercToken" />
       </Flex>
       {/* ARROW  */}
       <Flex justifyContent="center" mt="1.5rem" mb="0.5rem">
@@ -81,7 +122,7 @@ const BuyToken: React.FC = () => {
         Token
       </Text>
       <Flex alignItems="center">
-        <ThemedTokenSelect options={options} id="ercToken" />
+        <ThemedTokenSelect options={tokenOptions.to} id="ercToken" />
       </Flex>
       <Text
         as="label"

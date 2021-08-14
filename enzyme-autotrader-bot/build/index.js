@@ -279,13 +279,6 @@ const getERC20Tokens = (network = 'KOVAN') => __awaiter(void 0, void 0, void 0, 
     return TokenList;
 });
 exports.getERC20Tokens = getERC20Tokens;
-const mainRunner = () => __awaiter(void 0, void 0, void 0, function* () {
-    const currentBot = yield EnzymeBot_1.EnzymeBot.staticCreateKovan();
-    //main('liquidate', currentBot, { liquidateTokens: ['WBTC', 'WETH'], toBeSwappedInto: 'WETH' });
-    console.log(yield currentBot.getVaultValues());
-    exports.getERC20Tokens('MAINNET');
-});
-mainRunner();
 // npm install --production=false
 // npm run codegen
 // npm run dev
