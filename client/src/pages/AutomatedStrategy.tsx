@@ -9,7 +9,8 @@ import {
   Tabs,
 } from "@chakra-ui/react";
 import uuid from "react-uuid";
-import { EnzymeBot } from "enzyme-autotrader-bot";
+import { EnzymeBot, getPrice } from "enzyme-autotrader-bot";
+import { useAtom } from "jotai";
 
 import DefaultLayout from "../layouts/DefaultLayout";
 import { Table } from "../components/shared";
@@ -17,6 +18,8 @@ import { StopLimitActions } from "../enums";
 import BuyToken from "../components/partial/BuyToken";
 import SellToken from "../components/partial/SellToken";
 import useAuthentication from "../utils/useAuthentication";
+import { ENZYME_KOVAN_GRAPH_API } from "../config/api";
+import { reloadAutomatedStrategyHoldingsAtom } from "../atoms";
 
 const stopLimitRows = [
   {
@@ -47,6 +50,7 @@ type Holdings = { id: string; [x: string]: any }[];
 const AutomatedStrategy: React.FC = () => {
   const [, , authentication] = useAuthentication();
   const [vaultHoldings, setVaultHoldings] = useState<Holdings>([]);
+  const [reload, setReload] = useAtom(reloadAutomatedStrategyHoldingsAtom);
 
   useEffect(() => {
     try {
@@ -59,18 +63,24 @@ const AutomatedStrategy: React.FC = () => {
         const holdingsAmounts =
           holdingRes?.reduce((acc, curr) => acc + curr.amount, 0) || 0;
 
-        const holdings =
-          holdingRes?.map((h) => ({
-            id: uuid(),
-            asset: h.symbol,
-            balance: h.amount,
-            allocation: h.amount / holdingsAmounts,
-            price: h.price?.price,
-            // price: h.price?.price, // getPrice()
-          })) || [];
+        const holdings = await Promise.all(
+          holdingRes?.map(async (h) => {
+            // sync
+            // async
+            const price = await getPrice(
+              ENZYME_KOVAN_GRAPH_API,
+              h.symbol || ""
+            );
 
-        console.log({ holdingRes });
-        console.log({ holdings });
+            return {
+              id: uuid(),
+              asset: h.symbol,
+              balance: h.amount,
+              allocation: h.amount / holdingsAmounts,
+              price,
+            };
+          }) || []
+        );
 
         setVaultHoldings(holdings);
       });
@@ -79,6 +89,51 @@ const AutomatedStrategy: React.FC = () => {
       alert("Not a valid vault address");
     }
   }, [authentication.vaultAddress, authentication.privateKey]);
+
+  useEffect(() => {
+    if (reload) {
+      try {
+        EnzymeBot.createFromInput(
+          authentication.vaultAddress,
+          authentication.privateKey
+        ).then(async (res) => {
+          const holdingRes = await res.getHoldingsWithNumberAmounts();
+
+          const holdingsAmounts =
+            holdingRes?.reduce((acc, curr) => acc + curr.amount, 0) || 0;
+
+          const holdings = await Promise.all(
+            holdingRes?.map(async (h) => {
+              // sync
+              // async
+              const price = await getPrice(
+                ENZYME_KOVAN_GRAPH_API,
+                h.symbol || ""
+              );
+
+              return {
+                id: uuid(),
+                asset: h.symbol,
+                balance: h.amount,
+                allocation: h.amount / holdingsAmounts,
+                price,
+              };
+            }) || []
+          );
+
+          setVaultHoldings(holdings);
+        });
+      } catch (error) {
+        console.error(error);
+        alert("Not a valid vault address");
+      }
+
+      setTimeout(() => {
+        setReload(false);
+      }, 300);
+    }
+    // eslint-disable-next-line
+  }, [reload]);
 
   return (
     <DefaultLayout name="Automated Strategy">

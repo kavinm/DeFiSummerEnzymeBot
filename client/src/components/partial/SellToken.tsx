@@ -9,11 +9,13 @@ import {
 } from "@chakra-ui/react";
 import { BsArrowDown } from "react-icons/bs";
 import { CheckIcon } from "@chakra-ui/icons";
-import { useForm } from "react-hook-form";
-import { EnzymeBot, getERC20Tokens } from "enzyme-autotrader-bot";
+import { Controller, useForm } from "react-hook-form";
+import { EnzymeBot, getERC20Tokens, main } from "enzyme-autotrader-bot";
+import { useAtom } from "jotai";
 
 import { ThemedButton, ThemedTokenSelect } from "../shared";
 import useAuthentication from "../../utils/useAuthentication";
+import { reloadAutomatedStrategyHoldingsAtom } from "../../atoms";
 
 type TokenOptions = {
   from?: {
@@ -26,17 +28,42 @@ type TokenOptions = {
   }[];
 };
 
+type FormData = {
+  tokenBuy: {
+    value?: string;
+    label?: string;
+  };
+  tokenSell: {
+    value?: string;
+    label?: string;
+  };
+  priceLimit: number;
+};
+
 const SellToken: React.FC = () => {
-  const { handleSubmit } = useForm();
+  const { handleSubmit, register, control } = useForm<FormData>();
   const [tokenOptions, setTokenOptions] = useState<TokenOptions>({
     from: [],
     to: [],
   });
   const [, , authentication] = useAuthentication();
-  const [, setBot] = useState<Partial<EnzymeBot>>({});
+  const [bot, setBot] = useState<Partial<EnzymeBot>>({});
+  const [reload, setReload] = useAtom(reloadAutomatedStrategyHoldingsAtom);
 
-  const onSubmit = (data: any) => {
-    console.log({ data });
+  const onSubmit = ({ tokenSell, tokenBuy, priceLimit }: FormData) => {
+    try {
+      main("sellLimit", bot as EnzymeBot, {
+        tokenSell: tokenSell.value,
+        tokenBuy: tokenBuy.value,
+        priceLimit: +priceLimit,
+      });
+      setTimeout(() => {
+        alert("Sell Limit Successful.");
+        setReload(true);
+      }, 40000);
+    } catch (err) {
+      console.log({ err });
+    }
   };
 
   const getFromTokens = async () => {
@@ -72,6 +99,42 @@ const SellToken: React.FC = () => {
     }
   }, [authentication.vaultAddress, authentication.privateKey]);
 
+  useEffect(() => {
+    if (reload) {
+      getFromTokens().then((res) => {
+        const opts = res.map((r) => ({ value: r.symbol, label: r.symbol }));
+        setTokenOptions((prev) => ({ ...prev, to: opts }));
+      });
+      try {
+        EnzymeBot.createFromInput(
+          authentication.vaultAddress,
+          authentication.privateKey
+        )
+          .then((res) => {
+            setBot(res);
+            return res;
+          })
+          .then(async (bot) => {
+            const tokens = await bot.getHoldingsWithNumberAmounts();
+            setTokenOptions((prev) => ({
+              ...prev,
+              from: tokens
+                ?.filter((t) => t.amount)
+                .map((t) => ({ value: t.symbol, label: t.symbol })),
+            }));
+          });
+      } catch (error) {
+        console.error(error);
+        alert("Not a valid vault address");
+      }
+
+      setTimeout(() => {
+        setReload(false);
+      }, 300);
+    }
+    // eslint-disable-next-line
+  }, [reload]);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
       <Text
@@ -95,7 +158,24 @@ const SellToken: React.FC = () => {
         Token
       </Text>
       <Flex alignItems="center">
-        <ThemedTokenSelect options={tokenOptions.from} id="ercToken" />
+        <Controller
+          control={control}
+          name="tokenSell"
+          render={({
+            field: { onChange, onBlur, value, name, ref },
+            fieldState: { invalid, isTouched, isDirty, error },
+            formState,
+          }) => (
+            <ThemedTokenSelect
+              options={tokenOptions.from}
+              onBlur={onBlur}
+              onChange={onChange}
+              checked={value}
+              inputRef={ref}
+              id="tokenSell"
+            />
+          )}
+        />
       </Flex>
       <Text
         as="label"
@@ -120,6 +200,7 @@ const SellToken: React.FC = () => {
           color="white"
           type="number"
           pattern="^\(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?$"
+          {...register("priceLimit")}
         />
         <InputRightElement
           children={<CheckIcon color="green.500" />}
@@ -151,7 +232,24 @@ const SellToken: React.FC = () => {
         Token
       </Text>
       <Flex alignItems="center">
-        <ThemedTokenSelect options={tokenOptions.to} id="ercToken" />
+        <Controller
+          control={control}
+          name="tokenBuy"
+          render={({
+            field: { onChange, onBlur, value, name, ref },
+            fieldState: { invalid, isTouched, isDirty, error },
+            formState,
+          }) => (
+            <ThemedTokenSelect
+              options={tokenOptions.to}
+              onBlur={onBlur}
+              onChange={onChange}
+              checked={value}
+              inputRef={ref}
+              id="tokenBuy"
+            />
+          )}
+        />
       </Flex>
       <ThemedButton type="submit" w="full" mt="2.5rem" py="1.5rem">
         Trade
