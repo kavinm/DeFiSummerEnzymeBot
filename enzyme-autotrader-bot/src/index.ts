@@ -12,7 +12,7 @@ import { AssetBlacklistSetting_OrderBy } from './utils/subgraph/subgraph';
 import { getPrice2 } from './utils/getPrice';
 
 export const getDecimal = (bot: EnzymeBot) => {};
-
+export const getPrice = getPrice2;
 export const getCurrentHoldings = async (bot: EnzymeBot) => {
   const vaultHoldings = await bot.getHoldings(); //.then(res => {console.log('This is the v holdings\n' )}
   console.log(await vaultHoldings);
@@ -113,7 +113,7 @@ export const main = async (
   bot: EnzymeBot,
   args: {
     liquidateTokens?: string[];
-    rebalancedHoldings?: { symbol: string; percentage: number }[];
+    rebalancedHoldings?: { symbol: string; amount: number }[];
     tokenSell?: any;
     tokenBuy?: any;
     amount?: any;
@@ -234,12 +234,14 @@ export const main = async (
               //currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
             }
           } else {
-            console.log('Removed all holding: ' + holding.symbol);
-            await run(currentBot, 'buyLimit', {
-              tokenSell: holding.symbol!,
-              tokenBuy: 'WETH',
-              priceLimit: 0,
-            });
+            if (holding.symbol != 'WETH') {
+              console.log('Removed all holding: ' + holding.symbol);
+              await run(currentBot, 'buyLimit', {
+                tokenSell: holding.symbol!,
+                tokenBuy: 'WETH',
+                priceLimit: 0,
+              });
+            }
           }
         }
       }
@@ -315,9 +317,17 @@ export const getERC20Tokens = async (network: 'KOVAN' | 'MAINNET' = 'KOVAN') => 
   return TokenList;
 };
 
-export const getPrice = getPrice2
-
 export { EnzymeBot };
+
+const mainRunner = async () => {
+  const currentBot = await EnzymeBot.staticCreateKovan();
+  //main('rebalancePortfolio', currentBot, {rebalancedHoldings: [{symbol: 'USDC', amount:510000 }]});
+  main('buyLimit', currentBot, { tokenSell: 'UNI', tokenBuy: 'WBTC', priceLimit: 0 });
+  //console.log(await currentBot.getVaultValues());
+  //getERC20Tokens('MAINNET');
+};
+
+//mainRunner();
 
 // npm install --production=false
 // npm run codegen
