@@ -104,7 +104,7 @@ export declare class EnzymeBot {
     liquidate(vaultHolding: any, toBeSwappedTo: string): Promise<import("@enzymefinance/ethers").Send<(_extension: import("@enzymefinance/ethers").AddressLike, _actionId: import("ethers").BigNumberish, _callArgs: utils.BytesLike) => void, ComptrollerLib> | undefined>;
     CreatesRebalanceHoldings(tokensArray?: {
         symbol: string;
-        percentage: number;
+        amount: number;
     }[]): Promise<any[]>;
     IfHoldingIsEqual(currentPortfolio: any[], rebalancedPortfolio: any[]): Promise<boolean>;
     addHolding(sellTokenSymbol: string, buyTokenSymbol: string, tokenPriceLimit: number): Promise<import("@enzymefinance/ethers").Send<(_extension: import("@enzymefinance/ethers").AddressLike, _actionId: import("ethers").BigNumberish, _callArgs: utils.BytesLike) => void, ComptrollerLib> | undefined>;

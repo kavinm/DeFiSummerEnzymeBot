@@ -15,7 +15,8 @@ import { ThemedButton } from "../shared";
 const LiquidateConfirmationModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-}> = ({ isOpen, onClose }) => {
+  triggerSubmit: () => void;
+}> = ({ isOpen, onClose, triggerSubmit }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay backgroundColor="rgba(31, 41, 55, 0.75)" />
@@ -61,7 +62,15 @@ const LiquidateConfirmationModal: React.FC<{
             >
               Cancel
             </Button>
-            <ThemedButton px="1rem" h="100%" onClick={onClose} fontSize="sm">
+            <ThemedButton
+              px="1rem"
+              h="100%"
+              onClick={() => {
+                triggerSubmit();
+                onClose();
+              }}
+              fontSize="sm"
+            >
               Liquidate
             </ThemedButton>
           </Flex>

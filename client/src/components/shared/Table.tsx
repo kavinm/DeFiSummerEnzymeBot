@@ -10,7 +10,11 @@ interface TableProps extends BoxProps {
 
 const Table: React.FC<TableProps> = ({ rows, shownAs, ...props }) => {
   return (
-    <Box display="block" {...props}>
+    <Box
+      display="block"
+      {...(shownAs === "stopLimitTable" && { opacity: 0.5 })}
+      {...props}
+    >
       {shownAs === "stopLimitTable" &&
         rows.map((row, i) => (
           <Grid

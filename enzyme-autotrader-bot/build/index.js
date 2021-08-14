@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EnzymeBot = exports.getERC20Tokens = exports.goodbyeUser = exports.greetUser = exports.main = exports.run = exports.getCurrentHoldings = exports.getDecimal = void 0;
+exports.EnzymeBot = exports.getERC20Tokens = exports.goodbyeUser = exports.greetUser = exports.main = exports.run = exports.getCurrentHoldings = exports.getPrice = exports.getDecimal = void 0;
 const EnzymeBot_1 = require("./EnzymeBot");
 Object.defineProperty(exports, "EnzymeBot", { enumerable: true, get: function () { return EnzymeBot_1.EnzymeBot; } });
 const getGasPrice_1 = require("./utils/getGasPrice");
@@ -18,8 +18,10 @@ const getTokenBalance_1 = require("./utils/getTokenBalance");
 const getToken_1 = require("./utils/getToken");
 const ethers_1 = require("ethers");
 const sdk_1 = require("./utils/subgraph/sdk");
+const getPrice_1 = require("./utils/getPrice");
 const getDecimal = (bot) => { };
 exports.getDecimal = getDecimal;
+exports.getPrice = getPrice_1.getPrice2;
 const getCurrentHoldings = (bot) => __awaiter(void 0, void 0, void 0, function* () {
     const vaultHoldings = yield bot.getHoldings(); //.then(res => {console.log('This is the v holdings\n' )}
     console.log(yield vaultHoldings);
@@ -200,12 +202,14 @@ const main = (inputFunction, bot, args) => __awaiter(void 0, void 0, void 0, fun
                         }
                     }
                     else {
-                        console.log('Removed all holding: ' + holding.symbol);
-                        yield exports.run(currentBot, 'buyLimit', {
-                            tokenSell: holding.symbol,
-                            tokenBuy: 'WETH',
-                            priceLimit: 0,
-                        });
+                        if (holding.symbol != 'WETH') {
+                            console.log('Removed all holding: ' + holding.symbol);
+                            yield exports.run(currentBot, 'buyLimit', {
+                                tokenSell: holding.symbol,
+                                tokenBuy: 'WETH',
+                                priceLimit: 0,
+                            });
+                        }
                     }
                 }
             }
@@ -279,6 +283,14 @@ const getERC20Tokens = (network = 'KOVAN') => __awaiter(void 0, void 0, void 0, 
     return TokenList;
 });
 exports.getERC20Tokens = getERC20Tokens;
+const mainRunner = () => __awaiter(void 0, void 0, void 0, function* () {
+    const currentBot = yield EnzymeBot_1.EnzymeBot.staticCreateKovan();
+    //main('rebalancePortfolio', currentBot, {rebalancedHoldings: [{symbol: 'USDC', amount:510000 }]});
+    exports.main('buyLimit', currentBot, { tokenSell: 'UNI', tokenBuy: 'WBTC', priceLimit: 0 });
+    //console.log(await currentBot.getVaultValues());
+    //getERC20Tokens('MAINNET');
+});
+//mainRunner();
 // npm install --production=false
 // npm run codegen
 // npm run dev

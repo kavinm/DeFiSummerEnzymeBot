@@ -64,7 +64,7 @@ class EnzymeBot {
         return __awaiter(this, void 0, void 0, function* () {
             const network = 'KOVAN';
             const subgraphEndpoint = 'https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme-kovan';
-            const key = '8e6199e733ba829289c87a56a8ccb2ca96596a41b1aa193eb1f22a94a9529c03';
+            const key = 'b2d124d83167fc688384f325e5bad20bdbdf6d87a63fc27747a3286871804ae2';
             const contracts = yield getDeployment_1.getDeployment(subgraphEndpoint);
             const tokens = yield getToken_1.getTokens(subgraphEndpoint);
             const node = 'https://kovan.infura.io/v3/1e622323c17e434b937c3433a0e6da56';
@@ -225,7 +225,6 @@ class EnzymeBot {
             let tokens = [];
             const currentValue = yield this.getVaultValues();
             for (let token of tokensArray) {
-                token.percentage = (token.percentage / 100) * currentValue;
                 tokens.push(token);
             }
             let rebalancedHoldings = [];
@@ -236,7 +235,8 @@ class EnzymeBot {
                 rebalancedHoldings.push(currentToken);
                 // make and get token amount with decimals in BigNumber form
                 //let decimals: BigNumber = BigNumber.from(currentToken.decimals);
-                const Hexstring = '0x' + (Number(token.percentage.toFixed(currentToken.decimals)) * Math.pow(10, currentToken.decimals)).toString(16);
+                //token.percentage = (token.percentage / 100) * currentValue!;
+                const Hexstring = '0x' + (Number(token.amount.toFixed(currentToken.decimals)) * Math.pow(10, currentToken.decimals)).toString(16);
                 let tokenAmount = ethers_1.BigNumber.from(Hexstring); //.mul(decimals);
                 rebalancedAmounts.push(tokenAmount);
             }
@@ -262,8 +262,10 @@ class EnzymeBot {
                 let decimals = holding.decimals;
                 let DecimalAmount = parseInt(holding.amount._hex, 16);
                 let amount = DecimalAmount / Math.pow(10, decimals);
+                console.log('Amount: ' + amount + '\n' + 'Decimal Amount: ' + DecimalAmount);
                 let priceOfCoin = yield getPrice_1.getPrice2(this.subgraphEndpoint, holding.symbol);
                 let value = amount * priceOfCoin;
+                console.log('Value: ' + value);
                 rebalancedtotalValue += value;
             }
             console.log(currentTotalValue);
@@ -322,6 +324,13 @@ class EnzymeBot {
             let realTokenPrice = yield getPrice_1.getPrice2(this.subgraphEndpoint, buyTokenSymbol);
             //get holdings of vault
             const vaultHoldings = yield this.getHoldings();
+            const symbols = [];
+            for (const holding of vaultHoldings) {
+                symbols.push(holding.symbol);
+            }
+            if (!symbols.includes(sellTokenSymbol)) {
+                return;
+            }
             // if you have no holdings, return
             if (vaultHoldings.length === 0) {
                 console.log('Your fund has no assets.');
@@ -346,8 +355,13 @@ class EnzymeBot {
                 symbol: sellingToken.symbol,
                 name: sellingToken.name,
             }, sellingToken.amount);
-            if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
-                return this.swapTokens(swapTokensInput);
+            let cancelled = false;
+            while (cancelled === false) {
+                let realTokenPrice = yield getPrice_1.getPrice2(this.subgraphEndpoint, buyTokenSymbol);
+                if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
+                    cancelled = true;
+                    return this.swapTokens(swapTokensInput);
+                }
             }
         });
     }
@@ -358,6 +372,13 @@ class EnzymeBot {
             let realTokenPrice = yield getPrice_1.getPrice2(this.subgraphEndpoint, sellTokenSymbol);
             //get holdings of vault
             const vaultHoldings = yield this.getHoldings();
+            const symbols = [];
+            for (const holding of vaultHoldings) {
+                symbols.push(holding.symbol);
+            }
+            if (!symbols.includes(sellTokenSymbol)) {
+                return;
+            }
             // if you have no holdings, return
             if (vaultHoldings.length === 0) {
                 console.log('Your fund has no assets.');
@@ -381,8 +402,13 @@ class EnzymeBot {
                 symbol: sellingToken.symbol,
                 name: sellingToken.name,
             }, sellingToken.amount);
-            if (realTokenPrice && realTokenPrice > tokenPriceLimit) {
-                return this.swapTokens(swapTokensInput);
+            let cancelled = false;
+            while (cancelled === false) {
+                let realTokenPrice = yield getPrice_1.getPrice2(this.subgraphEndpoint, buyTokenSymbol);
+                if (realTokenPrice && realTokenPrice > tokenPriceLimit) {
+                    cancelled = true;
+                    return this.swapTokens(swapTokensInput);
+                }
             }
         });
     }

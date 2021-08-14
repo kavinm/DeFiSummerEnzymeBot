@@ -1,6 +1,8 @@
 import { EnzymeBot } from './EnzymeBot';
 import { BigNumber } from 'ethers';
+import { getPrice2 } from './utils/getPrice';
 export declare const getDecimal: (bot: EnzymeBot) => void;
+export declare const getPrice: typeof getPrice2;
 export declare const getCurrentHoldings: (bot: EnzymeBot) => Promise<{
     amount: BigNumber;
     __typename?: "Asset" | undefined;
@@ -41,7 +43,7 @@ export declare const main: (inputFunction: string, bot: EnzymeBot, args: {
     liquidateTokens?: string[];
     rebalancedHoldings?: {
         symbol: string;
-        percentage: number;
+        amount: number;
     }[];
     tokenSell?: any;
     tokenBuy?: any;

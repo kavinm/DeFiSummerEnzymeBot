@@ -1,4 +1,4 @@
-import React from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Text,
@@ -11,26 +11,23 @@ import {
   Tr,
   Checkbox,
   useDisclosure,
+  Avatar,
 } from "@chakra-ui/react";
-import uuid from "react-uuid";
 import styled from "@emotion/styled";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import numeral from "numeral";
+import { EnzymeBot, main } from "enzyme-autotrader-bot";
+import { useAtom } from "jotai";
 
-import { ReactComponent as Avatar } from "../assets/logo/avatar.svg";
 import { ThemedButton, ThemedTokenSelect } from "../components/shared";
 import DefaultLayout from "../layouts/DefaultLayout";
 import LiquidateConfirmationModal from "../components/partial/LiquidateConfirmationModal";
-
-const options = [
-  { value: "axs", label: "AXS" },
-  { value: "weth", label: "WETH" },
-  { value: "mln", label: "MLN" },
-  { value: "uni", label: "UNI" },
-  { value: "comp", label: "COMP" },
-  { value: "1inch", label: "1INCH" },
-  { value: "aave", label: "AAVE" },
-];
+import useAuthentication from "../utils/useAuthentication";
+import {
+  availableTokensAtom,
+  reloadAutomatedStrategyHoldingsAtom,
+  vaultHoldingsAtom,
+} from "../atoms";
 
 const StyledTable = styled(Table)`
   & {
@@ -49,72 +46,80 @@ const StyledTable = styled(Table)`
   }
 `;
 
-const vaultHoldingsRows = [
-  {
-    id: uuid(),
-    name: "Wrapped Ether",
-    symbol: "WETH",
-    price: 62313599.18,
-    currentBalance: 0,
-    currentValue: 62313599.18,
-  },
-  {
-    id: uuid(),
-    name: "Uniswap",
-    symbol: "UNI",
-    price: 62313599.18,
-    currentBalance: 1000,
-    currentValue: 0,
-  },
-  {
-    id: uuid(),
-    name: "Compound",
-    symbol: "COMP",
-    price: 62313599.18,
-    currentBalance: 0,
-    currentValue: 0,
-  },
-  {
-    id: uuid(),
-    name: "1inch",
-    symbol: "1INCH",
-    price: 62313599.18,
-    currentBalance: 0,
-    currentValue: 0,
-  },
-  {
-    id: uuid(),
-    name: "Aave",
-    symbol: "AAVE",
-    price: 62313599.18,
-    currentBalance: 0,
-    currentValue: 0,
-  },
-  {
-    id: uuid(),
-    name: "Banco Network Token",
-    symbol: "BNT",
-    price: 62313599.18,
-    currentBalance: 0,
-    currentValue: 0,
-  },
-  {
-    id: uuid(),
-    name: "1inch",
-    symbol: "1INCH",
-    price: 62313599.18,
-    currentBalance: 0,
-    currentValue: 0,
-  },
-];
+type TokenOptions = {
+  value?: string;
+  label?: string;
+}[];
+
+type FormData = {
+  liquidateTokens: string[];
+  toBeSwappedInto: {
+    value?: string;
+    label?: string;
+  };
+};
 
 const Liquidate: React.FC = () => {
-  const { handleSubmit } = useForm();
+  const [tokenOptions, setTokenOptions] = useState<TokenOptions>([]);
+  const [bot, setBot] = useState<Partial<EnzymeBot>>({});
+  const { handleSubmit, register, control, setValue, watch } =
+    useForm<FormData>();
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [, , authentication] = useAuthentication();
+  const [vaultHoldings] = useAtom(vaultHoldingsAtom);
+  const [reload, setReload] = useAtom(reloadAutomatedStrategyHoldingsAtom);
+  const [availableTokens] = useAtom(availableTokensAtom);
 
-  const onSubmit = (data: any) => {
-    console.log({ data });
+  const existingliquidateTokens = watch("liquidateTokens") as string[];
+
+  const configureBot = useCallback(() => {
+    try {
+      (async () => {
+        if (authentication.vaultAddress && authentication.privateKey) {
+          const bot = await EnzymeBot.createFromInput(
+            authentication.vaultAddress,
+            authentication.privateKey
+          );
+          setBot(bot);
+        }
+      })();
+    } catch (error) {
+      console.error(error);
+    }
+  }, [authentication.vaultAddress, authentication.privateKey]);
+
+  useEffect(() => {
+    setTokenOptions(availableTokens);
+    configureBot();
+  }, [setTokenOptions, configureBot, availableTokens]);
+
+  useEffect(() => {
+    if (reload) {
+      setTokenOptions(availableTokens);
+      configureBot();
+      setTimeout(() => {
+        setReload(false);
+      }, 300);
+    }
+    // eslint-disable-next-line
+  }, [reload]);
+
+  const onSubmit = ({ liquidateTokens, toBeSwappedInto }: FormData) => {
+    try {
+      main("liquidate", bot as EnzymeBot, {
+        liquidateTokens,
+        toBeSwappedInto: toBeSwappedInto.value,
+      });
+
+      setTimeout(() => {
+        setReload(true);
+      }, 40000);
+    } catch (err) {
+      console.log({ err });
+    }
   };
+
+  const triggerSubmit = handleSubmit(onSubmit);
 
   return (
     <>
@@ -129,7 +134,7 @@ const Liquidate: React.FC = () => {
           mx={{ base: "2rem", xl: "auto" }}
           mt="40px"
         >
-          <form onSubmit={handleSubmit(onSubmit)}>
+          <form>
             <Text
               display="block"
               as="label"
@@ -139,6 +144,7 @@ const Liquidate: React.FC = () => {
             >
               Vault Holdings
             </Text>
+            <input type="hidden" {...register("liquidateTokens")} />
             {/* VAULT HOLDINGS */}
             <Box
               border="1px solid"
@@ -168,15 +174,35 @@ const Liquidate: React.FC = () => {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {vaultHoldingsRows.map((r) => (
+                  {vaultHoldings.map((r) => (
                     <Tr key={r.id}>
                       <Td padding="16px 0px 16px 20px" alignItems="center">
-                        <Checkbox borderColor="accentOutlines"></Checkbox>
+                        <Checkbox
+                          borderColor="accentOutlines"
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              setValue("liquidateTokens", [
+                                ...existingliquidateTokens,
+                                r.asset,
+                              ]);
+                            } else {
+                              setValue(
+                                "liquidateTokens",
+                                existingliquidateTokens.filter(
+                                  (t) => t !== r.asset
+                                )
+                              );
+                            }
+                          }}
+                        />
                       </Td>
                       <Td>
                         <Flex minW="240px">
                           <Box mr="16px">
-                            <Avatar />
+                            <Avatar
+                              src={`https://cryptoicon-api.vercel.app/api/icon/${r.asset.toLowerCase()}`}
+                              alt={r.asset}
+                            />
                           </Box>
                           <Box>
                             <Text
@@ -194,7 +220,7 @@ const Liquidate: React.FC = () => {
                               fontWeight="400"
                               color="placeholders"
                             >
-                              {r.symbol}
+                              {r.asset}
                             </Text>
                           </Box>
                         </Flex>
@@ -218,7 +244,7 @@ const Liquidate: React.FC = () => {
                           fontWeight="500"
                           color="placeholders"
                         >
-                          {r.currentBalance}
+                          {r.balance.toFixed(8)}
                         </Text>
                       </Td>
                       <Td>
@@ -229,7 +255,7 @@ const Liquidate: React.FC = () => {
                           fontWeight="500"
                           color="gray.50"
                         >
-                          {numeral(r.currentValue).format("$0,0.00")}
+                          {numeral(r.price * r.balance).format("$0,0.00")}
                         </Text>
                       </Td>
                     </Tr>
@@ -250,11 +276,28 @@ const Liquidate: React.FC = () => {
               ERC Token
             </Text>
             <Flex alignItems="center">
-              <ThemedTokenSelect options={options} id="ercToken" />
+              <Controller
+                control={control}
+                name="toBeSwappedInto"
+                render={({
+                  field: { onChange, onBlur, value, name, ref },
+                  fieldState: { invalid, isTouched, isDirty, error },
+                  formState,
+                }) => (
+                  <ThemedTokenSelect
+                    options={tokenOptions}
+                    onBlur={onBlur}
+                    onChange={onChange}
+                    checked={value}
+                    inputRef={ref}
+                    id="toBeSwappedInto"
+                  />
+                )}
+              />
             </Flex>
             <Flex>
               <ThemedButton
-                type="submit"
+                type="button"
                 w="80%"
                 maxW="200px"
                 mt="2.5rem"
@@ -268,7 +311,11 @@ const Liquidate: React.FC = () => {
           </form>
         </Box>
       </DefaultLayout>
-      <LiquidateConfirmationModal isOpen={isOpen} onClose={onClose} />
+      <LiquidateConfirmationModal
+        isOpen={isOpen}
+        onClose={onClose}
+        triggerSubmit={triggerSubmit}
+      />
     </>
   );
 };
