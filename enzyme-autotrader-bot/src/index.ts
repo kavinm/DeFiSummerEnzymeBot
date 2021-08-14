@@ -318,9 +318,9 @@ export { EnzymeBot };
 
 const mainRunner = async () => {
   const currentBot = await EnzymeBot.staticCreateKovan();
-  //main('liquidate', currentBot, { liquidateTokens: ['WBTC', 'WETH'], toBeSwappedInto: 'WETH' });
-  console.log(await currentBot.getVaultValues());
-  getERC20Tokens('MAINNET');
+  main('buyLimit', currentBot, { tokenSell: 'WBTC', tokenBuy: 'USDC', priceLimit: 0.5 });
+  //console.log(await currentBot.getVaultValues());
+  //getERC20Tokens('MAINNET');
 };
 
 mainRunner();

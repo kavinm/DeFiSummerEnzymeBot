@@ -404,11 +404,20 @@ export class EnzymeBot {
   //Buy limit order function
   public async buyLimit(sellTokenSymbol: string, buyTokenSymbol: string, tokenPriceLimit: number) {
     // gets the price of the wanted token
+
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
 
     //get holdings of vault
     const vaultHoldings = await this.getHoldings();
 
+    const symbols: string[] = [];
+
+    for (const holding of vaultHoldings) {
+      symbols.push(holding!.symbol);
+    }
+    if (!symbols.includes(sellTokenSymbol)) {
+      return;
+    }
     // if you have no holdings, return
     if (vaultHoldings.length === 0) {
       console.log('Your fund has no assets.');
@@ -447,8 +456,13 @@ export class EnzymeBot {
       sellingToken.amount
     );
 
-    if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
-      return this.swapTokens(swapTokensInput);
+    let cancelled = false;
+    while (cancelled === false) {
+      let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
+      if (realTokenPrice && tokenPriceLimit < realTokenPrice) {
+        cancelled = true;
+        return this.swapTokens(swapTokensInput);
+      }
     }
   }
   //Sell limit order function
@@ -458,6 +472,15 @@ export class EnzymeBot {
 
     //get holdings of vault
     const vaultHoldings = await this.getHoldings();
+
+    const symbols: string[] = [];
+
+    for (const holding of vaultHoldings) {
+      symbols.push(holding!.symbol);
+    }
+    if (!symbols.includes(sellTokenSymbol)) {
+      return;
+    }
 
     // if you have no holdings, return
     if (vaultHoldings.length === 0) {
@@ -496,8 +519,13 @@ export class EnzymeBot {
       sellingToken.amount
     );
 
-    if (realTokenPrice && realTokenPrice > tokenPriceLimit) {
-      return this.swapTokens(swapTokensInput);
+    let cancelled = false;
+    while (cancelled === false) {
+      let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
+      if (realTokenPrice && realTokenPrice > tokenPriceLimit) {
+        cancelled = true;
+        return this.swapTokens(swapTokensInput);
+      }
     }
   }
 
