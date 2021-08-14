@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Text,
   Flex,
@@ -10,12 +10,16 @@ import {
 import { BsArrowDown } from "react-icons/bs";
 import { CheckIcon } from "@chakra-ui/icons";
 import { Controller, useForm } from "react-hook-form";
-import { EnzymeBot, getERC20Tokens, main } from "enzyme-autotrader-bot";
+import { EnzymeBot, main } from "enzyme-autotrader-bot";
 import { useAtom } from "jotai";
 
 import { ThemedButton, ThemedTokenSelect } from "../shared";
 import useAuthentication from "../../utils/useAuthentication";
-import { reloadAutomatedStrategyHoldingsAtom } from "../../atoms";
+import {
+  availableTokensAtom,
+  reloadAutomatedStrategyHoldingsAtom,
+  vaultHoldingsAtom,
+} from "../../atoms";
 
 type TokenOptions = {
   from?: {
@@ -49,6 +53,8 @@ const BuyToken: React.FC = () => {
   const [, , authentication] = useAuthentication();
   const [bot, setBot] = useState<Partial<EnzymeBot>>({});
   const [reload, setReload] = useAtom(reloadAutomatedStrategyHoldingsAtom);
+  const [availableTokens] = useAtom(availableTokensAtom);
+  const [vaultHoldings] = useAtom(vaultHoldingsAtom);
 
   const onSubmit = ({ tokenSell, tokenBuy, priceLimit }: FormData) => {
     try {
@@ -59,7 +65,6 @@ const BuyToken: React.FC = () => {
       });
 
       setTimeout(() => {
-        alert("Buy Limit Successful.");
         setReload(true);
       }, 40000);
     } catch (err) {
@@ -67,73 +72,47 @@ const BuyToken: React.FC = () => {
     }
   };
 
-  const getFromTokens = async () => {
-    return await getERC20Tokens("KOVAN");
-  };
-
-  useEffect(() => {
-    getFromTokens().then((res) => {
-      const opts = res.map((r) => ({ value: r.symbol, label: r.symbol }));
-      setTokenOptions((prev) => ({ ...prev, to: opts }));
-    });
-    try {
-      EnzymeBot.createFromInput(
-        authentication.vaultAddress,
-        authentication.privateKey
-      )
-        .then((res) => {
-          setBot(res);
-          return res;
-        })
-        .then(async (bot) => {
-          const tokens = await bot.getHoldingsWithNumberAmounts();
+  const hydrateOptions = useCallback(() => {
+    if (authentication.vaultAddress && authentication.privateKey) {
+      setTokenOptions((prev) => ({ ...prev, to: availableTokens }));
+      try {
+        (async () => {
+          const bot = await EnzymeBot.createFromInput(
+            authentication.vaultAddress,
+            authentication.privateKey
+          );
+          setBot(bot);
           setTokenOptions((prev) => ({
             ...prev,
-            from: tokens
-              ?.filter((t) => t.amount)
-              .map((t) => ({ value: t.symbol, label: t.symbol })),
+            from: vaultHoldings
+              ?.filter((t) => t.balance)
+              .map((t) => ({ value: t.asset, label: t.asset })),
           }));
-        });
-    } catch (error) {
-      console.error(error);
-      alert("Not a valid vault address");
+        })();
+      } catch (error) {
+        console.error(error);
+      }
     }
-  }, [authentication.vaultAddress, authentication.privateKey]);
+  }, [
+    authentication.vaultAddress,
+    authentication.privateKey,
+    availableTokens,
+    vaultHoldings,
+  ]);
+
+  useEffect(() => {
+    hydrateOptions();
+  }, [hydrateOptions]);
 
   useEffect(() => {
     if (reload) {
-      getFromTokens().then((res) => {
-        const opts = res.map((r) => ({ value: r.symbol, label: r.symbol }));
-        setTokenOptions((prev) => ({ ...prev, to: opts }));
-      });
-      try {
-        EnzymeBot.createFromInput(
-          authentication.vaultAddress,
-          authentication.privateKey
-        )
-          .then((res) => {
-            setBot(res);
-            return res;
-          })
-          .then(async (bot) => {
-            const tokens = await bot.getHoldingsWithNumberAmounts();
-            setTokenOptions((prev) => ({
-              ...prev,
-              from: tokens
-                ?.filter((t) => t.amount)
-                .map((t) => ({ value: t.symbol, label: t.symbol })),
-            }));
-          });
-      } catch (error) {
-        console.error(error);
-        alert("Not a valid vault address");
-      }
-
+      hydrateOptions();
       setTimeout(() => {
         setReload(false);
       }, 300);
     }
-  }, [reload, authentication.vaultAddress, authentication.privateKey]);
+    // eslint-disable-next-line
+  }, [reload]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>

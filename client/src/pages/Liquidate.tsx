@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   Box,
   Text,
@@ -13,34 +13,21 @@ import {
   useDisclosure,
   Avatar,
 } from "@chakra-ui/react";
-import uuid from "react-uuid";
 import styled from "@emotion/styled";
 import { Controller, useForm } from "react-hook-form";
 import numeral from "numeral";
-import {
-  EnzymeBot,
-  getERC20Tokens,
-  getPrice,
-  main,
-} from "enzyme-autotrader-bot";
+import { EnzymeBot, main } from "enzyme-autotrader-bot";
 import { useAtom } from "jotai";
 
 import { ThemedButton, ThemedTokenSelect } from "../components/shared";
 import DefaultLayout from "../layouts/DefaultLayout";
 import LiquidateConfirmationModal from "../components/partial/LiquidateConfirmationModal";
-import { ENZYME_KOVAN_GRAPH_API } from "../config/api";
 import useAuthentication from "../utils/useAuthentication";
-import { reloadAutomatedStrategyHoldingsAtom } from "../atoms";
-
-const options = [
-  { value: "axs", label: "AXS" },
-  { value: "weth", label: "WETH" },
-  { value: "mln", label: "MLN" },
-  { value: "uni", label: "UNI" },
-  { value: "comp", label: "COMP" },
-  { value: "1inch", label: "1INCH" },
-  { value: "aave", label: "AAVE" },
-];
+import {
+  availableTokensAtom,
+  reloadAutomatedStrategyHoldingsAtom,
+  vaultHoldingsAtom,
+} from "../atoms";
 
 const StyledTable = styled(Table)`
   & {
@@ -59,7 +46,6 @@ const StyledTable = styled(Table)`
   }
 `;
 
-type Holdings = { id: string; [x: string]: any }[];
 type TokenOptions = {
   value?: string;
   label?: string;
@@ -74,113 +60,49 @@ type FormData = {
 };
 
 const Liquidate: React.FC = () => {
+  const [tokenOptions, setTokenOptions] = useState<TokenOptions>([]);
+  const [bot, setBot] = useState<Partial<EnzymeBot>>({});
   const { handleSubmit, register, control, setValue, watch } =
     useForm<FormData>();
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [, , authentication] = useAuthentication();
-  const [vaultHoldings, setVaultHoldings] = useState<Holdings>([]);
+  const [vaultHoldings] = useAtom(vaultHoldingsAtom);
   const [reload, setReload] = useAtom(reloadAutomatedStrategyHoldingsAtom);
-  const [tokenOptions, setTokenOptions] = useState<TokenOptions>([]);
-  const [bot, setBot] = useState<Partial<EnzymeBot>>({});
+  const [availableTokens] = useAtom(availableTokensAtom);
 
   const existingliquidateTokens = watch("liquidateTokens") as string[];
 
-  const getFromTokens = async () => {
-    return await getERC20Tokens("KOVAN");
-  };
-
-  useEffect(() => {
-    getFromTokens().then((res) => {
-      const opts = res.map((r) => ({ value: r.symbol, label: r.symbol }));
-
-      setTokenOptions(opts);
-    });
+  const configureBot = useCallback(() => {
     try {
-      EnzymeBot.createFromInput(
-        authentication.vaultAddress,
-        authentication.privateKey
-      ).then(async (res) => {
-        setBot(res);
-        const holdingRes = await res.getHoldingsWithNumberAmounts();
-
-        const holdingsAmounts =
-          holdingRes?.reduce((acc, curr) => acc + curr.amount, 0) || 0;
-
-        const holdings = await Promise.all(
-          holdingRes?.map(async (h) => {
-            // sync
-            // async
-            const price = await getPrice(
-              ENZYME_KOVAN_GRAPH_API,
-              h.symbol || ""
-            );
-
-            return {
-              id: uuid(),
-              asset: h.symbol,
-              balance: h.amount,
-              allocation: h.amount / holdingsAmounts,
-              price,
-              name: h.name,
-            };
-          }) || []
-        );
-
-        setVaultHoldings(holdings);
-      });
+      (async () => {
+        if (authentication.vaultAddress && authentication.privateKey) {
+          const bot = await EnzymeBot.createFromInput(
+            authentication.vaultAddress,
+            authentication.privateKey
+          );
+          setBot(bot);
+        }
+      })();
     } catch (error) {
       console.error(error);
-      alert("Not a valid vault address");
     }
   }, [authentication.vaultAddress, authentication.privateKey]);
 
   useEffect(() => {
-    getFromTokens().then((res) => {
-      const opts = res.map((r) => ({ value: r.symbol, label: r.symbol }));
-      setTokenOptions(opts);
-    });
+    setTokenOptions(availableTokens);
+    configureBot();
+  }, [setTokenOptions, configureBot, availableTokens]);
+
+  useEffect(() => {
     if (reload) {
-      try {
-        EnzymeBot.createFromInput(
-          authentication.vaultAddress,
-          authentication.privateKey
-        ).then(async (res) => {
-          setBot(res);
-          const holdingRes = await res.getHoldingsWithNumberAmounts();
-
-          const holdingsAmounts =
-            holdingRes?.reduce((acc, curr) => acc + curr.amount, 0) || 0;
-
-          const holdings = await Promise.all(
-            holdingRes?.map(async (h) => {
-              const price = await getPrice(
-                ENZYME_KOVAN_GRAPH_API,
-                h.symbol || ""
-              );
-
-              return {
-                id: uuid(),
-                asset: h.symbol,
-                balance: h.amount,
-                allocation: h.amount / holdingsAmounts,
-                price,
-                name: h.name,
-              };
-            }) || []
-          );
-
-          setVaultHoldings(holdings);
-        });
-      } catch (error) {
-        console.error(error);
-        alert("Not a valid vault address");
-      }
-
+      setTokenOptions(availableTokens);
+      configureBot();
       setTimeout(() => {
         setReload(false);
       }, 300);
     }
-  }, [reload, authentication.vaultAddress, authentication.privateKey]);
+    // eslint-disable-next-line
+  }, [reload]);
 
   const onSubmit = ({ liquidateTokens, toBeSwappedInto }: FormData) => {
     try {
@@ -190,11 +112,9 @@ const Liquidate: React.FC = () => {
       });
 
       setTimeout(() => {
-        alert("Liquidate Successful.");
         setReload(true);
       }, 40000);
     } catch (err) {
-      alert("Error");
       console.log({ err });
     }
   };
@@ -224,6 +144,7 @@ const Liquidate: React.FC = () => {
             >
               Vault Holdings
             </Text>
+            <input type="hidden" {...register("liquidateTokens")} />
             {/* VAULT HOLDINGS */}
             <Box
               border="1px solid"
@@ -253,7 +174,6 @@ const Liquidate: React.FC = () => {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  <input type="hidden" {...register("liquidateTokens")} />
                   {vaultHoldings.map((r) => (
                     <Tr key={r.id}>
                       <Td padding="16px 0px 16px 20px" alignItems="center">

@@ -47,7 +47,6 @@ const Connect: React.FC = () => {
       history.push("/automated-strategy");
     } catch (error) {
       console.error(error);
-      alert("Not a valid vault address");
     }
   };
 
