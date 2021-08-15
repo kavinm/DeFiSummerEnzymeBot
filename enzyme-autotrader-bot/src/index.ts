@@ -75,14 +75,12 @@ export const run = async (
       const resolved = await tx.gas(gasLimit, gasPrice).send();
       let successfulTransaction = '';
 
-      console.log('This trade has been submitted to the blockchain. TRANSACTION HASH ==>', resolved.transactionHash);
       successfulTransaction =
         successfulTransaction +
         'This trade has been submitted to the blockchain. TRANSACTION HASH ==>' +
         resolved.transactionHash;
       successfulTransaction =
         successfulTransaction + '\n' + `Transaction successful. You spent ${resolved.gasUsed.toString()} in gas.`;
-      console.log(`Transaction successful. You spent ${resolved.gasUsed.toString()} in gas.`);
 
       return successfulTransaction;
     } else {
@@ -145,7 +143,7 @@ export const main = async (
       for (let i = 0; i < holdingsLength; i++) {
         await console.log(`BEFORE LIQUIDATE This is within the for each loop index of ${i} `);
         //check the token we are swapping is not zero and is a token that should be liquidated
-        if (!vaultHoldings[i].amount.isZero() || !tokensToLiquidate.includes(vaultHoldings[i].symbol!)) {
+        if (!vaultHoldings[i].amount.isZero() && tokensToLiquidate.includes(vaultHoldings[i].symbol!)) {
           successfulMessage =
             successfulMessage +
             (await run(currentBot, func2pass, { tokenSell: vaultHoldings[i], toBeSwappedInto: args.toBeSwappedInto }));
@@ -183,11 +181,14 @@ export const main = async (
     //   await run(await EnzymeBot.create('KOVAN'), func2pass);
     //   break;
     case 'swapWithAmount':
-      await run(currentBot, func2pass, {
-        tokenSell: args.tokenSell,
-        tokenBuy: args.tokenBuy,
-        amount: args.amount,
-      });
+      successfulMessage =
+        successfulMessage +
+        (await run(currentBot, func2pass, {
+          tokenSell: args.tokenSell,
+          tokenBuy: args.tokenBuy,
+          amount: args.amount,
+        }));
+      return successfulMessage;
       break;
     case 'getHoldings':
       await currentBot.getHoldingsWithNumberAmounts;
@@ -345,12 +346,13 @@ export { EnzymeBot };
 const mainRunner = async () => {
   const currentBot = await EnzymeBot.staticCreateKovan();
   //main('rebalancePortfolio', currentBot, {rebalancedHoldings: [{symbol: 'USDC', amount:510000 }]});
-  console.log(await main('buyLimit', currentBot, { tokenSell: 'WBTC', tokenBuy: 'BAT', priceLimit: 0 }));
+  console.log(await main('liquidate', currentBot, { liquidateTokens: ['WBTC', 'UNI'], toBeSwappedInto: 'USDC' }));
+  //console.log(await main('swapWithAmount', currentBot, { tokenSell: 'WBTC', tokenBuy: 'UNI', amount: 10000000 }));
   //console.log(await currentBot.getVaultValues());
   //getERC20Tokens('MAINNET');
 };
 
-mainRunner();
+//mainRunner();
 
 // npm install --production=false
 // npm run codegen
