@@ -38,7 +38,7 @@ export declare const run: (bot: EnzymeBot, funcName: string, args: {
     amount?: any;
     toBeSwappedInto?: string;
     priceLimit?: number;
-}) => Promise<boolean>;
+}) => Promise<string | boolean>;
 export declare const main: (inputFunction: string, bot: EnzymeBot, args: {
     liquidateTokens?: string[];
     rebalancedHoldings?: {
@@ -50,9 +50,7 @@ export declare const main: (inputFunction: string, bot: EnzymeBot, args: {
     amount?: any;
     toBeSwappedInto?: string;
     priceLimit?: number;
-}) => Promise<void>;
-export declare const greetUser: (user: string) => string;
-export declare const goodbyeUser: (user: string) => string;
+}) => Promise<string | undefined>;
 export declare const getERC20Tokens: (network?: 'KOVAN' | 'MAINNET') => Promise<({
     __typename?: "Asset" | undefined;
 } & Pick<import("./utils/subgraph/subgraph").Asset, "symbol" | "id" | "name" | "decimals" | "type" | "derivativeType"> & {

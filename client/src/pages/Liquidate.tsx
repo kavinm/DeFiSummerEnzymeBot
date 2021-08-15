@@ -12,6 +12,7 @@ import {
   Checkbox,
   useDisclosure,
   Avatar,
+  useToast,
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { Controller, useForm } from "react-hook-form";
@@ -28,6 +29,7 @@ import {
   reloadBuySellLimitHoldingsAtom,
   vaultHoldingsAtom,
 } from "../atoms";
+import { Networks } from "../config/api";
 
 const StyledTable = styled(Table)`
   & {
@@ -69,6 +71,8 @@ const Liquidate: React.FC = () => {
   const [vaultHoldings] = useAtom(vaultHoldingsAtom);
   const [reload, setReload] = useAtom(reloadBuySellLimitHoldingsAtom);
   const [availableTokens] = useAtom(availableTokensAtom);
+  const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const existingliquidateTokens = watch("liquidateTokens") as string[];
 
@@ -76,17 +80,31 @@ const Liquidate: React.FC = () => {
     try {
       (async () => {
         if (authentication.vaultAddress && authentication.privateKey) {
-          const bot = await EnzymeBot.createFromInput(
-            authentication.vaultAddress,
-            authentication.privateKey
-          );
+          let bot: EnzymeBot;
+
+          if (authentication.network === Networks.Kovan) {
+            bot = await EnzymeBot.createFromInput(
+              authentication.vaultAddress,
+              authentication.privateKey
+            );
+          } else {
+            bot = await EnzymeBot.createFromInputMainnet(
+              authentication.vaultAddress,
+              authentication.privateKey
+            );
+          }
+
           setBot(bot);
         }
       })();
     } catch (error) {
       console.error(error);
     }
-  }, [authentication.vaultAddress, authentication.privateKey]);
+  }, [
+    authentication.vaultAddress,
+    authentication.privateKey,
+    authentication.network,
+  ]);
 
   useEffect(() => {
     setTokenOptions(availableTokens);
@@ -105,16 +123,24 @@ const Liquidate: React.FC = () => {
   }, [reload]);
 
   const onSubmit = ({ liquidateTokens, toBeSwappedInto }: FormData) => {
+    setLoading(true);
     try {
       main("liquidate", bot as EnzymeBot, {
         liquidateTokens,
         toBeSwappedInto: toBeSwappedInto.value,
-      });
-
-      setTimeout(() => {
+      }).then((res) => {
+        toast({
+          title: "Liquidate successful.",
+          description: res,
+          position: "top",
+          isClosable: true,
+          duration: 10000,
+        });
+        setLoading(false);
         setReload(true);
-      }, 40000);
+      });
     } catch (err) {
+      setLoading(false);
       console.log({ err });
     }
   };
@@ -304,6 +330,7 @@ const Liquidate: React.FC = () => {
                 py="1.5rem"
                 mx="auto"
                 onClick={onOpen}
+                isLoading={loading}
               >
                 Liquidate
               </ThemedButton>

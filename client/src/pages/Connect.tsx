@@ -49,9 +49,13 @@ const Connect: React.FC = () => {
 
   const onSubmit = async ({ vaultAddress, privateKey, network }: FormData) => {
     try {
-      await EnzymeBot.createFromInput(vaultAddress, privateKey);
-      setAuthentication({ vaultAddress, privateKey });
-      history.push("/automated-strategy");
+      if (network === Networks.Kovan) {
+        await EnzymeBot.createFromInput(vaultAddress, privateKey);
+      } else {
+        await EnzymeBot.createFromInputMainnet(vaultAddress, privateKey);
+      }
+      setAuthentication({ vaultAddress, privateKey, network });
+      history.push("/buy-sell-limit");
     } catch (error) {
       console.error(error);
     }

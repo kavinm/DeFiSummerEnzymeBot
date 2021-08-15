@@ -14,7 +14,7 @@ import {
   reloadBuySellLimitHoldingsAtom,
   vaultHoldingsAtom,
 } from "./atoms";
-import { ENZYME_KOVAN_GRAPH_API } from "./config/api";
+import { Networks } from "./config/api";
 
 const App: React.FC = () => {
   const history = useHistory();
@@ -28,19 +28,26 @@ const App: React.FC = () => {
   const getHoldings = useCallback(async () => {
     if (authentication.vaultAddress && authentication.privateKey) {
       try {
-        const bot = await EnzymeBot.createFromInput(
-          authentication.vaultAddress,
-          authentication.privateKey
-        );
+        let bot: EnzymeBot;
+
+        if (authentication.network === Networks.Kovan) {
+          bot = await EnzymeBot.createFromInput(
+            authentication.vaultAddress,
+            authentication.privateKey
+          );
+        } else {
+          bot = await EnzymeBot.createFromInputMainnet(
+            authentication.vaultAddress,
+            authentication.privateKey
+          );
+        }
+
         const holdingsRes = await bot.getHoldingsWithNumberAmounts();
         const holdingsAmounts =
           holdingsRes?.reduce((acc, curr) => acc + curr.amount, 0) || 0;
         const holdings = await Promise.all(
           holdingsRes?.map(async (h) => {
-            const price = await getPrice(
-              ENZYME_KOVAN_GRAPH_API,
-              h.symbol || ""
-            );
+            const price = await getPrice(bot.subgraphEndpoint, h.symbol || "");
 
             return {
               id: uuid(),
@@ -60,18 +67,22 @@ const App: React.FC = () => {
   }, [
     authentication.vaultAddress,
     authentication.privateKey,
+    authentication.network,
     setVaultHoldings,
   ]);
 
   const getAvailableTokens = useCallback(async () => {
     if (authentication.vaultAddress && authentication.privateKey) {
-      const tokens = await getERC20Tokens("KOVAN");
+      const network =
+        authentication.network === Networks.Kovan ? "KOVAN" : "MAINNET";
+      const tokens = await getERC20Tokens(network);
       const opts = tokens.map((r) => ({ value: r.symbol, label: r.symbol }));
       setAvailableTokens(opts);
     }
   }, [
     authentication.vaultAddress,
     authentication.privateKey,
+    authentication.network,
     setAvailableTokens,
   ]);
 
