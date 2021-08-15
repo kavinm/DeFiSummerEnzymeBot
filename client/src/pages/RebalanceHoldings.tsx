@@ -95,7 +95,7 @@ const RebalanceHoldings: React.FC = () => {
       }).then((res) => {
         if (res) {
           toast({
-            title: "Rebalance portfolio successful.",
+            title: "Rebalance holdings successful.",
             description: res,
             position: "top",
             isClosable: true,
@@ -103,7 +103,7 @@ const RebalanceHoldings: React.FC = () => {
           });
         } else {
           toast({
-            title: "Rebalance portfolio failed.",
+            title: "Rebalance holdings failed.",
             description: res,
             position: "top",
             isClosable: true,
@@ -115,7 +115,7 @@ const RebalanceHoldings: React.FC = () => {
       });
     } catch (err) {
       toast({
-        title: "Rebalance portfolio failed.",
+        title: "Rebalance holdings failed.",
         position: "top",
         isClosable: true,
         duration: 10000,
@@ -173,7 +173,7 @@ const RebalanceHoldings: React.FC = () => {
 
   return (
     <>
-      <DefaultLayout name="Rebalance Portfolio">
+      <DefaultLayout name="Rebalance Holdings">
         <Box
           backgroundColor="accentCards"
           border="1px solid"
