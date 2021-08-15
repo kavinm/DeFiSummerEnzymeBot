@@ -77,6 +77,13 @@ const BuyToken: React.FC = () => {
         setReload(true);
       });
     } catch (err) {
+      toast({
+        title: "Buy limit failed.",
+        description: err,
+        position: "top",
+        isClosable: true,
+        duration: 10000,
+      });
       setLoading(false);
       console.log({ err });
     }

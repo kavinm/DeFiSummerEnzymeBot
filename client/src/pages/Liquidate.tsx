@@ -142,6 +142,13 @@ const Liquidate: React.FC = () => {
         setReload(true);
       });
     } catch (err) {
+      toast({
+        title: "Liquidate failed.",
+        description: err,
+        position: "top",
+        isClosable: true,
+        duration: 10000,
+      });
       setLoading(false);
       console.log({ err });
     }

@@ -103,7 +103,7 @@ const RebalanceHoldings: React.FC = () => {
           });
         } else {
           toast({
-            title: "Rebalance portfolio unsuccessful.",
+            title: "Rebalance portfolio failed.",
             description: res,
             position: "top",
             isClosable: true,
@@ -115,7 +115,7 @@ const RebalanceHoldings: React.FC = () => {
       });
     } catch (err) {
       toast({
-        title: "Rebalance portfolio unsuccessful.",
+        title: "Rebalance portfolio failed.",
         position: "top",
         isClosable: true,
         duration: 10000,
