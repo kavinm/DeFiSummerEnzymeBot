@@ -90,7 +90,7 @@ const RebalanceHoldings: React.FC = () => {
       const holdings = Object.entries(rebalancedHoldings)
         .map((e) => ({ ...e[1], amount: +e[1].amount }))
         .filter((e) => e.amount);
-      main("rebalancePortfolioUSDCPlan", bot as EnzymeBot, {
+      main("rebalancePortfolio", bot as EnzymeBot, {
         rebalancedHoldings: holdings,
       }).then((res) => {
         if (res) {
