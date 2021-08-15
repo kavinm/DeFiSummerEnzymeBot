@@ -259,7 +259,7 @@ const Liquidate: React.FC = () => {
                           fontWeight="500"
                           color="gray.50"
                         >
-                          {numeral(r.price).format("$0,0.00")}
+                          {numeral(r.price).format("$ 0,0.00")}
                         </Text>
                       </Td>
                       <Td>
@@ -281,7 +281,7 @@ const Liquidate: React.FC = () => {
                           fontWeight="500"
                           color="gray.50"
                         >
-                          {numeral(r.price * r.balance).format("$0,0.00")}
+                          {numeral(r.price * r.balance).format("$ 0,0.00")}
                         </Text>
                       </Td>
                     </Tr>

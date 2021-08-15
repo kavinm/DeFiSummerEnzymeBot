@@ -11,6 +11,7 @@ import useAuthentication from "./utils/useAuthentication";
 import { EnzymeBot, getERC20Tokens, getPrice } from "enzyme-autotrader-bot";
 import {
   availableTokensAtom,
+  holdingsChoicesAtom,
   reloadBuySellLimitHoldingsAtom,
   vaultHoldingsAtom,
 } from "./atoms";
@@ -21,6 +22,7 @@ const App: React.FC = () => {
   const [isAuthenticated] = useAuthentication();
   const [, setVaultHoldings] = useAtom(vaultHoldingsAtom);
   const [, setAvailableTokens] = useAtom(availableTokensAtom);
+  const [, setHoldingsChoices] = useAtom(holdingsChoicesAtom);
   const [, , authentication] = useAuthentication();
 
   const [reload, setReload] = useAtom(reloadBuySellLimitHoldingsAtom);
@@ -77,13 +79,22 @@ const App: React.FC = () => {
         authentication.network === Networks.Kovan ? "KOVAN" : "MAINNET";
       const tokens = await getERC20Tokens(network);
       const opts = tokens.map((r) => ({ value: r.symbol, label: r.symbol }));
+      const holdingsChoices = tokens.map((t) => ({
+        id: uuid(),
+        name: t.name,
+        asset: t.symbol,
+        price: t.price,
+        balance: 0,
+      }));
       setAvailableTokens(opts);
+      setHoldingsChoices(holdingsChoices);
     }
   }, [
     authentication.vaultAddress,
     authentication.privateKey,
     authentication.network,
     setAvailableTokens,
+    setHoldingsChoices,
   ]);
 
   useEffect(() => {

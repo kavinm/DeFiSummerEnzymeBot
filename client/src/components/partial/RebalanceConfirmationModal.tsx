@@ -11,6 +11,8 @@ import {
   Text,
 } from "@chakra-ui/react";
 import numeral from "numeral";
+import uuid from "react-uuid";
+
 import { ReactComponent as InformationLogo } from "../../assets/logo/information.svg";
 import { ReactComponent as Avatar } from "../../assets/logo/avatar.svg";
 import { ThemedButton } from "../shared";
@@ -39,7 +41,8 @@ const assets = [
 const RebalanceConfirmationModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-}> = ({ isOpen, onClose }) => {
+  triggerSubmit: () => void;
+}> = ({ isOpen, onClose, triggerSubmit }) => {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay backgroundColor="rgba(31, 41, 55, 0.75)" />
@@ -61,6 +64,7 @@ const RebalanceConfirmationModal: React.FC<{
             <Flex
               justifyContent="space-between"
               alignItems="center"
+              key={uuid()}
               {...(i < assets.length - 1 && { mb: "20px" })}
             >
               <Flex>
@@ -140,7 +144,15 @@ const RebalanceConfirmationModal: React.FC<{
             >
               Cancel
             </Button>
-            <ThemedButton px="1rem" h="100%" onClick={onClose} fontSize="sm">
+            <ThemedButton
+              px="1rem"
+              h="100%"
+              onClick={() => {
+                triggerSubmit();
+                onClose();
+              }}
+              fontSize="sm"
+            >
               Confirm
             </ThemedButton>
           </Flex>
