@@ -4,10 +4,12 @@ import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useHistory } from "react-router-dom";
 import { EnzymeBot } from "enzyme-autotrader-bot";
+import { useAtom } from "jotai";
 
 import { Navbar, ThemedButton, ThemedInput } from "../components/shared";
 import useAuthentication from "../utils/useAuthentication";
 import { Networks } from "../config/api";
+import { reloadBuySellLimitHoldingsAtom } from "../atoms";
 
 type FormData = {
   vaultAddress: string;
@@ -46,6 +48,7 @@ const Connect: React.FC = () => {
 
   const history = useHistory();
   const [, setAuthentication] = useAuthentication();
+  const [, setReload] = useAtom(reloadBuySellLimitHoldingsAtom);
 
   const onSubmit = async ({ vaultAddress, privateKey, network }: FormData) => {
     try {
@@ -59,9 +62,8 @@ const Connect: React.FC = () => {
 
       if (bot) {
         setAuthentication({ vaultAddress, privateKey, network });
-        setTimeout(() => {
-          history.push("/buy-sell-limit");
-        }, 500);
+        setReload(true);
+        history.push("/buy-sell-limit");
       }
     } catch (error) {
       console.error(error);
