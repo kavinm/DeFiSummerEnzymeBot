@@ -6,7 +6,7 @@ import uuid from "react-uuid";
 import Connect from "./pages/Connect";
 import BuySellLimit from "./pages/BuySellLimit";
 import Liquidate from "./pages/Liquidate";
-import RebalancePortfolio from "./pages/RebalancePortfolio";
+import RebalanceHoldings from "./pages/RebalanceHoldings";
 import useAuthentication from "./utils/useAuthentication";
 import { EnzymeBot, getERC20Tokens, getPrice } from "enzyme-autotrader-bot";
 import {
@@ -135,8 +135,8 @@ const App: React.FC = () => {
       <Route exact path="/liquidate">
         <Liquidate />
       </Route>
-      <Route exact path="/rebalance-portfolio">
-        <RebalancePortfolio />
+      <Route exact path="/rebalance-holdings">
+        <RebalanceHoldings />
       </Route>
     </Switch>
   );

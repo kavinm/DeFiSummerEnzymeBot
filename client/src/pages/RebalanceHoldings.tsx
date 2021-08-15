@@ -16,12 +16,14 @@ import {
   useDisclosure,
   Avatar,
   useToast,
+  Skeleton,
 } from "@chakra-ui/react";
 import { useForm } from "react-hook-form";
 import styled from "@emotion/styled";
 import numeral from "numeral";
 import { EnzymeBot, main } from "enzyme-autotrader-bot";
 import { useAtom } from "jotai";
+import uuid from "react-uuid";
 
 import DefaultLayout from "../layouts/DefaultLayout";
 import { ThemedButton } from "../components/shared";
@@ -60,10 +62,10 @@ type FormData = {
   };
 };
 
-const RebalancePortfolio: React.FC = () => {
+const RebalanceHoldings: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [bot, setBot] = useState<Partial<EnzymeBot>>({});
-  const { handleSubmit, register } = useForm<FormData>();
+  const { handleSubmit, register, reset, watch } = useForm<FormData>();
   const [, , authentication] = useAuthentication();
   const [vaultHoldings] = useAtom(vaultHoldingsAtom);
   const [holdingsChoices] = useAtom(holdingsChoicesAtom);
@@ -78,6 +80,10 @@ const RebalancePortfolio: React.FC = () => {
 
   const iterator = (h: { [x: string]: any; id: string }) => h.asset;
 
+  const watchedHoldings = Object.entries(watch("rebalancedHoldings") || {})
+    .map((e) => ({ ...e[1], amount: +e[1].amount }))
+    .filter((e) => e.amount);
+
   const onSubmit = ({ rebalancedHoldings }: FormData) => {
     setLoading(true);
     try {
@@ -89,7 +95,7 @@ const RebalancePortfolio: React.FC = () => {
       }).then((res) => {
         if (res) {
           toast({
-            title: "Rebalance portfolio successful.",
+            title: "Rebalance holdings successful.",
             description: res,
             position: "top",
             isClosable: true,
@@ -97,7 +103,7 @@ const RebalancePortfolio: React.FC = () => {
           });
         } else {
           toast({
-            title: "Rebalance portfolio unsuccessful.",
+            title: "Rebalance holdings failed.",
             description: res,
             position: "top",
             isClosable: true,
@@ -109,7 +115,7 @@ const RebalancePortfolio: React.FC = () => {
       });
     } catch (err) {
       toast({
-        title: "Rebalance portfolio unsuccessful.",
+        title: "Rebalance holdings failed.",
         position: "top",
         isClosable: true,
         duration: 10000,
@@ -167,7 +173,7 @@ const RebalancePortfolio: React.FC = () => {
 
   return (
     <>
-      <DefaultLayout name="Rebalance Portfolio">
+      <DefaultLayout name="Rebalance Holdings">
         <Box
           backgroundColor="accentCards"
           border="1px solid"
@@ -195,8 +201,9 @@ const RebalancePortfolio: React.FC = () => {
               borderRadius="8px"
               padding="0px"
               mt="0.5rem"
-              maxH="400px !important"
+              maxH={vaultHoldings.length ? "400px !important" : "230px"}
               overflow={{ base: "auto", xl: "hidden auto" }}
+              {...(!vaultHoldings.length && { overflow: "hidden" })}
             >
               <StyledTable variant="simple">
                 <Thead>
@@ -223,8 +230,8 @@ const RebalancePortfolio: React.FC = () => {
                     <Th color="gray.300" fontWeight="500">
                       TOTAL
                     </Th>
-                    <Th color="gray.300" fontWeight="500"></Th>
-                    <Th color="gray.300" fontWeight="500"></Th>
+                    <Th color="gray.300" fontWeight="500" />
+                    <Th color="gray.300" fontWeight="500" />
                     <Th color="gray.300" fontWeight="500">
                       {numeral(totalCurrentValue).format("$ 0,0.00")}
                     </Th>
@@ -234,92 +241,123 @@ const RebalancePortfolio: React.FC = () => {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {uniqBy([...vaultHoldings, ...holdingsChoices], iterator).map(
-                    (r, i) => (
-                      <Tr key={r.id}>
-                        <Td>
-                          <Flex minW="240px">
-                            <Box mr="16px">
-                              <Avatar
-                                src={`https://cryptoicon-api.vercel.app/api/icon/${r.asset.toLowerCase()}`}
-                                alt={r.asset}
-                              />
-                            </Box>
-                            <Box>
-                              <Text
-                                as="span"
-                                display="block"
-                                fontSize="sm"
-                                fontWeight="medium"
+                  {vaultHoldings.length
+                    ? uniqBy(
+                        [...vaultHoldings, ...holdingsChoices],
+                        iterator
+                      ).map((r, i) => (
+                        <Tr key={r.id}>
+                          <Td>
+                            <Flex minW="240px">
+                              <Box mr="16px">
+                                <Avatar
+                                  bg="gray.400"
+                                  icon={<Box />}
+                                  src={`https://cryptoicon-api.vercel.app/api/icon/${r.asset.toLowerCase()}`}
+                                  alt={r.asset}
+                                />
+                              </Box>
+                              <Box>
+                                <Text
+                                  as="span"
+                                  display="block"
+                                  fontSize="sm"
+                                  fontWeight="medium"
+                                  color="white"
+                                >
+                                  {r.name}
+                                </Text>
+                                <Text
+                                  as="span"
+                                  fontSize="sm"
+                                  fontWeight="400"
+                                  color="placeholders"
+                                >
+                                  {r.asset}
+                                </Text>
+                              </Box>
+                            </Flex>
+                          </Td>
+                          <Td>
+                            <Text
+                              as="span"
+                              display="block"
+                              fontSize="sm"
+                              fontWeight="500"
+                              color="gray.50"
+                            >
+                              {numeral(r.price).format("$ 0,0.00")}
+                            </Text>
+                          </Td>
+                          <Td>
+                            <Text
+                              as="span"
+                              display="block"
+                              fontSize="sm"
+                              fontWeight="500"
+                              color="placeholders"
+                            >
+                              {r.balance}
+                            </Text>
+                          </Td>
+                          <Td>
+                            <Text
+                              as="span"
+                              display="block"
+                              fontSize="sm"
+                              fontWeight="500"
+                              color="gray.50"
+                            >
+                              {numeral(r.price * r.balance).format("$ 0,0.00")}
+                            </Text>
+                          </Td>
+                          <Td>
+                            <NumberInput w="150px">
+                              <NumberInputField
                                 color="white"
-                              >
-                                {r.name}
-                              </Text>
-                              <Text
-                                as="span"
-                                fontSize="sm"
-                                fontWeight="400"
-                                color="placeholders"
-                              >
-                                {r.asset}
-                              </Text>
-                            </Box>
-                          </Flex>
-                        </Td>
-                        <Td>
-                          <Text
-                            as="span"
-                            display="block"
-                            fontSize="sm"
-                            fontWeight="500"
-                            color="gray.50"
-                          >
-                            {numeral(r.price).format("$ 0,0.00")}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <Text
-                            as="span"
-                            display="block"
-                            fontSize="sm"
-                            fontWeight="500"
-                            color="placeholders"
-                          >
-                            {r.balance}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <Text
-                            as="span"
-                            display="block"
-                            fontSize="sm"
-                            fontWeight="500"
-                            color="gray.50"
-                          >
-                            {numeral(r.price * r.balance).format("$ 0,0.00")}
-                          </Text>
-                        </Td>
-                        <Td>
-                          <NumberInput w="150px">
-                            <NumberInputField
-                              color="white"
-                              borderColor="accentOutlines"
+                                borderColor="accentOutlines"
+                                {...register(
+                                  `rebalancedHoldings.${r.asset}.amount` as any
+                                )}
+                              />
+                            </NumberInput>
+                            <input
+                              type="hidden"
                               {...register(
-                                `rebalancedHoldings.${r.asset}.amount` as any
+                                `rebalancedHoldings.${r.asset}.symbol` as any
                               )}
+                              value={r.asset}
                             />
-                          </NumberInput>
-                          <input
-                            type="hidden"
-                            {...register(
-                              `rebalancedHoldings.${r.asset}.symbol` as any
-                            )}
-                            value={r.asset}
-                          />
-                        </Td>
-                      </Tr>
-                    )
-                  )}
+                          </Td>
+                        </Tr>
+                      ))
+                    : Array.from({ length: 2 }).map((_) => (
+                        <Tr key={uuid()} py="1rem">
+                          <Td>
+                            <Flex minW="240px">
+                              <Box mr="16px">
+                                <Skeleton w="40px" height="40px" />
+                              </Box>
+                              <Box>
+                                <Skeleton height="20px" width="120px" />
+                                <Skeleton height="16px" mt="4px" width="72px" />
+                              </Box>
+                            </Flex>
+                          </Td>
+                          <Td>
+                            <Skeleton height="20px" />
+                          </Td>
+                          <Td>
+                            <Skeleton height="20px" />
+                          </Td>
+                          <Td>
+                            <Skeleton height="20px" />
+                          </Td>
+                          <Td>
+                            <Skeleton height="20px" />
+                          </Td>
+                        </Tr>
+                      ))}
                 </Tbody>
               </StyledTable>
             </Box>
@@ -340,6 +378,10 @@ const RebalancePortfolio: React.FC = () => {
                 px="4rem"
                 h="100%"
                 mr="20px"
+                isDisabled={!vaultHoldings.length}
+                onClick={() => {
+                  reset();
+                }}
               >
                 Reset
               </Button>
@@ -348,6 +390,7 @@ const RebalancePortfolio: React.FC = () => {
                 h="100%"
                 onClick={onOpen}
                 isLoading={loading}
+                isDisabled={!vaultHoldings.length}
               >
                 Confirm
               </ThemedButton>
@@ -359,9 +402,11 @@ const RebalancePortfolio: React.FC = () => {
         isOpen={isOpen}
         onClose={onClose}
         triggerSubmit={triggerSubmit}
+        basisHoldings={uniqBy([...vaultHoldings, ...holdingsChoices], iterator)}
+        watchedHoldings={watchedHoldings}
       />
     </>
   );
 };
 
-export default RebalancePortfolio;
+export default RebalanceHoldings;
