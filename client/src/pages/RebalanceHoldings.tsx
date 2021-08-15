@@ -103,7 +103,7 @@ const RebalanceHoldings: React.FC = () => {
           });
         } else {
           toast({
-            title: "Rebalance holdings failed.",
+            title: "Rebalance holdings are not equal or within 5% below value.",
             description: res,
             position: "top",
             isClosable: true,
