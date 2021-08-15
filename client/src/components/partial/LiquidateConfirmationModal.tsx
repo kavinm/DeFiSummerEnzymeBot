@@ -35,7 +35,7 @@ const LiquidateConfirmationModal: React.FC<{
         </ModalHeader>
         <ModalBody>
           <Text as="span" color="#D1D5DB" fontSize="sm" fontWeight="400">
-            Are you sure you want to proceedt? This action cannot be undone.
+            Are you sure you want to proceed? This action cannot be undone.
           </Text>
         </ModalBody>
 

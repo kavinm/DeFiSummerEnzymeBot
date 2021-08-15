@@ -57,7 +57,22 @@ class EnzymeBot {
             const wallet = getWallet_1.getWallet(key, provider);
             const vaultAddress = inputVaultAddress;
             const vault = yield getVault_1.getVaultInfo(subgraphEndpoint, vaultAddress);
-            return new this(network, contracts, tokens, wallet, vaultAddress || '0x6221e604a94143798834faed4788687aa37aaf9a', vault, provider, subgraphEndpoint);
+            return new this(network, contracts, tokens, wallet, vaultAddress, vault, provider, subgraphEndpoint);
+        });
+    }
+    static createFromInputMainnet(inputVaultAddress, privateKey) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const network = 'MAINNET';
+            const subgraphEndpoint = 'https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme';
+            const key = privateKey;
+            const contracts = yield getDeployment_1.getDeployment(subgraphEndpoint);
+            const tokens = yield getToken_1.getTokens(subgraphEndpoint);
+            const node = 'https://mainnet.infura.io/v3/1d5ebf5899694a72a55198c3719c06e5';
+            const provider = new ethers_1.providers.JsonRpcProvider(node, network.toLowerCase());
+            const wallet = getWallet_1.getWallet(key, provider);
+            const vaultAddress = inputVaultAddress;
+            const vault = yield getVault_1.getVaultInfo(subgraphEndpoint, vaultAddress);
+            return new this(network, contracts, tokens, wallet, vaultAddress, vault, provider, subgraphEndpoint);
         });
     }
     static staticCreateKovan(inputVaultAddress) {

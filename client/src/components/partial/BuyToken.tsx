@@ -6,6 +6,7 @@ import {
   InputGroup,
   InputLeftElement,
   InputRightElement,
+  useToast,
 } from "@chakra-ui/react";
 import { BsArrowDown } from "react-icons/bs";
 import { CheckIcon } from "@chakra-ui/icons";
@@ -17,9 +18,10 @@ import { ThemedButton, ThemedTokenSelect } from "../shared";
 import useAuthentication from "../../utils/useAuthentication";
 import {
   availableTokensAtom,
-  reloadAutomatedStrategyHoldingsAtom,
+  reloadBuySellLimitHoldingsAtom,
   vaultHoldingsAtom,
 } from "../../atoms";
+import { Networks } from "../../config/api";
 
 type TokenOptions = {
   from?: {
@@ -52,22 +54,32 @@ const BuyToken: React.FC = () => {
   });
   const [, , authentication] = useAuthentication();
   const [bot, setBot] = useState<Partial<EnzymeBot>>({});
-  const [reload, setReload] = useAtom(reloadAutomatedStrategyHoldingsAtom);
+  const [reload, setReload] = useAtom(reloadBuySellLimitHoldingsAtom);
   const [availableTokens] = useAtom(availableTokensAtom);
   const [vaultHoldings] = useAtom(vaultHoldingsAtom);
+  const [loading, setLoading] = useState(false);
+  const toast = useToast();
 
   const onSubmit = ({ tokenSell, tokenBuy, priceLimit }: FormData) => {
+    setLoading(true);
     try {
       main("buyLimit", bot as EnzymeBot, {
         tokenSell: tokenSell.value,
         tokenBuy: tokenBuy.value,
         priceLimit: +priceLimit,
-      });
-
-      setTimeout(() => {
+      }).then((res) => {
+        toast({
+          title: "Buy limit successful.",
+          description: res,
+          position: "top",
+          isClosable: true,
+          duration: 10000,
+        });
+        setLoading(false);
         setReload(true);
-      }, 40000);
+      });
     } catch (err) {
+      setLoading(false);
       console.log({ err });
     }
   };
@@ -77,10 +89,20 @@ const BuyToken: React.FC = () => {
       setTokenOptions((prev) => ({ ...prev, to: availableTokens }));
       try {
         (async () => {
-          const bot = await EnzymeBot.createFromInput(
-            authentication.vaultAddress,
-            authentication.privateKey
-          );
+          let bot: EnzymeBot;
+
+          if (authentication.network === Networks.Kovan) {
+            bot = await EnzymeBot.createFromInput(
+              authentication.vaultAddress,
+              authentication.privateKey
+            );
+          } else {
+            bot = await EnzymeBot.createFromInputMainnet(
+              authentication.vaultAddress,
+              authentication.privateKey
+            );
+          }
+
           setBot(bot);
           setTokenOptions((prev) => ({
             ...prev,
@@ -96,6 +118,7 @@ const BuyToken: React.FC = () => {
   }, [
     authentication.vaultAddress,
     authentication.privateKey,
+    authentication.network,
     availableTokens,
     vaultHoldings,
   ]);
@@ -230,7 +253,13 @@ const BuyToken: React.FC = () => {
           zIndex="0"
         />
       </InputGroup>
-      <ThemedButton type="submit" w="full" mt="2.5rem" py="1.5rem">
+      <ThemedButton
+        type="submit"
+        w="full"
+        mt="2.5rem"
+        py="1.5rem"
+        isLoading={loading}
+      >
         Trade
       </ThemedButton>
     </form>

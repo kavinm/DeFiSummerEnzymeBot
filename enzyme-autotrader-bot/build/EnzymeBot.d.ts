@@ -12,7 +12,8 @@ export declare class EnzymeBot {
     readonly provider: providers.JsonRpcProvider;
     readonly subgraphEndpoint: string;
     static create(network: 'KOVAN' | 'MAINNET'): Promise<EnzymeBot>;
-    static createFromInput(inputVaultAddress?: string, privateKey?: string): Promise<EnzymeBot>;
+    static createFromInput(inputVaultAddress: string, privateKey: string): Promise<EnzymeBot>;
+    static createFromInputMainnet(inputVaultAddress: string, privateKey: string): Promise<EnzymeBot>;
     static staticCreateKovan(inputVaultAddress?: string): Promise<EnzymeBot>;
     private constructor();
     chooseRandomAsset(): Promise<({

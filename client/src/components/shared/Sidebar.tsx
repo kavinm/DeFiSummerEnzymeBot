@@ -6,7 +6,7 @@ import uuid from "react-uuid";
 import { ReactComponent as EnzymeLogo } from "../../assets/logo/enzyme.svg";
 
 const links = [
-  { id: uuid(), label: "Automated Strategy", url: "/automated-strategy" },
+  { id: uuid(), label: "Buy-Sell Limit", url: "/buy-sell-limit" },
   { id: uuid(), label: "Liquidate", url: "/liquidate" },
   { id: uuid(), label: "Rebalance Portfolio", url: "/rebalance-portfolio" },
 ];

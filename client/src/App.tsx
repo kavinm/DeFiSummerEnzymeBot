@@ -4,43 +4,52 @@ import { useAtom } from "jotai";
 import uuid from "react-uuid";
 
 import Connect from "./pages/Connect";
-import AutomatedStrategy from "./pages/AutomatedStrategy";
+import BuySellLimit from "./pages/BuySellLimit";
 import Liquidate from "./pages/Liquidate";
 import RebalancePortfolio from "./pages/RebalancePortfolio";
 import useAuthentication from "./utils/useAuthentication";
 import { EnzymeBot, getERC20Tokens, getPrice } from "enzyme-autotrader-bot";
 import {
   availableTokensAtom,
-  reloadAutomatedStrategyHoldingsAtom,
+  holdingsChoicesAtom,
+  reloadBuySellLimitHoldingsAtom,
   vaultHoldingsAtom,
 } from "./atoms";
-import { ENZYME_KOVAN_GRAPH_API } from "./config/api";
+import { Networks } from "./config/api";
 
 const App: React.FC = () => {
   const history = useHistory();
   const [isAuthenticated] = useAuthentication();
   const [, setVaultHoldings] = useAtom(vaultHoldingsAtom);
   const [, setAvailableTokens] = useAtom(availableTokensAtom);
+  const [, setHoldingsChoices] = useAtom(holdingsChoicesAtom);
   const [, , authentication] = useAuthentication();
 
-  const [reload, setReload] = useAtom(reloadAutomatedStrategyHoldingsAtom);
+  const [reload, setReload] = useAtom(reloadBuySellLimitHoldingsAtom);
 
   const getHoldings = useCallback(async () => {
     if (authentication.vaultAddress && authentication.privateKey) {
       try {
-        const bot = await EnzymeBot.createFromInput(
-          authentication.vaultAddress,
-          authentication.privateKey
-        );
+        let bot: EnzymeBot;
+
+        if (authentication.network === Networks.Kovan) {
+          bot = await EnzymeBot.createFromInput(
+            authentication.vaultAddress,
+            authentication.privateKey
+          );
+        } else {
+          bot = await EnzymeBot.createFromInputMainnet(
+            authentication.vaultAddress,
+            authentication.privateKey
+          );
+        }
+
         const holdingsRes = await bot.getHoldingsWithNumberAmounts();
         const holdingsAmounts =
           holdingsRes?.reduce((acc, curr) => acc + curr.amount, 0) || 0;
         const holdings = await Promise.all(
           holdingsRes?.map(async (h) => {
-            const price = await getPrice(
-              ENZYME_KOVAN_GRAPH_API,
-              h.symbol || ""
-            );
+            const price = await getPrice(bot.subgraphEndpoint, h.symbol || "");
 
             return {
               id: uuid(),
@@ -60,24 +69,37 @@ const App: React.FC = () => {
   }, [
     authentication.vaultAddress,
     authentication.privateKey,
+    authentication.network,
     setVaultHoldings,
   ]);
 
   const getAvailableTokens = useCallback(async () => {
     if (authentication.vaultAddress && authentication.privateKey) {
-      const tokens = await getERC20Tokens("KOVAN");
+      const network =
+        authentication.network === Networks.Kovan ? "KOVAN" : "MAINNET";
+      const tokens = await getERC20Tokens(network);
       const opts = tokens.map((r) => ({ value: r.symbol, label: r.symbol }));
+      const holdingsChoices = tokens.map((t) => ({
+        id: uuid(),
+        name: t.name,
+        asset: t.symbol,
+        price: t.price,
+        balance: 0,
+      }));
       setAvailableTokens(opts);
+      setHoldingsChoices(holdingsChoices);
     }
   }, [
     authentication.vaultAddress,
     authentication.privateKey,
+    authentication.network,
     setAvailableTokens,
+    setHoldingsChoices,
   ]);
 
   useEffect(() => {
     if (isAuthenticated && history.location.pathname === "/") {
-      history.replace("/automated-strategy");
+      history.replace("/buy-sell-limit");
     } else if (!isAuthenticated && history.location.pathname !== "/") {
       history.replace("/");
     }
@@ -107,8 +129,8 @@ const App: React.FC = () => {
       <Route exact path="/">
         <Connect />
       </Route>
-      <Route exact path="/automated-strategy">
-        <AutomatedStrategy />
+      <Route exact path="/buy-sell-limit">
+        <BuySellLimit />
       </Route>
       <Route exact path="/liquidate">
         <Liquidate />

@@ -41,11 +41,11 @@ const stopLimitRows = [
   },
 ];
 
-const AutomatedStrategy: React.FC = () => {
+const BuySellLimit: React.FC = () => {
   const [vaultHoldings] = useAtom(vaultHoldingsAtom);
 
   return (
-    <DefaultLayout name="Automated Strategy">
+    <DefaultLayout name="Buy-Sell Limit">
       <Flex
         maxW="1000px"
         mt="40px"
@@ -94,4 +94,4 @@ const AutomatedStrategy: React.FC = () => {
   );
 };
 
-export default AutomatedStrategy;
+export default BuySellLimit;
