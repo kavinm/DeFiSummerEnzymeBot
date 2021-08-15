@@ -1,5 +1,5 @@
-import { Box, Text } from "@chakra-ui/react";
-import { useForm } from "react-hook-form";
+import { Box, Radio, RadioGroup, Text } from "@chakra-ui/react";
+import { useForm, Controller } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import * as yup from "yup";
 import { useHistory } from "react-router-dom";
@@ -7,10 +7,12 @@ import { EnzymeBot } from "enzyme-autotrader-bot";
 
 import { Navbar, ThemedButton, ThemedInput } from "../components/shared";
 import useAuthentication from "../utils/useAuthentication";
+import { Networks } from "../config/api";
 
 type FormData = {
   vaultAddress: string;
   privateKey: string;
+  network: string;
 };
 
 const schema = yup.object().shape({
@@ -26,21 +28,26 @@ const schema = yup.object().shape({
     .matches(/^[a-fA-F0-9]{64}$/, {
       message: "Please provide a valid private key format.",
     }),
+  network: yup.string(),
 });
 
 const Connect: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    control,
+    formState: { errors, isSubmitting },
   } = useForm<FormData>({
     resolver: yupResolver(schema),
+    defaultValues: {
+      network: Networks.Kovan,
+    },
   });
 
   const history = useHistory();
   const [, setAuthentication] = useAuthentication();
 
-  const onSubmit = async ({ vaultAddress, privateKey }: FormData) => {
+  const onSubmit = async ({ vaultAddress, privateKey, network }: FormData) => {
     try {
       await EnzymeBot.createFromInput(vaultAddress, privateKey);
       setAuthentication({ vaultAddress, privateKey });
@@ -51,7 +58,7 @@ const Connect: React.FC = () => {
   };
 
   return (
-    <Box backgroundColor="accentCards" minHeight="100vh">
+    <Box backgroundColor="accentCards" minHeight="100vh" pb="2rem">
       <Navbar />
       <Box
         backgroundColor="accentSurface"
@@ -103,7 +110,7 @@ const Connect: React.FC = () => {
             as="span"
             color="red.400"
             display="block"
-            h="1.5rem"
+            h="1.25rem"
             fontSize="sm"
           >
             {errors.vaultAddress?.message}
@@ -124,22 +131,57 @@ const Connect: React.FC = () => {
             id="privateKey"
             placeholder="Enter private key"
             isInvalid={!!errors.privateKey?.message}
+            type="password"
           />
           <Text
             as="span"
             color="red.400"
             display="block"
-            h="2rem"
+            h="1.25rem"
             fontSize="sm"
           >
             {errors.privateKey?.message}
           </Text>
+          <Text
+            as="label"
+            htmlFor="privateKey"
+            fontSize="sm"
+            fontWeight="medium"
+            color="gray.300"
+            lineHeight="1.25rem"
+          >
+            Network
+          </Text>
+          <Controller
+            control={control}
+            name="network"
+            render={({
+              field: { onChange, onBlur, value, name, ref },
+              fieldState: { invalid, isTouched, isDirty, error },
+              formState,
+            }) => (
+              <RadioGroup
+                onBlur={onBlur}
+                onChange={onChange}
+                checked={value}
+                ref={ref}
+                color="gray.300"
+                defaultValue={Networks.Kovan}
+              >
+                <Radio value={Networks.Kovan} mr="1rem">
+                  Kovan
+                </Radio>
+                <Radio value={Networks.Mainnet}>Mainnet</Radio>
+              </RadioGroup>
+            )}
+          />
           <ThemedButton
             color="white"
             type="submit"
-            mt="2rem"
+            mt="3rem"
             mx="auto"
             display="block"
+            isLoading={isSubmitting}
           >
             Connect Wallet
           </ThemedButton>

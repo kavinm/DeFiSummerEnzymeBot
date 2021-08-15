@@ -25,7 +25,7 @@ import LiquidateConfirmationModal from "../components/partial/LiquidateConfirmat
 import useAuthentication from "../utils/useAuthentication";
 import {
   availableTokensAtom,
-  reloadAutomatedStrategyHoldingsAtom,
+  reloadBuySellLimitHoldingsAtom,
   vaultHoldingsAtom,
 } from "../atoms";
 
@@ -67,7 +67,7 @@ const Liquidate: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [, , authentication] = useAuthentication();
   const [vaultHoldings] = useAtom(vaultHoldingsAtom);
-  const [reload, setReload] = useAtom(reloadAutomatedStrategyHoldingsAtom);
+  const [reload, setReload] = useAtom(reloadBuySellLimitHoldingsAtom);
   const [availableTokens] = useAtom(availableTokensAtom);
 
   const existingliquidateTokens = watch("liquidateTokens") as string[];

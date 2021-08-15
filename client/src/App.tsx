@@ -4,14 +4,14 @@ import { useAtom } from "jotai";
 import uuid from "react-uuid";
 
 import Connect from "./pages/Connect";
-import AutomatedStrategy from "./pages/AutomatedStrategy";
+import BuySellLimit from "./pages/BuySellLimit";
 import Liquidate from "./pages/Liquidate";
 import RebalancePortfolio from "./pages/RebalancePortfolio";
 import useAuthentication from "./utils/useAuthentication";
 import { EnzymeBot, getERC20Tokens, getPrice } from "enzyme-autotrader-bot";
 import {
   availableTokensAtom,
-  reloadAutomatedStrategyHoldingsAtom,
+  reloadBuySellLimitHoldingsAtom,
   vaultHoldingsAtom,
 } from "./atoms";
 import { ENZYME_KOVAN_GRAPH_API } from "./config/api";
@@ -23,7 +23,7 @@ const App: React.FC = () => {
   const [, setAvailableTokens] = useAtom(availableTokensAtom);
   const [, , authentication] = useAuthentication();
 
-  const [reload, setReload] = useAtom(reloadAutomatedStrategyHoldingsAtom);
+  const [reload, setReload] = useAtom(reloadBuySellLimitHoldingsAtom);
 
   const getHoldings = useCallback(async () => {
     if (authentication.vaultAddress && authentication.privateKey) {
@@ -77,7 +77,7 @@ const App: React.FC = () => {
 
   useEffect(() => {
     if (isAuthenticated && history.location.pathname === "/") {
-      history.replace("/automated-strategy");
+      history.replace("/buy-sell-limit");
     } else if (!isAuthenticated && history.location.pathname !== "/") {
       history.replace("/");
     }
@@ -107,8 +107,8 @@ const App: React.FC = () => {
       <Route exact path="/">
         <Connect />
       </Route>
-      <Route exact path="/automated-strategy">
-        <AutomatedStrategy />
+      <Route exact path="/buy-sell-limit">
+        <BuySellLimit />
       </Route>
       <Route exact path="/liquidate">
         <Liquidate />

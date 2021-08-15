@@ -17,7 +17,7 @@ import { ThemedButton, ThemedTokenSelect } from "../shared";
 import useAuthentication from "../../utils/useAuthentication";
 import {
   availableTokensAtom,
-  reloadAutomatedStrategyHoldingsAtom,
+  reloadBuySellLimitHoldingsAtom,
   vaultHoldingsAtom,
 } from "../../atoms";
 
@@ -52,7 +52,7 @@ const BuyToken: React.FC = () => {
   });
   const [, , authentication] = useAuthentication();
   const [bot, setBot] = useState<Partial<EnzymeBot>>({});
-  const [reload, setReload] = useAtom(reloadAutomatedStrategyHoldingsAtom);
+  const [reload, setReload] = useAtom(reloadBuySellLimitHoldingsAtom);
   const [availableTokens] = useAtom(availableTokensAtom);
   const [vaultHoldings] = useAtom(vaultHoldingsAtom);
 
