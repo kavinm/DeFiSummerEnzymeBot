@@ -32,7 +32,7 @@ export class EnzymeBot {
 
     return new this(network, contracts, tokens, wallet, vaultAddress, vault, provider, subgraphEndpoint);
   }
-  public static async createFromInput(inputVaultAddress?: string, privateKey?: string) {
+  public static async createFromInput(inputVaultAddress: string, privateKey: string) {
     const network = 'KOVAN';
     const subgraphEndpoint = 'https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme-kovan';
     const key = privateKey;
@@ -44,16 +44,22 @@ export class EnzymeBot {
     const vaultAddress = inputVaultAddress;
     const vault = await getVaultInfo(subgraphEndpoint, vaultAddress!);
 
-    return new this(
-      network,
-      contracts,
-      tokens,
-      wallet,
-      vaultAddress || '0x6221e604a94143798834faed4788687aa37aaf9a',
-      vault,
-      provider,
-      subgraphEndpoint
-    );
+    return new this(network, contracts, tokens, wallet, vaultAddress!, vault, provider, subgraphEndpoint);
+  }
+
+  public static async createFromInputMainnet(inputVaultAddress: string, privateKey: string) {
+    const network = 'MAINNET';
+    const subgraphEndpoint = 'https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme';
+    const key = privateKey;
+    const contracts = await getDeployment(subgraphEndpoint);
+    const tokens = await getTokens(subgraphEndpoint);
+    const node = 'https://mainnet.infura.io/v3/1d5ebf5899694a72a55198c3719c06e5';
+    const provider = new providers.JsonRpcProvider(node, network.toLowerCase());
+    const wallet = getWallet(key!, provider);
+    const vaultAddress = inputVaultAddress;
+    const vault = await getVaultInfo(subgraphEndpoint, vaultAddress!);
+
+    return new this(network, contracts, tokens, wallet, vaultAddress!, vault, provider, subgraphEndpoint);
   }
 
   public static async staticCreateKovan(inputVaultAddress?: string) {
@@ -330,10 +336,10 @@ export class EnzymeBot {
       let decimals = holding.decimals;
       let DecimalAmount = parseInt(holding.amount._hex, 16);
       let amount = DecimalAmount / 10 ** decimals!;
-      console.log('Amount: ' + amount + '\n'+ 'Decimal Amount: ' + DecimalAmount);
+      console.log('Amount: ' + amount + '\n' + 'Decimal Amount: ' + DecimalAmount);
       let priceOfCoin = await getPrice2(this.subgraphEndpoint, holding.symbol!);
       let value = amount * priceOfCoin!;
-      console.log('Value: '+value);
+      console.log('Value: ' + value);
       rebalancedtotalValue += value;
     }
     console.log(currentTotalValue);
@@ -343,7 +349,7 @@ export class EnzymeBot {
 
     // allows trades within 5%
     const withinFivePercent =
-    rebalancedtotalValue > currentTotalValue * 0.95 && rebalancedtotalValue <= currentTotalValue;
+      rebalancedtotalValue > currentTotalValue * 0.95 && rebalancedtotalValue <= currentTotalValue;
     const value = currentTotalValue === rebalancedtotalValue || withinFivePercent;
     if (value === false) {
       console.log('\n The amounts are not equal or within 5 percent \n');

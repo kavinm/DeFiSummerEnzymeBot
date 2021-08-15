@@ -19,7 +19,13 @@ export async function getPrice2(endpoint: string, token: string) {
   let priceOfETH: number;
 
   //change this to mainnet api later on
-  const res = await axios.get('https://data.kovan.enzyme.finance/api/currency/list');
+  let res;
+  //if the last character is n, must be kovan endpoint
+  if (endpoint.slice(-1) === 'n') {
+    res = await axios.get('https://data.kovan.enzyme.finance/api/currency/list');
+  } else {
+    res = await axios.get('https://data.enzyme.finance/api/currency/list');
+  }
 
   priceOfETH = Number(res.data.data.find((d: any) => d.id === 'ETH').price.price);
   // use the price of USDC which is also in ETH to get the price in USD
