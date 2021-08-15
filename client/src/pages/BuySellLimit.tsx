@@ -83,6 +83,7 @@ const BuySellLimit: React.FC = () => {
         <Flex direction={{ base: "column", xl: "row" }} w="min-content">
           <Table
             rows={stopLimitRows}
+            tempBasisRows={vaultHoldings}
             shownAs="stopLimitTable"
             mr={{ base: "0px", xl: "20px" }}
             mb={{ base: "20px", xl: "0px" }}

@@ -5,11 +5,9 @@ import {
   Input,
   InputGroup,
   InputLeftElement,
-  InputRightElement,
   useToast,
 } from "@chakra-ui/react";
 import { BsArrowDown } from "react-icons/bs";
-import { CheckIcon } from "@chakra-ui/icons";
 import { Controller, useForm } from "react-hook-form";
 import { EnzymeBot, main } from "enzyme-autotrader-bot";
 import { useAtom } from "jotai";
@@ -204,10 +202,6 @@ const SellToken: React.FC = () => {
           pattern="^\(\d{1,3}(\,\d{3})*|(\d+))(\.\d{2})?$"
           {...register("priceLimit")}
         />
-        <InputRightElement
-          children={<CheckIcon color="green.500" />}
-          zIndex="0"
-        />
       </InputGroup>
       {/* ARROW  */}
       <Flex justifyContent="center" mt="1.5rem" mb="0.5rem">
@@ -259,6 +253,7 @@ const SellToken: React.FC = () => {
         mt="2.5rem"
         py="1.5rem"
         isLoading={loading}
+        isDisabled={!vaultHoldings.length}
       >
         Trade
       </ThemedButton>

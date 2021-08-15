@@ -13,12 +13,14 @@ import {
   useDisclosure,
   Avatar,
   useToast,
+  Skeleton,
 } from "@chakra-ui/react";
 import styled from "@emotion/styled";
 import { Controller, useForm } from "react-hook-form";
 import numeral from "numeral";
 import { EnzymeBot, main } from "enzyme-autotrader-bot";
 import { useAtom } from "jotai";
+import uuid from "react-uuid";
 
 import { ThemedButton, ThemedTokenSelect } from "../components/shared";
 import DefaultLayout from "../layouts/DefaultLayout";
@@ -200,92 +202,122 @@ const Liquidate: React.FC = () => {
                   </Tr>
                 </Thead>
                 <Tbody>
-                  {vaultHoldings.map((r) => (
-                    <Tr key={r.id}>
-                      <Td padding="16px 0px 16px 20px" alignItems="center">
-                        <Checkbox
-                          borderColor="accentOutlines"
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              setValue("liquidateTokens", [
-                                ...existingliquidateTokens,
-                                r.asset,
-                              ]);
-                            } else {
-                              setValue(
-                                "liquidateTokens",
-                                existingliquidateTokens.filter(
-                                  (t) => t !== r.asset
-                                )
-                              );
-                            }
-                          }}
-                        />
-                      </Td>
-                      <Td>
-                        <Flex minW="240px">
-                          <Box mr="16px">
-                            <Avatar
-                              src={`https://cryptoicon-api.vercel.app/api/icon/${r.asset.toLowerCase()}`}
-                              alt={r.asset}
+                  {vaultHoldings.length
+                    ? vaultHoldings.map((r) => (
+                        <Tr key={r.id}>
+                          <Td padding="16px 0px 16px 20px" alignItems="center">
+                            <Checkbox
+                              borderColor="accentOutlines"
+                              onChange={(e) => {
+                                if (e.target.checked) {
+                                  setValue("liquidateTokens", [
+                                    ...existingliquidateTokens,
+                                    r.asset,
+                                  ]);
+                                } else {
+                                  setValue(
+                                    "liquidateTokens",
+                                    existingliquidateTokens.filter(
+                                      (t) => t !== r.asset
+                                    )
+                                  );
+                                }
+                              }}
                             />
-                          </Box>
-                          <Box>
+                          </Td>
+                          <Td>
+                            <Flex minW="240px">
+                              <Box mr="16px">
+                                <Avatar
+                                  bg="gray.400"
+                                  icon={<Box />}
+                                  src={`https://cryptoicon-api.vercel.app/api/icon/${r.asset.toLowerCase()}`}
+                                  alt={r.asset}
+                                />
+                              </Box>
+                              <Box>
+                                <Text
+                                  as="span"
+                                  display="block"
+                                  fontSize="sm"
+                                  fontWeight="medium"
+                                  color="white"
+                                >
+                                  {r.name}
+                                </Text>
+                                <Text
+                                  as="span"
+                                  fontSize="sm"
+                                  fontWeight="400"
+                                  color="placeholders"
+                                >
+                                  {r.asset}
+                                </Text>
+                              </Box>
+                            </Flex>
+                          </Td>
+                          <Td>
                             <Text
                               as="span"
                               display="block"
                               fontSize="sm"
-                              fontWeight="medium"
-                              color="white"
+                              fontWeight="500"
+                              color="gray.50"
                             >
-                              {r.name}
+                              {numeral(r.price).format("$ 0,0.00")}
                             </Text>
+                          </Td>
+                          <Td>
                             <Text
                               as="span"
+                              display="block"
                               fontSize="sm"
-                              fontWeight="400"
+                              fontWeight="500"
                               color="placeholders"
                             >
-                              {r.asset}
+                              {r.balance.toFixed(8)}
                             </Text>
-                          </Box>
-                        </Flex>
-                      </Td>
-                      <Td>
-                        <Text
-                          as="span"
-                          display="block"
-                          fontSize="sm"
-                          fontWeight="500"
-                          color="gray.50"
-                        >
-                          {numeral(r.price).format("$ 0,0.00")}
-                        </Text>
-                      </Td>
-                      <Td>
-                        <Text
-                          as="span"
-                          display="block"
-                          fontSize="sm"
-                          fontWeight="500"
-                          color="placeholders"
-                        >
-                          {r.balance.toFixed(8)}
-                        </Text>
-                      </Td>
-                      <Td>
-                        <Text
-                          as="span"
-                          display="block"
-                          fontSize="sm"
-                          fontWeight="500"
-                          color="gray.50"
-                        >
-                          {numeral(r.price * r.balance).format("$ 0,0.00")}
-                        </Text>
-                      </Td>
-                    </Tr>
-                  ))}
+                          </Td>
+                          <Td>
+                            <Text
+                              as="span"
+                              display="block"
+                              fontSize="sm"
+                              fontWeight="500"
+                              color="gray.50"
+                            >
+                              {numeral(r.price * r.balance).format("$ 0,0.00")}
+                            </Text>
+                          </Td>
+                        </Tr>
+                      ))
+                    : Array.from({ length: 2 }).map((_, i) => (
+                        <Tr key={uuid()}>
+                          <Td padding="16px 0px 16px 20px">
+                            <Skeleton height="20px" w="20px" />
+                          </Td>
+                          <Td>
+                            <Flex minW="240px">
+                              <Box mr="16px">
+                                <Skeleton w="40px" height="40px" />
+                              </Box>
+                              <Box>
+                                <Skeleton height="20px" width="120px" />
+                                <Skeleton height="16px" mt="4px" width="72px" />
+                              </Box>
+                            </Flex>
+                          </Td>
+                          <Td>
+                            <Skeleton height="20px" />
+                          </Td>
+                          <Td>
+                            <Skeleton height="20px" />
+                          </Td>
+                          <Td>
+                            <Skeleton height="20px" />
+                          </Td>
+                        </Tr>
+                      ))}
                 </Tbody>
               </StyledTable>
             </Box>
@@ -331,6 +363,7 @@ const Liquidate: React.FC = () => {
                 mx="auto"
                 onClick={onOpen}
                 isLoading={loading}
+                isDisabled={!vaultHoldings.length}
               >
                 Liquidate
               </ThemedButton>
