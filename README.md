@@ -7,3 +7,5 @@ If you would like to run this locally, git clone the repository and npm run star
 IMPORTANT: Only use a private key/wallet that has enough money for gas fees or make a new wallet just for this. 
 
 You can try it live at https://defi-summer-enzyme-bot.vercel.app
+
+See the demo video at https://www.youtube.com/watch?v=gHUf_IVpsh8&feature=youtu.be
