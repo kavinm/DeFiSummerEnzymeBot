@@ -4,7 +4,7 @@ An interface for providing Enzyme vault managers the ease of access on portfolio
 
 If you would like to run this locally, git clone the repository and npm run start in the client folder.
 
-IMPORTANT: Only use a private key/wallet that has enough money for gas fees or make a new wallet just for this. 
+IMPORTANT: Only use a private key/wallet that has enough money for gas fees or make a new wallet just for this. This is only a prototype, please only play around with it on KOVAN testnet for now.
 
 You can try it live at https://defi-summer-enzyme-bot.vercel.app
 
