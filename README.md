@@ -1,7 +1,7 @@
 # DeFiSummerEnzymeBot
-# # In Production, DO NOT USE ON MAINNET
+## In Production, DO NOT USE ON MAINNET
 
-# # #IMPORTANT: Only use a private key/wallet that has enough money for gas fees or make a new wallet just for this. This is only a prototype, please only play around with it on KOVAN testnet for now.
+###IMPORTANT: Only use a private key/wallet that has enough money for gas fees or make a new wallet just for this. This is only a prototype, please only play around with it on KOVAN testnet for now.
 An interface for providing Enzyme vault managers the ease of access on portfolio management. Official entry for DefiSummer Hackathon 2021. 🤖
 
 
