@@ -9,7 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.EnzymeBot = exports.getERC20Tokens = exports.goodbyeUser = exports.greetUser = exports.main = exports.run = exports.getCurrentHoldings = exports.getDecimal = void 0;
+exports.EnzymeBot = exports.getERC20Tokens = exports.main = exports.run = exports.getCurrentHoldings = exports.getPrice = exports.getDecimal = void 0;
 const EnzymeBot_1 = require("./EnzymeBot");
 Object.defineProperty(exports, "EnzymeBot", { enumerable: true, get: function () { return EnzymeBot_1.EnzymeBot; } });
 const getGasPrice_1 = require("./utils/getGasPrice");
@@ -18,8 +18,10 @@ const getTokenBalance_1 = require("./utils/getTokenBalance");
 const getToken_1 = require("./utils/getToken");
 const ethers_1 = require("ethers");
 const sdk_1 = require("./utils/subgraph/sdk");
+const getPrice_1 = require("./utils/getPrice");
 const getDecimal = (bot) => { };
 exports.getDecimal = getDecimal;
+exports.getPrice = getPrice_1.getPrice2;
 const getCurrentHoldings = (bot) => __awaiter(void 0, void 0, void 0, function* () {
     const vaultHoldings = yield bot.getHoldings(); //.then(res => {console.log('This is the v holdings\n' )}
     console.log(yield vaultHoldings);
@@ -67,8 +69,14 @@ const run = (bot, funcName, args) => __awaiter(void 0, void 0, void 0, function*
             const gasPrice = bot.network === 'KOVAN' ? undefined : yield getGasPrice_1.getGasPrice(2);
             // if send is set to false it'll give you the tx object that contains the hash
             const resolved = yield tx.gas(gasLimit, gasPrice).send();
-            console.log('This trade has been submitted to the blockchain. TRANSACTION HASH ==>', resolved.transactionHash);
-            console.log(`Transaction successful. You spent ${resolved.gasUsed.toString()} in gas.`);
+            let successfulTransaction = '';
+            successfulTransaction =
+                successfulTransaction +
+                    'This trade has been submitted to the blockchain. TRANSACTION HASH ==>' +
+                    resolved.transactionHash;
+            successfulTransaction =
+                successfulTransaction + '\n' + `Transaction successful. You spent ${resolved.gasUsed.toString()} in gas.`;
+            return successfulTransaction;
         }
         else {
             console.log('The bot has decided not to trade.');
@@ -85,7 +93,6 @@ const run = (bot, funcName, args) => __awaiter(void 0, void 0, void 0, function*
         console.log(error);
     }
     finally {
-        console.log('Scheduling the next iteration...');
         // commented out to prevent loop  in exchanging tokens
         // setTimeout(() => {
         //   while (i < (vaultHoldings?.length || 0)) {
@@ -105,6 +112,7 @@ const main = (inputFunction, bot, args) => __awaiter(void 0, void 0, void 0, fun
     const func2pass = inputFunction;
     const vaultHoldings = yield exports.getCurrentHoldings(currentBot);
     const holdingsLength = vaultHoldings.length;
+    let successfulMessage = '';
     switch (func2pass) {
         case 'liquidate':
             //only liquidate the tokens in here
@@ -113,39 +121,51 @@ const main = (inputFunction, bot, args) => __awaiter(void 0, void 0, void 0, fun
             for (let i = 0; i < holdingsLength; i++) {
                 yield console.log(`BEFORE LIQUIDATE This is within the for each loop index of ${i} `);
                 //check the token we are swapping is not zero and is a token that should be liquidated
-                if (!vaultHoldings[i].amount.isZero() || !tokensToLiquidate.includes(vaultHoldings[i].symbol)) {
-                    yield exports.run(currentBot, func2pass, { tokenSell: vaultHoldings[i], toBeSwappedInto: args.toBeSwappedInto }).then((res) => console.log("That's all folks."));
+                if (!vaultHoldings[i].amount.isZero() && tokensToLiquidate.includes(vaultHoldings[i].symbol)) {
+                    successfulMessage =
+                        successfulMessage +
+                            (yield exports.run(currentBot, func2pass, { tokenSell: vaultHoldings[i], toBeSwappedInto: args.toBeSwappedInto }));
                 }
                 else {
                     console.log('Amount was zero');
                 }
                 yield console.log(`AFTER LIQUIDATE This is within the for each loop index of ${i} `);
             }
+            return successfulMessage;
             //await run(await EnzymeBot.create('KOVAN'), func2pass); //.then((res) => console.log("That's all folks."));
             break;
         case 'buyLimit':
-            yield exports.run(currentBot, func2pass, {
-                tokenSell: args.tokenSell,
-                tokenBuy: args.tokenBuy,
-                priceLimit: args.priceLimit,
-            });
+            successfulMessage =
+                successfulMessage +
+                    (yield exports.run(currentBot, func2pass, {
+                        tokenSell: args.tokenSell,
+                        tokenBuy: args.tokenBuy,
+                        priceLimit: args.priceLimit,
+                    }));
+            return successfulMessage;
             break;
         case 'sellLimit':
-            yield exports.run(currentBot, func2pass, {
-                tokenSell: args.tokenSell,
-                tokenBuy: args.tokenBuy,
-                priceLimit: args.priceLimit,
-            });
+            successfulMessage =
+                successfulMessage +
+                    (yield exports.run(currentBot, func2pass, {
+                        tokenSell: args.tokenSell,
+                        tokenBuy: args.tokenBuy,
+                        priceLimit: args.priceLimit,
+                    }));
+            return successfulMessage;
             break;
         // case 'addHolding':
         //   await run(await EnzymeBot.create('KOVAN'), func2pass);
         //   break;
         case 'swapWithAmount':
-            yield exports.run(currentBot, func2pass, {
-                tokenSell: args.tokenSell,
-                tokenBuy: args.tokenBuy,
-                amount: args.amount,
-            });
+            successfulMessage =
+                successfulMessage +
+                    (yield exports.run(currentBot, func2pass, {
+                        tokenSell: args.tokenSell,
+                        tokenBuy: args.tokenBuy,
+                        amount: args.amount,
+                    }));
+            return successfulMessage;
             break;
         case 'getHoldings':
             yield currentBot.getHoldingsWithNumberAmounts;
@@ -160,12 +180,14 @@ const main = (inputFunction, bot, args) => __awaiter(void 0, void 0, void 0, fun
             const currentHoldingsWithAmounts = vaultHoldings.map((item, index) => {
                 return Object.assign(Object.assign({}, item), { amount: holdingsAmounts[index] });
             });
+            //first check if rebalanced Holdings are equal or within 5%
             const holdingsIsEqual = yield currentBot.IfHoldingIsEqual(currentHoldingsWithAmounts, rebalanceHoldingsWithAmout);
             console.log('gets value of holdings' + holdingsIsEqual);
             if (!holdingsIsEqual) {
                 console.log('The holding values are not equal!');
                 return;
             }
+            //logic for holdings order plan is contained in logic.txt
             const symbolsCurrent = [];
             const symbolsRebalanced = [];
             for (let holding of currentHoldingsWithAmounts) {
@@ -191,21 +213,27 @@ const main = (inputFunction, bot, args) => __awaiter(void 0, void 0, void 0, fun
                             let difference = holding.amount.sub(rebalanceHoldingsWithAmout[rebalancedIndex].amount);
                             console.log('The difference for current Holding' + difference);
                             console.log('Swap With Amount');
-                            yield exports.run(currentBot, 'swapWithAmount', {
-                                tokenSell: holding.symbol,
-                                tokenBuy: 'WETH',
-                                amount: difference,
-                            });
+                            successfulMessage =
+                                successfulMessage +
+                                    (yield exports.run(currentBot, 'swapWithAmount', {
+                                        tokenSell: holding.symbol,
+                                        tokenBuy: 'WETH',
+                                        amount: difference,
+                                    }));
                             //currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
                         }
                     }
                     else {
-                        console.log('Removed all holding: ' + holding.symbol);
-                        yield exports.run(currentBot, 'buyLimit', {
-                            tokenSell: holding.symbol,
-                            tokenBuy: 'WETH',
-                            priceLimit: 0,
-                        });
+                        if (holding.symbol != 'WETH') {
+                            console.log('Removed all holding: ' + holding.symbol);
+                            successfulMessage =
+                                successfulMessage +
+                                    (yield exports.run(currentBot, 'buyLimit', {
+                                        tokenSell: holding.symbol,
+                                        tokenBuy: 'WETH',
+                                        priceLimit: 0,
+                                    }));
+                        }
                     }
                 }
             }
@@ -226,11 +254,13 @@ const main = (inputFunction, bot, args) => __awaiter(void 0, void 0, void 0, fun
                         EthAmount = EthAmount.mul(vartosix);
                         EthAmount = EthAmount.mul(vartosix);
                         console.log('EthAmount: ' + EthAmount);
-                        yield exports.run(currentBot, 'swapWithAmount', {
-                            tokenSell: 'WETH',
-                            tokenBuy: holding.symbol,
-                            amount: EthAmount,
-                        });
+                        successfulMessage =
+                            successfulMessage +
+                                (yield exports.run(currentBot, 'swapWithAmount', {
+                                    tokenSell: 'WETH',
+                                    tokenBuy: holding.symbol,
+                                    amount: EthAmount,
+                                }));
                     }
                 }
                 else {
@@ -244,27 +274,136 @@ const main = (inputFunction, bot, args) => __awaiter(void 0, void 0, void 0, fun
                     const totalAmountHex = '0x' + (amountInDecimal * holdingPrice * Math.pow(10, 18)).toString(16);
                     let EthAmount = ethers_1.BigNumber.from(totalAmountHex);
                     console.log('EthAmount: ' + EthAmount);
-                    yield exports.run(currentBot, 'swapWithAmount', {
-                        tokenSell: 'WETH',
-                        tokenBuy: holding.symbol,
-                        amount: EthAmount,
-                    });
+                    successfulMessage =
+                        successfulMessage +
+                            (yield exports.run(currentBot, 'swapWithAmount', {
+                                tokenSell: 'WETH',
+                                tokenBuy: holding.symbol,
+                                amount: EthAmount,
+                            }));
                 }
             }
+            return successfulMessage;
+            break;
+        case 'rebalancePortfolioUSDCPlan':
+            const rebalancedHoldingsWithAmountUSDC = yield currentBot.CreatesRebalanceHoldings(args.rebalancedHoldings);
+            //const vaultHoldings = await getCurrentHoldings(currentBot);
+            //console.log('got rebalanceHoldings' + rebalanceHoldingsWithAmout);
+            //makes an amount array of numbers from getToken
+            const holdingsAmountsUSDC = yield Promise.all(vaultHoldings.map((holding) => getTokenBalance_1.getTokenBalance(currentBot.vaultAddress, holding.id, currentBot.network)));
+            // combine holding token data with amounts
+            const currentHoldingsWithAmountsUSDC = vaultHoldings.map((item, index) => {
+                return Object.assign(Object.assign({}, item), { amount: holdingsAmountsUSDC[index] });
+            });
+            //first check if rebalanced Holdings are equal or within 5%
+            const holdingsAreEqualUSDC = yield currentBot.IfHoldingIsEqual(currentHoldingsWithAmountsUSDC, rebalancedHoldingsWithAmountUSDC);
+            console.log('gets value of holdings' + holdingsAreEqualUSDC);
+            if (!holdingsAreEqualUSDC) {
+                console.log('The holding values are not equal!');
+                return;
+            }
+            //logic for holdings order plan is contained in logic.txt
+            const symbolsCurrentUSDC = [];
+            const symbolsRebalancedUSDC = [];
+            for (let holding of currentHoldingsWithAmountsUSDC) {
+                symbolsCurrentUSDC.push(holding.symbol);
+            }
+            for (let holding of rebalancedHoldingsWithAmountUSDC) {
+                symbolsRebalancedUSDC.push(holding.symbol);
+            }
+            let iUSDC = 0;
+            console.log('before loop');
+            for (let holding of currentHoldingsWithAmountsUSDC) {
+                //Skips over holding that are zero value
+                if (holding.amount._hex != '0x00') {
+                    //console.log(holding.symbol);
+                    //console.log(symbolsRebalanced);
+                    if (symbolsRebalancedUSDC.includes(holding.symbol)) {
+                        //console.log(holding);
+                        const rebalancedIndex = symbolsRebalancedUSDC.indexOf(holding.symbol);
+                        console.log('REBALANCED HOLDING WITH AMOUNT ---------- \n');
+                        console.log(rebalancedIndex);
+                        //console.log(rebalanceHoldingsWithAmout[rebalancedIndex]);
+                        if (holding.amount.gt(rebalancedHoldingsWithAmountUSDC[rebalancedIndex].amount)) {
+                            let difference = holding.amount.sub(rebalancedHoldingsWithAmountUSDC[rebalancedIndex].amount);
+                            console.log('The difference for current Holding' + difference);
+                            console.log('Swap With Amount');
+                            successfulMessage =
+                                successfulMessage +
+                                    (yield exports.run(currentBot, 'swapWithAmount', {
+                                        tokenSell: holding.symbol,
+                                        tokenBuy: 'USDC',
+                                        amount: difference,
+                                    }));
+                            //currentBot.swapWithAmount(holding.symbol!, 'WETH', difference);
+                        }
+                    }
+                    else {
+                        if (holding.symbol != 'USDC') {
+                            console.log('Removed all holding: ' + holding.symbol);
+                            successfulMessage =
+                                successfulMessage +
+                                    (yield exports.run(currentBot, 'buyLimit', {
+                                        tokenSell: holding.symbol,
+                                        tokenBuy: 'USDC',
+                                        priceLimit: 0,
+                                    }));
+                        }
+                    }
+                }
+            }
+            //const resultUSDC = await gql(currentBot.subgraphEndpoint).assets();
+            for (let holding of rebalancedHoldingsWithAmountUSDC) {
+                if (symbolsCurrentUSDC.includes(holding.symbol)) {
+                    const currentindex = symbolsCurrentUSDC.indexOf(holding.symbol);
+                    //get holding price in ETH
+                    let holdingPrice = yield getPrice_1.getPrice2(bot.subgraphEndpoint, holding.symbol);
+                    if (holding.amount.gt(currentHoldingsWithAmountsUSDC[currentindex].amount)) {
+                        let difference = holding.amount.sub(currentHoldingsWithAmountsUSDC[currentindex].amount);
+                        //get difference between before and after
+                        const DecimalDifference = parseInt(difference._hex, 16);
+                        const amountInDecimal = DecimalDifference / Math.pow(10, holding.decimals);
+                        console.log('Amount in decimal: ' + amountInDecimal);
+                        console.log('holding price: ' + holdingPrice);
+                        console.log('Holdig symbol: ' + holding.symbol);
+                        const vartosix = ethers_1.BigNumber.from(Math.pow(10, 6));
+                        let USDCAmount = ethers_1.BigNumber.from(amountInDecimal * holdingPrice).mul(vartosix);
+                        USDCAmount = USDCAmount.mul(vartosix);
+                        USDCAmount = USDCAmount.mul(vartosix);
+                        console.log('USDCAmount: ' + USDCAmount);
+                        successfulMessage =
+                            successfulMessage +
+                                (yield exports.run(currentBot, 'swapWithAmount', {
+                                    tokenSell: 'USDC',
+                                    tokenBuy: holding.symbol,
+                                    amount: USDCAmount,
+                                }));
+                    }
+                }
+                else {
+                    let holdingPrice = yield getPrice_1.getPrice2(bot.subgraphEndpoint, holding.symbol);
+                    let difference = holding.amount;
+                    const DecimalDifference = parseInt(difference._hex, 16);
+                    const amountInDecimal = DecimalDifference / Math.pow(10, holding.decimals);
+                    const totalAmountHex = '0x' + (amountInDecimal * holdingPrice * Math.pow(10, 18)).toString(16);
+                    let USDCAmount = ethers_1.BigNumber.from(totalAmountHex);
+                    console.log('USDC: ' + USDCAmount);
+                    successfulMessage =
+                        successfulMessage +
+                            (yield exports.run(currentBot, 'swapWithAmount', {
+                                tokenSell: 'USDC',
+                                tokenBuy: holding.symbol,
+                                amount: USDCAmount,
+                            }));
+                }
+            }
+            return successfulMessage;
             break;
         default:
             currentBot.getVaultValues();
     }
 });
 exports.main = main;
-const greetUser = (user) => {
-    return `Hello, ${user}`;
-};
-exports.greetUser = greetUser;
-const goodbyeUser = (user) => {
-    return `Goodbye, ${user}`;
-};
-exports.goodbyeUser = goodbyeUser;
 //is hard coded to only work with KOVAN right now
 const getERC20Tokens = (network = 'KOVAN') => __awaiter(void 0, void 0, void 0, function* () {
     let tokenRequestResult;
@@ -281,11 +420,13 @@ const getERC20Tokens = (network = 'KOVAN') => __awaiter(void 0, void 0, void 0, 
 exports.getERC20Tokens = getERC20Tokens;
 const mainRunner = () => __awaiter(void 0, void 0, void 0, function* () {
     const currentBot = yield EnzymeBot_1.EnzymeBot.staticCreateKovan();
-    //main('liquidate', currentBot, { liquidateTokens: ['WBTC', 'WETH'], toBeSwappedInto: 'WETH' });
-    console.log(yield currentBot.getVaultValues());
-    exports.getERC20Tokens('MAINNET');
+    //main('rebalancePortfolio', currentBot, {rebalancedHoldings: [{symbol: 'USDC', amount:510000 }]});
+    console.log(yield exports.main('rebalancePortfolioUSDCPlan', currentBot, { rebalancedHoldings: [{ symbol: 'USDC', amount: 2359000 }] }));
+    //console.log(await main('swapWithAmount', currentBot, { tokenSell: 'WBTC', tokenBuy: 'UNI', amount: 10000000 }));
+    //console.log(await currentBot.getVaultValues());
+    //getERC20Tokens('MAINNET');
 });
-mainRunner();
+//mainRunner();
 // npm install --production=false
 // npm run codegen
 // npm run dev

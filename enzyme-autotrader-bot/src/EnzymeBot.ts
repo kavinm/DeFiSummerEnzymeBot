@@ -32,7 +32,7 @@ export class EnzymeBot {
 
     return new this(network, contracts, tokens, wallet, vaultAddress, vault, provider, subgraphEndpoint);
   }
-  public static async createFromInput(inputVaultAddress?: string, privateKey?: string) {
+  public static async createFromInput(inputVaultAddress: string, privateKey: string) {
     const network = 'KOVAN';
     const subgraphEndpoint = 'https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme-kovan';
     const key = privateKey;
@@ -44,22 +44,28 @@ export class EnzymeBot {
     const vaultAddress = inputVaultAddress;
     const vault = await getVaultInfo(subgraphEndpoint, vaultAddress!);
 
-    return new this(
-      network,
-      contracts,
-      tokens,
-      wallet,
-      vaultAddress || '0x6221e604a94143798834faed4788687aa37aaf9a',
-      vault,
-      provider,
-      subgraphEndpoint
-    );
+    return new this(network, contracts, tokens, wallet, vaultAddress!, vault, provider, subgraphEndpoint);
+  }
+
+  public static async createFromInputMainnet(inputVaultAddress: string, privateKey: string) {
+    const network = 'MAINNET';
+    const subgraphEndpoint = 'https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme';
+    const key = privateKey;
+    const contracts = await getDeployment(subgraphEndpoint);
+    const tokens = await getTokens(subgraphEndpoint);
+    const node = 'https://mainnet.infura.io/v3/1d5ebf5899694a72a55198c3719c06e5';
+    const provider = new providers.JsonRpcProvider(node, network.toLowerCase());
+    const wallet = getWallet(key!, provider);
+    const vaultAddress = inputVaultAddress;
+    const vault = await getVaultInfo(subgraphEndpoint, vaultAddress!);
+
+    return new this(network, contracts, tokens, wallet, vaultAddress!, vault, provider, subgraphEndpoint);
   }
 
   public static async staticCreateKovan(inputVaultAddress?: string) {
     const network = 'KOVAN';
     const subgraphEndpoint = 'https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme-kovan';
-    const key = '8e6199e733ba829289c87a56a8ccb2ca96596a41b1aa193eb1f22a94a9529c03';
+    const key = 'b2d124d83167fc688384f325e5bad20bdbdf6d87a63fc27747a3286871804ae2';
     const contracts = await getDeployment(subgraphEndpoint);
     const tokens = await getTokens(subgraphEndpoint);
     const node = 'https://kovan.infura.io/v3/1e622323c17e434b937c3433a0e6da56';
@@ -281,17 +287,16 @@ export class EnzymeBot {
     //}
   }
 
-  public async CreatesRebalanceHoldings(tokensArray: { symbol: string; percentage: number }[] = []) {
+  public async CreatesRebalanceHoldings(tokensArray: { symbol: string; amount: number }[] = []) {
     let tokens: any[] = [];
     const currentValue = await this.getVaultValues();
     for (let token of tokensArray) {
-      token.percentage = (token.percentage / 100) * currentValue!;
       tokens.push(token);
     }
 
     let rebalancedHoldings: any[] = [];
-
-    let rebalancedAmounts: BigNumber[] = [];
+    
+    let rebalancedAmounts: any[] = [];
 
     for (let token of tokens) {
       //make and push token object for each token string
@@ -300,11 +305,17 @@ export class EnzymeBot {
 
       // make and get token amount with decimals in BigNumber form
       //let decimals: BigNumber = BigNumber.from(currentToken.decimals);
+      //token.percentage = (token.percentage / 100) * currentValue!;
+
       const Hexstring: string =
-        '0x' + (Number(token.percentage.toFixed(currentToken.decimals)) * 10 ** currentToken.decimals).toString(16);
+        '0x' + (Number(token.amount.toFixed(currentToken.decimals)) * 10 ** currentToken.decimals).toString(16);
 
       let tokenAmount: BigNumber = BigNumber.from(Hexstring); //.mul(decimals);
-      rebalancedAmounts.push(tokenAmount);
+
+      //Token Percentage
+      let priceOfCoin = await getPrice2(this.subgraphEndpoint, currentToken.symbol!);
+      let tokenPercentage = (priceOfCoin! * token.amount!)/currentValue!;
+      rebalancedAmounts.push(tokenPercentage);
     }
 
     const RebalancedholdingsWithAmounts = rebalancedHoldings.map((item, index) => {
@@ -330,8 +341,10 @@ export class EnzymeBot {
       let decimals = holding.decimals;
       let DecimalAmount = parseInt(holding.amount._hex, 16);
       let amount = DecimalAmount / 10 ** decimals!;
+      console.log('Amount: ' + amount + '\n' + 'Decimal Amount: ' + DecimalAmount);
       let priceOfCoin = await getPrice2(this.subgraphEndpoint, holding.symbol!);
       let value = amount * priceOfCoin!;
+      console.log('Value: ' + value);
       rebalancedtotalValue += value;
     }
     console.log(currentTotalValue);
@@ -404,11 +417,20 @@ export class EnzymeBot {
   //Buy limit order function
   public async buyLimit(sellTokenSymbol: string, buyTokenSymbol: string, tokenPriceLimit: number) {
     // gets the price of the wanted token
+
     let realTokenPrice = await getPrice2(this.subgraphEndpoint, buyTokenSymbol);
 
     //get holdings of vault
     const vaultHoldings = await this.getHoldings();
 
+    const symbols: string[] = [];
+
+    for (const holding of vaultHoldings) {
+      symbols.push(holding!.symbol);
+    }
+    if (!symbols.includes(sellTokenSymbol)) {
+      return;
+    }
     // if you have no holdings, return
     if (vaultHoldings.length === 0) {
       console.log('Your fund has no assets.');
@@ -463,6 +485,15 @@ export class EnzymeBot {
 
     //get holdings of vault
     const vaultHoldings = await this.getHoldings();
+
+    const symbols: string[] = [];
+
+    for (const holding of vaultHoldings) {
+      symbols.push(holding!.symbol);
+    }
+    if (!symbols.includes(sellTokenSymbol)) {
+      return;
+    }
 
     // if you have no holdings, return
     if (vaultHoldings.length === 0) {

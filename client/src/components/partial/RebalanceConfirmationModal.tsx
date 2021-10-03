@@ -9,11 +9,13 @@ import {
   ModalHeader,
   ModalOverlay,
   Text,
+  Avatar,
 } from "@chakra-ui/react";
-import numeral from "numeral";
+import uuid from "react-uuid";
+
 import { ReactComponent as InformationLogo } from "../../assets/logo/information.svg";
-import { ReactComponent as Avatar } from "../../assets/logo/avatar.svg";
 import { ThemedButton } from "../shared";
+import { intersectionBy } from "lodash";
 
 const assets = [
   {
@@ -36,10 +38,24 @@ const assets = [
   },
 ];
 
+type BasisHoldings = { id: string; [x: string]: any }[];
+
 const RebalanceConfirmationModal: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-}> = ({ isOpen, onClose }) => {
+  triggerSubmit: () => void;
+  watchedHoldings: { amount: number; symbol: string }[];
+  basisHoldings: BasisHoldings;
+}> = ({ isOpen, onClose, triggerSubmit, watchedHoldings, basisHoldings }) => {
+  const holdings = intersectionBy(
+    basisHoldings,
+    watchedHoldings.map((h) => ({ ...h, asset: h.symbol })),
+    "asset"
+  ).map((h) => ({
+    ...h,
+    to: watchedHoldings.find((w) => w.symbol === h.asset)?.amount,
+  })) as BasisHoldings;
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay backgroundColor="rgba(31, 41, 55, 0.75)" />
@@ -56,16 +72,22 @@ const RebalanceConfirmationModal: React.FC<{
             Confirm changes
           </Text>
         </ModalHeader>
-        <ModalBody>
-          {assets.map((a, i) => (
+        <ModalBody px="3rem">
+          {holdings.map((a, i) => (
             <Flex
               justifyContent="space-between"
               alignItems="center"
+              key={uuid()}
               {...(i < assets.length - 1 && { mb: "20px" })}
             >
               <Flex>
                 <Box mr="8px">
-                  <Avatar />
+                  <Avatar
+                    bg="gray.400"
+                    icon={<Box />}
+                    src={`https://cryptoicon-api.vercel.app/api/icon/${a.asset.toLowerCase()}`}
+                    alt={a.asset}
+                  />
                 </Box>
                 <Box>
                   <Text
@@ -83,7 +105,7 @@ const RebalanceConfirmationModal: React.FC<{
                     fontWeight="400"
                     color="placeholders"
                   >
-                    {a.symbol}
+                    {a.asset}
                   </Text>
                 </Box>
               </Flex>
@@ -94,24 +116,7 @@ const RebalanceConfirmationModal: React.FC<{
                   fontWeight="bold"
                   color="iconsActive"
                 >
-                  {numeral(a.from).format("0%")}
-                </Text>
-                <Text
-                  as="span"
-                  display="block"
-                  fontWeight="bold"
-                  color="accentOutlines"
-                  mx="1rem"
-                >
-                  →
-                </Text>
-                <Text
-                  as="span"
-                  display="block"
-                  fontWeight="bold"
-                  color="iconsActive"
-                >
-                  {numeral(a.to).format("0%")}
+                  {a.to}
                 </Text>
               </Flex>
             </Flex>
@@ -140,7 +145,15 @@ const RebalanceConfirmationModal: React.FC<{
             >
               Cancel
             </Button>
-            <ThemedButton px="1rem" h="100%" onClick={onClose} fontSize="sm">
+            <ThemedButton
+              px="1rem"
+              h="100%"
+              onClick={() => {
+                triggerSubmit();
+                onClose();
+              }}
+              fontSize="sm"
+            >
               Confirm
             </ThemedButton>
           </Flex>

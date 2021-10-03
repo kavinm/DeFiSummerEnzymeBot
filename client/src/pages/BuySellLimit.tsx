@@ -1,4 +1,3 @@
-import React from "react";
 import {
   Box,
   Flex,
@@ -8,14 +7,15 @@ import {
   TabPanels,
   Tabs,
 } from "@chakra-ui/react";
-
 import uuid from "react-uuid";
+import { useAtom } from "jotai";
 
 import DefaultLayout from "../layouts/DefaultLayout";
 import { Table } from "../components/shared";
 import { StopLimitActions } from "../enums";
 import BuyToken from "../components/partial/BuyToken";
 import SellToken from "../components/partial/SellToken";
+import { vaultHoldingsAtom } from "../atoms";
 
 const stopLimitRows = [
   {
@@ -41,26 +41,11 @@ const stopLimitRows = [
   },
 ];
 
-const vaultHoldingsRows = [
-  {
-    id: uuid(),
-    asset: "AXS",
-    balance: 50.1,
-    allocation: 14073.4836,
-    price: 1990.16,
-  },
-  {
-    id: uuid(),
-    asset: "steCRV-gauge",
-    balance: 49.9,
-    allocation: 13783.5404,
-    price: 2024.08,
-  },
-];
+const BuySellLimit: React.FC = () => {
+  const [vaultHoldings] = useAtom(vaultHoldingsAtom);
 
-const AutomatedStrategy: React.FC = () => {
   return (
-    <DefaultLayout name="Automated Strategy">
+    <DefaultLayout name="Buy-Sell Limit">
       <Flex
         maxW="1000px"
         mt="40px"
@@ -98,15 +83,16 @@ const AutomatedStrategy: React.FC = () => {
         <Flex direction={{ base: "column", xl: "row" }} w="min-content">
           <Table
             rows={stopLimitRows}
+            tempBasisRows={vaultHoldings}
             shownAs="stopLimitTable"
             mr={{ base: "0px", xl: "20px" }}
             mb={{ base: "20px", xl: "0px" }}
           />
-          <Table rows={vaultHoldingsRows} shownAs="vaultHoldingsTable" />
+          <Table rows={vaultHoldings} shownAs="vaultHoldingsTable" />
         </Flex>
       </Flex>
     </DefaultLayout>
   );
 };
 
-export default AutomatedStrategy;
+export default BuySellLimit;

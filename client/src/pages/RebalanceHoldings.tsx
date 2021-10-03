@@ -1,37 +1,40 @@
 import { useCallback, useEffect, useState } from "react";
+import { uniqBy } from "lodash";
 import {
-  Box,
-  Text,
-  Flex,
   Table,
-  Tbody,
-  Td,
-  Th,
   Thead,
+  Tbody,
   Tr,
-  Checkbox,
+  Th,
+  Td,
+  Text,
+  Box,
+  Flex,
+  NumberInput,
+  NumberInputField,
+  Button,
   useDisclosure,
   Avatar,
   useToast,
   Skeleton,
 } from "@chakra-ui/react";
+import { useForm } from "react-hook-form";
 import styled from "@emotion/styled";
-import { Controller, useForm } from "react-hook-form";
 import numeral from "numeral";
 import { EnzymeBot, main } from "enzyme-autotrader-bot";
 import { useAtom } from "jotai";
 import uuid from "react-uuid";
 
-import { ThemedButton, ThemedTokenSelect } from "../components/shared";
 import DefaultLayout from "../layouts/DefaultLayout";
-import LiquidateConfirmationModal from "../components/partial/LiquidateConfirmationModal";
-import useAuthentication from "../utils/useAuthentication";
+import { ThemedButton } from "../components/shared";
+import RebalanceConfirmationModal from "../components/partial/RebalanceConfirmationModal";
 import {
-  availableTokensAtom,
-  reloadBuySellLimitHoldingsAtom,
   vaultHoldingsAtom,
+  holdingsChoicesAtom,
+  reloadBuySellLimitHoldingsAtom,
 } from "../atoms";
 import { Networks } from "../config/api";
+import useAuthentication from "../utils/useAuthentication";
 
 const StyledTable = styled(Table)`
   & {
@@ -50,33 +53,79 @@ const StyledTable = styled(Table)`
   }
 `;
 
-type TokenOptions = {
-  value?: string;
-  label?: string;
-}[];
-
 type FormData = {
-  liquidateTokens: string[];
-  toBeSwappedInto: {
-    value?: string;
-    label?: string;
+  rebalancedHoldings: {
+    [symbol: string]: {
+      symbol: string;
+      amount: number;
+    };
   };
 };
 
-const Liquidate: React.FC = () => {
-  const [tokenOptions, setTokenOptions] = useState<TokenOptions>([]);
-  const [bot, setBot] = useState<Partial<EnzymeBot>>({});
-  const { handleSubmit, register, control, setValue, watch } =
-    useForm<FormData>();
+const RebalanceHoldings: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const [bot, setBot] = useState<Partial<EnzymeBot>>({});
+  const { handleSubmit, register, reset, watch } = useForm<FormData>();
   const [, , authentication] = useAuthentication();
   const [vaultHoldings] = useAtom(vaultHoldingsAtom);
-  const [reload, setReload] = useAtom(reloadBuySellLimitHoldingsAtom);
-  const [availableTokens] = useAtom(availableTokensAtom);
+  const [holdingsChoices] = useAtom(holdingsChoicesAtom);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
+  const [reload, setReload] = useAtom(reloadBuySellLimitHoldingsAtom);
 
-  const existingliquidateTokens = watch("liquidateTokens") as string[];
+  const totalCurrentValue = vaultHoldings.reduce(
+    (acc, curr) => acc + curr.price * curr.balance,
+    0
+  );
+
+  const iterator = (h: { [x: string]: any; id: string }) => h.asset;
+
+  const watchedHoldings = Object.entries(watch("rebalancedHoldings") || {})
+    .map((e) => ({ ...e[1], amount: +e[1].amount }))
+    .filter((e) => e.amount);
+
+  const onSubmit = ({ rebalancedHoldings }: FormData) => {
+    setLoading(true);
+    try {
+      const holdings = Object.entries(rebalancedHoldings)
+        .map((e) => ({ ...e[1], amount: +e[1].amount }))
+        .filter((e) => e.amount);
+      main("rebalancePortfolio", bot as EnzymeBot, {
+        rebalancedHoldings: holdings,
+      }).then((res) => {
+        if (res) {
+          toast({
+            title: "Rebalance holdings successful.",
+            description: res,
+            position: "top",
+            isClosable: true,
+            duration: 10000,
+          });
+        } else {
+          toast({
+            title: "Rebalance holdings are not equal or within 5% below value.",
+            description: res,
+            position: "top",
+            isClosable: true,
+            duration: 10000,
+          });
+        }
+        setLoading(false);
+        setReload(true);
+      });
+    } catch (err) {
+      toast({
+        title: "Rebalance holdings failed.",
+        position: "top",
+        isClosable: true,
+        duration: 10000,
+      });
+      setLoading(false);
+      console.log({ err });
+    }
+  };
+
+  const triggerSubmit = handleSubmit(onSubmit);
 
   const configureBot = useCallback(() => {
     try {
@@ -109,13 +158,11 @@ const Liquidate: React.FC = () => {
   ]);
 
   useEffect(() => {
-    setTokenOptions(availableTokens);
     configureBot();
-  }, [setTokenOptions, configureBot, availableTokens]);
+  }, [configureBot]);
 
   useEffect(() => {
     if (reload) {
-      setTokenOptions(availableTokens);
       configureBot();
       setTimeout(() => {
         setReload(false);
@@ -124,48 +171,16 @@ const Liquidate: React.FC = () => {
     // eslint-disable-next-line
   }, [reload]);
 
-  const onSubmit = ({ liquidateTokens, toBeSwappedInto }: FormData) => {
-    setLoading(true);
-    try {
-      main("liquidate", bot as EnzymeBot, {
-        liquidateTokens,
-        toBeSwappedInto: toBeSwappedInto.value,
-      }).then((res) => {
-        toast({
-          title: "Liquidate successful.",
-          description: res,
-          position: "top",
-          isClosable: true,
-          duration: 10000,
-        });
-        setLoading(false);
-        setReload(true);
-      });
-    } catch (err) {
-      toast({
-        title: "Liquidate failed.",
-        description: err,
-        position: "top",
-        isClosable: true,
-        duration: 10000,
-      });
-      setLoading(false);
-      console.log({ err });
-    }
-  };
-
-  const triggerSubmit = handleSubmit(onSubmit);
-
   return (
     <>
-      <DefaultLayout name="Liquidate">
+      <DefaultLayout name="Rebalance Holdings">
         <Box
           backgroundColor="accentCards"
           border="1px solid"
           borderColor="accentOutlines"
           p="2rem"
           borderRadius="8px"
-          maxW="1000px"
+          maxW="1100px"
           mx={{ base: "2rem", xl: "auto" }}
           mt="40px"
         >
@@ -179,21 +194,20 @@ const Liquidate: React.FC = () => {
             >
               Vault Holdings
             </Text>
-            <input type="hidden" {...register("liquidateTokens")} />
-            {/* VAULT HOLDINGS */}
+
             <Box
               border="1px solid"
               borderColor="accentOutlines"
               borderRadius="8px"
               padding="0px"
               mt="0.5rem"
-              maxH="400px !important"
+              maxH={vaultHoldings.length ? "400px !important" : "230px"}
               overflow={{ base: "auto", xl: "hidden auto" }}
+              {...(!vaultHoldings.length && { overflow: "hidden" })}
             >
               <StyledTable variant="simple">
                 <Thead>
                   <Tr backgroundColor="accentOutlines">
-                    <Th padding="16px"></Th>
                     <Th color="gray.300" fontWeight="500">
                       TOKEN
                     </Th>
@@ -206,32 +220,33 @@ const Liquidate: React.FC = () => {
                     <Th color="gray.300" fontWeight="500">
                       CURRENT VALUE
                     </Th>
+                    <Th color="gray.300" fontWeight="500">
+                      DESIRED WEIGHT
+                    </Th>
+                  </Tr>
+                </Thead>
+                <Thead>
+                  <Tr backgroundColor="accentSurface">
+                    <Th color="gray.300" fontWeight="500">
+                      TOTAL
+                    </Th>
+                    <Th color="gray.300" fontWeight="500" />
+                    <Th color="gray.300" fontWeight="500" />
+                    <Th color="gray.300" fontWeight="500">
+                      {numeral(totalCurrentValue).format("$ 0,0.00")}
+                    </Th>
+                    <Th color="gray.300" fontWeight="500">
+                      -
+                    </Th>
                   </Tr>
                 </Thead>
                 <Tbody>
                   {vaultHoldings.length
-                    ? vaultHoldings.map((r) => (
+                    ? uniqBy(
+                        [...vaultHoldings, ...holdingsChoices],
+                        iterator
+                      ).map((r, i) => (
                         <Tr key={r.id}>
-                          <Td padding="16px 0px 16px 20px" alignItems="center">
-                            <Checkbox
-                              borderColor="accentOutlines"
-                              onChange={(e) => {
-                                if (e.target.checked) {
-                                  setValue("liquidateTokens", [
-                                    ...existingliquidateTokens,
-                                    r.asset,
-                                  ]);
-                                } else {
-                                  setValue(
-                                    "liquidateTokens",
-                                    existingliquidateTokens.filter(
-                                      (t) => t !== r.asset
-                                    )
-                                  );
-                                }
-                              }}
-                            />
-                          </Td>
                           <Td>
                             <Flex minW="240px">
                               <Box mr="16px">
@@ -282,7 +297,7 @@ const Liquidate: React.FC = () => {
                               fontWeight="500"
                               color="placeholders"
                             >
-                              {r.balance.toFixed(8)}
+                              {r.balance}
                             </Text>
                           </Td>
                           <Td>
@@ -296,13 +311,28 @@ const Liquidate: React.FC = () => {
                               {numeral(r.price * r.balance).format("$ 0,0.00")}
                             </Text>
                           </Td>
+                          <Td>
+                            <NumberInput w="150px">
+                              <NumberInputField
+                                color="white"
+                                borderColor="accentOutlines"
+                                {...register(
+                                  `rebalancedHoldings.${r.asset}.amount` as any
+                                )}
+                              />
+                            </NumberInput>
+                            <input
+                              type="hidden"
+                              {...register(
+                                `rebalancedHoldings.${r.asset}.symbol` as any
+                              )}
+                              value={r.asset}
+                            />
+                          </Td>
                         </Tr>
                       ))
-                    : Array.from({ length: 2 }).map((_, i) => (
-                        <Tr key={uuid()}>
-                          <Td padding="16px 0px 16px 20px">
-                            <Skeleton height="20px" w="20px" />
-                          </Td>
+                    : Array.from({ length: 2 }).map((_) => (
+                        <Tr key={uuid()} py="1rem">
                           <Td>
                             <Flex minW="240px">
                               <Box mr="16px">
@@ -323,68 +353,60 @@ const Liquidate: React.FC = () => {
                           <Td>
                             <Skeleton height="20px" />
                           </Td>
+                          <Td>
+                            <Skeleton height="20px" />
+                          </Td>
                         </Tr>
                       ))}
                 </Tbody>
               </StyledTable>
             </Box>
-            {/* ERC TOKEN */}
-            <Text
-              mt="1.5rem"
-              mb="0.5rem"
-              display="block"
-              as="label"
-              fontSize="sm"
-              fontWeight=""
-              color="headers"
-            >
-              ERC Token
-            </Text>
-            <Flex alignItems="center">
-              <Controller
-                control={control}
-                name="toBeSwappedInto"
-                render={({
-                  field: { onChange, onBlur, value, name, ref },
-                  fieldState: { invalid, isTouched, isDirty, error },
-                  formState,
-                }) => (
-                  <ThemedTokenSelect
-                    options={tokenOptions}
-                    onBlur={onBlur}
-                    onChange={onChange}
-                    checked={value}
-                    inputRef={ref}
-                    id="toBeSwappedInto"
-                  />
-                )}
-              />
-            </Flex>
-            <Flex>
+            <Flex justifyContent="center" h="48px" mt="2rem">
+              <Button
+                color="placeholders"
+                border="1px transparent solid"
+                backgroundColor="accentOutlines"
+                _hover={{
+                  backgroundColor: "accentSurface",
+                }}
+                _active={{
+                  backgroundColor: "accentOutlines",
+                  border: "1px solid",
+                  borderColor: "primaryLight",
+                }}
+                variant="solid"
+                px="4rem"
+                h="100%"
+                mr="20px"
+                isDisabled={!vaultHoldings.length}
+                onClick={() => {
+                  reset();
+                }}
+              >
+                Reset
+              </Button>
               <ThemedButton
-                type="button"
-                w="80%"
-                maxW="200px"
-                mt="2.5rem"
-                py="1.5rem"
-                mx="auto"
+                px="4rem"
+                h="100%"
                 onClick={onOpen}
                 isLoading={loading}
                 isDisabled={!vaultHoldings.length}
               >
-                Liquidate
+                Confirm
               </ThemedButton>
             </Flex>
           </form>
         </Box>
       </DefaultLayout>
-      <LiquidateConfirmationModal
+      <RebalanceConfirmationModal
         isOpen={isOpen}
         onClose={onClose}
         triggerSubmit={triggerSubmit}
+        basisHoldings={uniqBy([...vaultHoldings, ...holdingsChoices], iterator)}
+        watchedHoldings={watchedHoldings}
       />
     </>
   );
 };
 
-export default Liquidate;
+export default RebalanceHoldings;

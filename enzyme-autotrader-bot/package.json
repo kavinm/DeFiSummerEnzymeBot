@@ -2,7 +2,7 @@
   "main": "build/index.js",
   "bin": "build/index.js",
   "name": "enzyme-autotrader-bot",
-  "version": "1.0.3",
+  "version": "1.0.7",
   "description": "An enzyme autotrader bot implementation",
   "license": "MIT",
   "private": false,
