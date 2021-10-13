@@ -38,6 +38,9 @@ const run = (bot, funcName, args) => __awaiter(void 0, void 0, void 0, function*
     var _a, _b;
     const vaultHoldings = yield bot.getHoldings();
     const lengthHoldings = vaultHoldings.length;
+    console.log('____________________________');
+    console.log('This should be outputted if the npm package has been updated');
+    console.log('____________________________');
     try {
         // return the transaction object
         let tx;
@@ -421,12 +424,12 @@ exports.getERC20Tokens = getERC20Tokens;
 const mainRunner = () => __awaiter(void 0, void 0, void 0, function* () {
     const currentBot = yield EnzymeBot_1.EnzymeBot.staticCreateKovan();
     //main('rebalancePortfolio', currentBot, {rebalancedHoldings: [{symbol: 'USDC', amount:510000 }]});
-    console.log(yield exports.main('rebalancePortfolioUSDCPlan', currentBot, { rebalancedHoldings: [{ symbol: 'USDC', amount: 2359000 }] }));
-    //console.log(await main('swapWithAmount', currentBot, { tokenSell: 'WBTC', tokenBuy: 'UNI', amount: 10000000 }));
+    //await main('rebalancePortfolio', currentBot, { rebalancedHoldings: [{ symbol: 'USDC', amount: 2359000 }] });
+    exports.main('swapWithAmount', currentBot, { tokenSell: 'UNI', tokenBuy: 'MKR', amount: '1000000000000000000000' });
     //console.log(await currentBot.getVaultValues());
     //getERC20Tokens('MAINNET');
 });
-//mainRunner();
+mainRunner();
 // npm install --production=false
 // npm run codegen
 // npm run dev
