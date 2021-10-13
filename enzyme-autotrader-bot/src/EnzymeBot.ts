@@ -144,7 +144,6 @@ export class EnzymeBot {
     const adapter = this.contracts.network?.currentRelease?.uniswapV2Adapter;
     const integrationManager = this.contracts.network?.currentRelease?.integrationManager;
     const comptroller = this.vault.fund?.accessor.id;
-
     if (!adapter || !integrationManager || !comptroller) {
       console.log(
         'Missing a contract address. Uniswap Adapter: ',

@@ -19,3 +19,10 @@ src/utils/subgraph/subgraph.ts
 !.env.example
 !.gitignore
 
+
+node_modules
+.env
+
+#Hardhat files
+cache
+artifacts

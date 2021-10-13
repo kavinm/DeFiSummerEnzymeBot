@@ -468,9 +468,9 @@ export { EnzymeBot };
 const mainRunner = async () => {
   const currentBot = await EnzymeBot.staticCreateKovan();
   //main('rebalancePortfolio', currentBot, {rebalancedHoldings: [{symbol: 'USDC', amount:510000 }]});
- 
+
   //await main('rebalancePortfolio', currentBot, { rebalancedHoldings: [{ symbol: 'USDC', amount: 2359000 }] });
-  main('swapWithAmount', currentBot, { tokenSell: 'UNI', tokenBuy: 'MKR', amount: '1000000000000000000000' });
+  main('swapWithAmount', currentBot, { tokenSell: 'USDC', tokenBuy: 'MKR', amount: '1000000000000000000000' });
   //console.log(await currentBot.getVaultValues());
   //getERC20Tokens('MAINNET');
 };
