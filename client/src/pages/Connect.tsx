@@ -54,11 +54,14 @@ const Connect: React.FC = () => {
     try {
       let bot;
 
-      if (network === Networks.Kovan) {
-        bot = await EnzymeBot.createFromInput(vaultAddress, privateKey);
-      } else {
-        bot = await EnzymeBot.createFromInputMainnet(vaultAddress, privateKey);
-      }
+      // For testing, remove after verifying MetaMask  and uncomment below lines
+      bot = EnzymeBot.staticCreateKovan();
+
+      // if (network === Networks.Kovan) {
+      //   bot = await EnzymeBot.createFromInput(vaultAddress, privateKey);
+      // } else {
+      //   bot = await EnzymeBot.createFromInputMainnet(vaultAddress, privateKey);
+      // }
 
       if (bot) {
         setAuthentication({ vaultAddress, privateKey, network });
