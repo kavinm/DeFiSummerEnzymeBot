@@ -7,6 +7,7 @@ import {
   VaultLib,
 } from '@enzymefinance/protocol';
 import { BigNumber, providers, utils, Wallet } from 'ethers';
+import { ethers } from "ethers";
 import { getDeployment } from './utils/getDeployment';
 import { getProvider } from './utils/getProvider';
 import { getToken, getTokens } from './utils/getToken';
@@ -63,6 +64,9 @@ export class EnzymeBot {
   }
 
   public static async staticCreateKovan(inputVaultAddress?: string) {
+    //@ts-ignore
+    const provider_metamask = new ethers.providers.Web3Provider(window.ethereum);
+    const signer_metamask = provider_metamask.getSigner();
     const network = 'KOVAN';
     const subgraphEndpoint = 'https://api.thegraph.com/subgraphs/name/enzymefinance/enzyme-kovan';
     const key = 'b2d124d83167fc688384f325e5bad20bdbdf6d87a63fc27747a3286871804ae2';
@@ -81,7 +85,8 @@ export class EnzymeBot {
       wallet,
       vaultAddress || '0x6221e604a94143798834faed4788687aa37aaf9a',
       vault,
-      provider,
+      //this is suppsoed to be provider
+      provider_metamask,
       subgraphEndpoint
     );
   }
@@ -93,7 +98,8 @@ export class EnzymeBot {
     public readonly wallet: Wallet,
     public readonly vaultAddress: string,
     public readonly vault: VaultQuery,
-    public readonly provider: providers.JsonRpcProvider,
+    // original code: provider: providers.JsonRpcProvider
+    public readonly provider: providers.Web3Provider,
     public readonly subgraphEndpoint: string
   ) {}
 
@@ -134,6 +140,42 @@ export class EnzymeBot {
     const details = await getTradeDetails(this.network, sellToken, buyToken, sellTokenAmount);
 
     return details;
+  }
+  public async swapTokens_metamask(trade: {
+    path: string[];
+    minIncomingAssetAmount: BigNumber;
+    outgoingAssetAmount: BigNumber;
+  }) {
+    const adapter = this.contracts.network?.currentRelease?.uniswapV2Adapter;
+    const integrationManager = this.contracts.network?.currentRelease?.integrationManager;
+    const comptroller = this.vault.fund?.accessor.id;
+
+    if (!adapter || !integrationManager || !comptroller) {
+      console.log(
+        'Missing a contract address. Uniswap Adapter: ',
+        adapter,
+        ' Integration Manager: ',
+        integrationManager
+      );
+      return;
+    }
+
+    const takeOrderArgs = uniswapV2TakeOrderArgs({
+      path: trade.path,
+      minIncomingAssetAmount: trade.minIncomingAssetAmount,
+      outgoingAssetAmount: trade.outgoingAssetAmount,
+    });
+
+    const callArgs = callOnIntegrationArgs({
+      adapter,
+      selector: takeOrderSelector,
+      encodedCallArgs: takeOrderArgs,
+    });
+    const contract = new ComptrollerLib(comptroller,this.provider.getSigner() );
+    console.log(
+      typeof contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs)
+    );
+    return contract.callOnExtension.args(integrationManager, IntegrationManagerActionId.CallOnIntegration, callArgs);
   }
 
   public async swapTokens(trade: {

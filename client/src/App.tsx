@@ -17,6 +17,8 @@ import {
 } from "./atoms";
 import { Networks } from "./config/api";
 
+
+
 const App: React.FC = () => {
   const history = useHistory();
   const [isAuthenticated] = useAuthentication();
