@@ -5747,10 +5747,10 @@
   "resolved" "https://registry.npmjs.org/entities/-/entities-2.2.0.tgz"
   "version" "2.2.0"
 
-"enzyme-autotrader-bot@^1.0.7":
-  "integrity" "sha512-WekZddnv0Sr+kyluLdT+47J8TGQ5FwiYykXC/6M4IVgKt9ysQEbqA2EHL/9nuDlJEc90LcGLbTfgEmyDQhizbw=="
-  "resolved" "https://registry.npmjs.org/enzyme-autotrader-bot/-/enzyme-autotrader-bot-1.0.7.tgz"
-  "version" "1.0.7"
+"enzyme-autotrader-bot@^1.0.10":
+  "integrity" "sha512-PLNV12QBm3y5avgVhg0n2kfmTKwHRMr/gsROSRFv5qn/U4HTn62xC2fFTmi1tuAEeZKA8taBC8E3qveACQYwdA=="
+  "resolved" "https://registry.npmjs.org/enzyme-autotrader-bot/-/enzyme-autotrader-bot-1.0.10.tgz"
+  "version" "1.0.10"
   dependencies:
     "@enzymefinance/protocol" "^2.0.1"
     "@uniswap/sdk" "^3.0.3"
